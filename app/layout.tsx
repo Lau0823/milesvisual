@@ -18,8 +18,8 @@ const sans = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Photography",
-  description: "productos digitales",
+  title: "MILES VISUAL",
+  description: "Fotografo",
 };
 
 export default function RootLayout({

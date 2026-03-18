@@ -2,1063 +2,844 @@
 
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { Cormorant_Garamond, Montserrat } from "next/font/google";
+import { useEffect, useState } from "react";
 
-type Category = "Bodas" | "Retrato" | "Editorial" | "Eventos";
+const serif = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-serif",
+});
 
-type PhotoItem = {
+const sans = Montserrat({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-sans",
+});
+
+type NavItem = {
+  label: string;
+  href: string;
+};
+
+type HeroSlide = {
+  id: number;
+  image: string;
+  alt: string;
+};
+
+type WeddingSlide = {
   id: string;
   title: string;
   subtitle: string;
-  category: Category;
   image: string;
 };
 
-type Testimonial = {
+type PlanItem = {
+  id: string;
   name: string;
-  role: string;
-  quote: string;
+  image: string;
+  price: string;
+  details: string[];
 };
 
-const fadeUp = {
-  initial: { opacity: 0, y: 30 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.2 },
-  transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
-};
+const navLeft: NavItem[] = [
+  { label: "Bodas", href: "#bodas" },
+  { label: "Shootings", href: "#shootings" },
+  { label: "Planes", href: "#planes" },
+];
 
-const categories: {
-  name: Category;
-  cover: string;
-  description: string;
-}[] = [
+const navRight: NavItem[] = [
+  { label: "Acerca de mí", href: "#about" },
+  { label: "Contacto", href: "#contacto" },
+];
+
+const heroSlides: HeroSlide[] = [
   {
-    name: "Bodas",
-    cover:
-      "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1400&q=80",
-    description: "Historias emotivas, elegantes y atemporales.",
+    id: 1,
+    image:
+      "https://i.pinimg.com/1200x/0a/3b/40/0a3b40b36d43b8b40106dbfc418def4b.jpg",
+    alt: "Fotografía de boda cinematográfica",
   },
   {
-    name: "Retrato",
-    cover:
-      "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1400&q=80",
-    description: "Presencia, identidad y dirección visual premium.",
+    id: 2,
+    image:
+      "https://i.pinimg.com/1200x/57/06/ee/5706ee451c6c989fb4b4e38ccb7158da.jpg",
+    alt: "Retrato romántico de pareja",
   },
   {
-    name: "Editorial",
-    cover:
-      "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1400&q=80",
-    description: "Imágenes aspiracionales con estética de campaña.",
+    id: 3,
+    image:
+      "https://i.pinimg.com/736x/e4/4b/ca/e44bcaa99e49d2f7c26b309620549c1b.jpg",
+    alt: "Sesión editorial premium",
   },
   {
-    name: "Eventos",
-    cover:
-      "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=1400&q=80",
-    description: "Cobertura visual con energía, detalle y emoción.",
+    id: 4,
+    image:
+      "https://i.pinimg.com/1200x/f2/0b/7f/f20b7f979cd5f1576c168686047669de.jpg",
+    alt: "Pareja en celebración de boda",
   },
 ];
 
-const photos: PhotoItem[] = [
+const weddingSlides: WeddingSlide[] = [
   {
-    id: "bodas-1",
-    title: "Bodas / ceremonia",
-    subtitle: "Momentos irrepetibles contados con elegancia.",
-    category: "Bodas",
+    id: "w1",
+    title: "Ceremonias con emoción real",
+    subtitle:
+      "Instantes irrepetibles contados con elegancia, atmósfera y una dirección visual que se siente cinematográfica.",
     image:
-      "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1400&q=80",
+      "https://i.pinimg.com/736x/09/b4/8d/09b48d276d783c11c961fb384e5b1d4f.jpg",
   },
   {
-    id: "bodas-2",
-    title: "Bodas / celebración",
-    subtitle: "Emoción real y narrativa visual.",
-    category: "Bodas",
+    id: "w2",
+    title: "Luz, piel y atmósfera",
+    subtitle:
+      "Una narrativa íntima para parejas que quieren recuerdos sofisticados, sensibles y profundamente memorables.",
     image:
-      "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1400&q=80",
+      "https://i.pinimg.com/1200x/8a/50/36/8a5036a75979b4439ad62be98f12d377.jpg",
   },
   {
-    id: "bodas-3",
-    title: "Bodas / detalles",
-    subtitle: "Luz, textura y memoria en pequeños momentos.",
-    category: "Bodas",
+    id: "w3",
+    title: "Celebraciones inolvidables",
+    subtitle:
+      "Cobertura viva, elegante y emocional para convertir cada momento en una memoria visual atemporal.",
     image:
-      "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1400&q=80",
-  },
-  {
-    id: "bodas-4",
-    title: "Bodas / fiesta",
-    subtitle: "La energía de la noche capturada con estilo.",
-    category: "Bodas",
-    image:
-      "https://images.unsplash.com/photo-1507504031003-b417219a0fde?auto=format&fit=crop&w=1400&q=80",
-  },
-  {
-    id: "bodas-5",
-    title: "Bodas / pareja",
-    subtitle: "Retratos emotivos con una estética atemporal.",
-    category: "Bodas",
-    image:
-      "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1400&q=80",
-  },
-
-  {
-    id: "retrato-1",
-    title: "Retrato / estudio",
-    subtitle: "Presencia, identidad y dirección visual.",
-    category: "Retrato",
-    image:
-      "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1400&q=80",
-  },
-  {
-    id: "retrato-2",
-    title: "Retrato / lifestyle",
-    subtitle: "Una imagen más íntima y auténtica.",
-    category: "Retrato",
-    image:
-      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1400&q=80",
-  },
-  {
-    id: "retrato-3",
-    title: "Retrato / black",
-    subtitle: "Contraste, carácter y una mirada poderosa.",
-    category: "Retrato",
-    image:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1400&q=80",
-  },
-  {
-    id: "retrato-4",
-    title: "Retrato / soft light",
-    subtitle: "Minimalismo y sensibilidad en una sola toma.",
-    category: "Retrato",
-    image:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1400&q=80",
-  },
-  {
-    id: "retrato-5",
-    title: "Retrato / creative",
-    subtitle: "Estética editorial para marca personal.",
-    category: "Retrato",
-    image:
-      "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=1400&q=80",
-  },
-
-  {
-    id: "editorial-1",
-    title: "Editorial / campaña",
-    subtitle: "Una estética cinematográfica para marcas y talento.",
-    category: "Editorial",
-    image:
-      "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1400&q=80",
-  },
-  {
-    id: "editorial-2",
-    title: "Editorial / fashion",
-    subtitle: "Visuales premium con intención de marca.",
-    category: "Editorial",
-    image:
-      "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1400&q=80",
-  },
-  {
-    id: "editorial-3",
-    title: "Editorial / magazine",
-    subtitle: "Una narrativa visual más artística y sofisticada.",
-    category: "Editorial",
-    image:
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1400&q=80",
-  },
-  {
-    id: "editorial-4",
-    title: "Editorial / monochrome",
-    subtitle: "Fuerza visual con una dirección minimalista.",
-    category: "Editorial",
-    image:
-      "https://images.unsplash.com/photo-1500336624523-d727130c3328?auto=format&fit=crop&w=1400&q=80",
-  },
-  {
-    id: "editorial-5",
-    title: "Editorial / campaign portrait",
-    subtitle: "Imagen aspiracional para marcas y talento.",
-    category: "Editorial",
-    image:
-      "https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=1400&q=80",
-  },
-
-  {
-    id: "eventos-1",
-    title: "Eventos / social",
-    subtitle: "Cobertura visual con emoción y ritmo.",
-    category: "Eventos",
-    image:
-      "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=1400&q=80",
-  },
-  {
-    id: "eventos-2",
-    title: "Eventos / premium",
-    subtitle: "Ambiente, energía y detalle en cada toma.",
-    category: "Eventos",
-    image:
-      "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1400&q=80",
-  },
-  {
-    id: "eventos-3",
-    title: "Eventos / stage",
-    subtitle: "Luces, atmósfera y narrativa de escena.",
-    category: "Eventos",
-    image:
-      "https://images.unsplash.com/photo-1505236858219-8359eb29e329?auto=format&fit=crop&w=1400&q=80",
-  },
-  {
-    id: "eventos-4",
-    title: "Eventos / crowd",
-    subtitle: "Instantes espontáneos que cuentan el ambiente.",
-    category: "Eventos",
-    image:
-      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1400&q=80",
-  },
-  {
-    id: "eventos-5",
-    title: "Eventos / gala",
-    subtitle: "Elegancia documental para experiencias premium.",
-    category: "Eventos",
-    image:
-      "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1400&q=80",
+      "https://i.pinimg.com/1200x/03/62/58/036258347b231e1e3eceaa4e23d1d388.jpg",
   },
 ];
 
-const testimonials: Testimonial[] = [
+const shootingSlides: HeroSlide[] = [
   {
-    name: "Camila & Juan",
-    role: "Boda destino",
-    quote:
-      "La experiencia fue impecable. Cada imagen se sintió editorial, emotiva y demasiado elegante.",
+    id: 1,
+    image:
+      "https://i.pinimg.com/1200x/cc/3a/a0/cc3aa061c6d0f064cb616f423038571a.jpg",
+    alt: "Retrato editorial femenino",
   },
   {
-    name: "Valentina R.",
-    role: "Marca personal",
-    quote:
-      "No fueron solo fotos: fue dirección visual, presencia y una estética que elevó mi marca.",
+    id: 2,
+    image:
+      "https://i.pinimg.com/736x/38/54/ff/3854ff04381c73298b30ef3bc513fa6c.jpg",
+    alt: "Marca personal premium",
   },
   {
-    name: "Casa Aurea",
-    role: "Campaña editorial",
-    quote:
-      "Miles Visual entendió perfecto el tono premium que queríamos. El resultado se sintió de campaña internacional.",
+    id: 3,
+    image:
+      "https://i.pinimg.com/736x/20/29/c7/2029c71e79952ace3ccb6d08e2489c31.jpg",
+    alt: "Shooting de moda editorial",
+  },
+  {
+    id: 4,
+    image:
+      "https://i.pinimg.com/1200x/95/27/3c/95273c7af4a9cc0cfb73ab9f45d03fd0.jpg",
+    alt: "Retrato masculino elegante",
   },
 ];
 
-const brands = ["AUREA", "LUMEN", "VELA", "NOVA", "ETEREA", "MONTE"];
+const plans: PlanItem[] = [
+  {
+    id: "basic",
+    name: "Basic",
+    image:
+      "https://i.pinimg.com/1200x/6d/a7/46/6da746c1826067d9e724d3c72d0a4db1.jpg",
+    price: "$1.500.000",
+    details: [
+      "5 fotos impresas tamaño 15x20 cm",
+      "Cubrimiento del evento en formato digital",
+      "Aprox. 200 fotos",
+      "USB con el material del evento",
+      "Protocolo, decoración, recepción, maquillaje y hora loca",
+    ],
+  },
+  {
+    id: "classic",
+    name: "Classic",
+    image:
+      "https://i.pinimg.com/736x/32/67/34/326734839f0b778ad52f7cb59591b313.jpg",
+    price: "$1.850.000",
+    details: [
+      "10 fotos impresas tamaño 15x20 cm",
+      "Photobook 30x30 cm",
+      "5 hojas con 30 fotos plasmadas",
+      "Cubrimiento del evento en formato digital",
+      "Aprox. 300 fotos",
+      "USB con material del evento",
+    ],
+  },
+  {
+    id: "premium",
+    name: "Premium",
+    image:
+      "https://i.pinimg.com/1200x/2e/71/a1/2e71a1a82e1e6748a84da942f170b50b.jpg",
+    price: "$2.400.000",
+    details: [
+      "15 fotos impresas tamaño 15x20 cm",
+      "Photobook 30x30 cm",
+      "10 hojas con 70 fotos plasmadas",
+      "Cubrimiento del evento en formato digital",
+      "Aprox. 400 fotos",
+      "USB con material del evento",
+    ],
+  },
+  {
+    id: "diamante",
+    name: "Diamante",
+    image:
+      "https://i.pinimg.com/736x/87/d3/cf/87d3cf88fbbaf867860f0d8009eb957e.jpg",
+    price: "$2.850.000",
+    details: [
+      "Pre boda",
+      "20 fotos impresas tamaño 15x20 cm",
+      "Photobook 30x30 cm",
+      "15 hojas con 90 fotos plasmadas",
+      "USB con todo el material del evento",
+      "Video clip",
+    ],
+  },
+  {
+    id: "gold",
+    name: "Gold",
+    image:
+      "https://i.pinimg.com/736x/a2/49/3b/a2493bc7df7d14bfd2839bc57e201c56.jpg",
+    price: "$3.600.000",
+    details: [
+      "Pre boda",
+      "Photobook 15x20 cm y 30x30 cm",
+      "18 hojas con 100 fotos plasmadas",
+      "USB con todo el material del evento",
+      "Tomas de drone",
+      "Video de tus sueños",
+    ],
+  },
+];
+
+const whatsappUrl =
+  "https://wa.me/573102345742?text=Hola%20Miles%20Visual%2C%20quiero%20cotizar%20mi%20evento";
+
+const aboutTitle = "¿Quiénes somos?";
+const aboutParagraphs = [
+  "Hola, mi nombre es Miles Esteban Morales Andrade: fotógrafo y productor autoral audiovisual de bodas colombiano establecido en la ciudad de Valencia, Córdoba. Conectar y apasionar por estar entre arte es la fotografía.",
+  "Me dedico a plasmar recuerdos con calidad y creatividad para toda la vida, sumo un equipo capacitado y enfocado en brindar una experiencia única y diferente en cada evento, cubriendo tus momentos con un detalle digno de catedral y proporcionando una dirección visual que te hace diferenciar por estilosa creatividad por la emoción de que no encargarse para que lo que vivan con nosotros se la película.",
+];
 
 export default function Page() {
-  const whatsapp =
-    "https://wa.me/573102345742?text=Hola%20Miles%20Visual%2C%20quiero%20reservar%20una%20sesi%C3%B3n";
-
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [activeCategory, setActiveCategory] = useState<Category | null>(null);
-  const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeHeroSlide, setActiveHeroSlide] = useState(0);
+  const [activeWeddingSlide, setActiveWeddingSlide] = useState(0);
+  const [activeShootingSlide, setActiveShootingSlide] = useState(0);
+  const [activePlan, setActivePlan] = useState(0);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
-      setMousePosition({ x: event.clientX, y: event.clientY });
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    const interval = setInterval(() => {
+      setActiveHeroSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
-  const currentCategoryPhotos = useMemo(() => {
-    if (!activeCategory) return [];
-    return photos.filter((photo) => photo.category === activeCategory);
-  }, [activeCategory]);
-
-  const selectedPhoto = useMemo(() => {
-    if (!selectedPhotoId) return null;
-    return photos.find((photo) => photo.id === selectedPhotoId) ?? null;
-  }, [selectedPhotoId]);
-
-  const selectedPhotoCategoryPhotos = useMemo(() => {
-    if (!selectedPhoto) return [];
-    return photos.filter((photo) => photo.category === selectedPhoto.category);
-  }, [selectedPhoto]);
-
-  const selectedPhotoIndex = useMemo(() => {
-    if (!selectedPhoto) return -1;
-    return selectedPhotoCategoryPhotos.findIndex(
-      (photo) => photo.id === selectedPhoto.id
-    );
-  }, [selectedPhoto, selectedPhotoCategoryPhotos]);
-
-  const openCategory = (category: Category) => {
-    setActiveCategory(category);
-  };
-
-  const backToCategories = () => {
-    setActiveCategory(null);
-  };
-
-  const openPhoto = (photoId: string) => {
-    setSelectedPhotoId(photoId);
-  };
-
-  const closePhoto = () => {
-    setSelectedPhotoId(null);
-  };
-
-  const goToPreviousPhoto = () => {
-    if (!selectedPhoto || selectedPhotoCategoryPhotos.length === 0) return;
-
-    const prevIndex =
-      selectedPhotoIndex === 0
-        ? selectedPhotoCategoryPhotos.length - 1
-        : selectedPhotoIndex - 1;
-
-    setSelectedPhotoId(selectedPhotoCategoryPhotos[prevIndex].id);
-  };
-
-  const goToNextPhoto = () => {
-    if (!selectedPhoto || selectedPhotoCategoryPhotos.length === 0) return;
-
-    const nextIndex =
-      selectedPhotoIndex === selectedPhotoCategoryPhotos.length - 1
-        ? 0
-        : selectedPhotoIndex + 1;
-
-    setSelectedPhotoId(selectedPhotoCategoryPhotos[nextIndex].id);
-  };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveWeddingSlide((prev) => (prev + 1) % weddingSlides.length);
+    }, 5200);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        if (selectedPhoto) {
-          closePhoto();
-          return;
-        }
-      }
+    const interval = setInterval(() => {
+      setActiveShootingSlide((prev) => (prev + 1) % shootingSlides.length);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, []);
 
-      if (!selectedPhoto) return;
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-      if (event.key === "ArrowLeft") {
-        goToPreviousPhoto();
-      }
-
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsMenuOpen(false);
       if (event.key === "ArrowRight") {
-        goToNextPhoto();
+        setActiveHeroSlide((prev) => (prev + 1) % heroSlides.length);
+      }
+      if (event.key === "ArrowLeft") {
+        setActiveHeroSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedPhoto, selectedPhotoIndex, selectedPhotoCategoryPhotos]);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   useEffect(() => {
-    if (selectedPhoto) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
-
+    document.body.style.overflow = isMenuOpen ? "hidden" : "auto";
     return () => {
       document.body.style.overflow = "auto";
     };
-  }, [selectedPhoto]);
+  }, [isMenuOpen]);
+
+  const nextHeroSlide = () => setActiveHeroSlide((prev) => (prev + 1) % heroSlides.length);
+  const prevHeroSlide = () =>
+    setActiveHeroSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+
+  const nextWeddingSlide = () =>
+    setActiveWeddingSlide((prev) => (prev + 1) % weddingSlides.length);
+  const prevWeddingSlide = () =>
+    setActiveWeddingSlide((prev) => (prev - 1 + weddingSlides.length) % weddingSlides.length);
+
+  const nextShooting = () =>
+    setActiveShootingSlide((prev) => (prev + 1) % shootingSlides.length);
+  const prevShooting = () =>
+    setActiveShootingSlide((prev) => (prev - 1 + shootingSlides.length) % shootingSlides.length);
+
+  const nextPlan = () => setActivePlan((prev) => (prev + 1) % plans.length);
+  const prevPlan = () => setActivePlan((prev) => (prev - 1 + plans.length) % plans.length);
+
+  const selectedPlan = plans[activePlan];
 
   return (
-    <main className="relative overflow-x-hidden bg-neutral-950 text-white selection:bg-white selection:text-black">
-      <motion.div
-        initial={{ opacity: 1 }}
-        animate={{ opacity: 0, pointerEvents: "none" }}
-        transition={{ duration: 1.2, delay: 0.6 }}
-        className="pointer-events-none fixed inset-0 z-[100] flex items-center justify-center bg-neutral-950"
+    <main
+      className={`${serif.variable} ${sans.variable} bg-[#0a0a0a] font-sans text-[#f4efe7] selection:bg-white selection:text-black`}
+    >
+      <header
+        className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
+          scrolled
+            ? "border-b border-white/10 bg-black/35 backdrop-blur-2xl"
+            : "bg-transparent"
+        }`}
       >
-        <div className="text-center">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: 220 }}
-            transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-            className="mx-auto h-px bg-white/70"
-          />
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15, duration: 0.7 }}
-            className="mt-5 text-xs uppercase tracking-[0.45em] text-neutral-400"
+        <div className="mx-auto flex h-20 max-w-[1500px] items-center justify-between px-4 sm:px-6 lg:px-10">
+          <nav className="hidden items-center gap-7 xl:flex">
+            {navLeft.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                className="group relative text-[11px] uppercase tracking-[0.3em] text-white/88 transition hover:text-white"
+              >
+                {item.label}
+                <span className="absolute -bottom-2 left-0 h-px w-0 bg-white/80 transition-all duration-300 group-hover:w-full" />
+              </a>
+            ))}
+          </nav>
+
+          <a
+            href="#top"
+            className="font-serif text-2xl tracking-[0.18em] text-white sm:text-3xl"
           >
             Miles Visual
-          </motion.p>
-        </div>
-      </motion.div>
-
-      <motion.div
-        className="pointer-events-none fixed inset-0 z-0 hidden md:block"
-        animate={{
-          background: `radial-gradient(600px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(255,255,255,0.08), transparent 40%)`,
-        }}
-        transition={{ type: "tween", ease: "linear", duration: 0.15 }}
-      />
-
-      <section className="relative min-h-screen overflow-hidden">
-        <div className="absolute inset-0">
-          <Image
-            src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1800&q=80"
-            alt="Miles Visual hero"
-            fill
-            priority
-            className="object-cover opacity-35 scale-105"
-          />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_22%)]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/55 to-neutral-950" />
-          <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/85 via-transparent to-neutral-950/40" />
-          <motion.div
-            animate={{ y: [0, -20, 0], opacity: [0.45, 0.6, 0.45] }}
-            transition={{ repeat: Infinity, duration: 7, ease: "easeInOut" }}
-            className="absolute -left-10 top-20 h-72 w-72 rounded-full bg-white/10 blur-3xl"
-          />
-          <motion.div
-            animate={{ y: [0, 20, 0], opacity: [0.18, 0.3, 0.18] }}
-            transition={{ repeat: Infinity, duration: 9, ease: "easeInOut" }}
-            className="absolute right-0 top-1/3 h-80 w-80 rounded-full bg-emerald-400/20 blur-3xl"
-          />
-        </div>
-
-        <div className="relative mx-auto flex min-h-screen max-w-7xl items-center px-6 py-16 lg:px-10">
-          <div className="grid w-full gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
-            <motion.div {...fadeUp} className="max-w-4xl">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                className="mb-6 inline-flex items-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.3em] text-neutral-300 backdrop-blur-md"
-              >
-                Fotografía premium • Bogotá / Colombia
-              </motion.div>
-
-              <div className="overflow-hidden">
-                <motion.h1
-                  initial={{ opacity: 0, y: 70 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 1,
-                    ease: [0.22, 1, 0.36, 1] as const,
-                  }}
-                  className="text-6xl font-semibold tracking-[-0.08em] sm:text-8xl lg:text-[8.7rem]"
-                >
-                  MILES
-                  <span className="block bg-gradient-to-r from-white via-neutral-300 to-neutral-500 bg-clip-text text-transparent">
-                    VISUAL
-                  </span>
-                </motion.h1>
-              </div>
-
-              <motion.p
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.8 }}
-                className="mt-8 max-w-2xl text-lg leading-8 text-neutral-300 sm:text-xl"
-              >
-                Fotografía con una mirada cinematográfica. Cada imagen está
-                pensada para sentirse exclusiva, emocional y memorable.
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35, duration: 0.8 }}
-                className="mt-10 flex flex-wrap gap-4"
-              >
-                <a
-                  href="#portfolio"
-                  className="group relative overflow-hidden rounded-full border border-white/20 px-7 py-3 text-sm font-medium transition-transform duration-300 hover:scale-[1.03] active:scale-[0.98]"
-                >
-                  <span className="relative z-10 transition-colors duration-300 group-hover:text-black">
-                    Ver portafolio
-                  </span>
-                  <span className="absolute inset-0 translate-y-full bg-white transition-transform duration-500 ease-out group-hover:translate-y-0" />
-                </a>
-
-                <a
-                  href={whatsapp}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group relative overflow-hidden rounded-full bg-white px-7 py-3 text-sm font-medium text-black transition-transform duration-300 hover:scale-[1.03] active:scale-[0.98]"
-                >
-                  <span className="relative z-10 transition-colors duration-300 group-hover:text-black">
-                    Reservar sesión
-                  </span>
-                  <span className="absolute inset-0 translate-y-full bg-emerald-400 transition-transform duration-500 ease-out group-hover:translate-y-0" />
-                </a>
-              </motion.div>
-            </motion.div>
-
-            <motion.div
-              {...fadeUp}
-              className="grid gap-4"
-              transition={{
-                duration: 1,
-                delay: 0.15,
-                ease: [0.22, 1, 0.36, 1] as const,
-              }}
-            >
-              <motion.div
-                whileHover={{ y: -8, rotateX: 2, rotateY: -2 }}
-                transition={{ duration: 0.4 }}
-                className="rounded-[2rem] border border-white/10 bg-white/[0.06] p-5 backdrop-blur-xl"
-              >
-                <div className="relative h-[460px] overflow-hidden rounded-[1.5rem] border border-white/10">
-                  <Image
-                    src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1400&q=80"
-                    alt="Preview editorial"
-                    fill
-                    className="object-cover transition duration-700 hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between p-5">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.3em] text-neutral-400">
-                        Featured frame
-                      </p>
-                      <p className="mt-2 text-lg font-medium">
-                        Dirección editorial premium
-                      </p>
-                    </div>
-                    <div className="rounded-full border border-white/15 bg-black/30 px-3 py-1 text-xs text-neutral-300 backdrop-blur-md">
-                      2026
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-
-              <div className="grid gap-4 sm:grid-cols-3">
-                {[
-                  ["+120", "sesiones realizadas"],
-                  ["Premium", "dirección visual"],
-                  ["1:1", "acompañamiento creativo"],
-                ].map(([value, label]) => (
-                  <motion.div
-                    key={label}
-                    whileHover={{ y: -6 }}
-                    className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-4 backdrop-blur-md"
-                  >
-                    <div className="text-2xl font-semibold tracking-tight">
-                      {value}
-                    </div>
-                    <div className="mt-1 text-sm text-neutral-400">{label}</div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.8 }}
-          className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 md:flex"
-        >
-          <a
-            href="#portfolio"
-            className="flex flex-col items-center gap-3 text-[11px] uppercase tracking-[0.35em] text-neutral-400"
-          >
-            Scroll
-            <span className="flex h-12 w-7 items-start justify-center rounded-full border border-white/15 p-1">
-              <motion.span
-                animate={{ y: [0, 18, 0] }}
-                transition={{
-                  repeat: Infinity,
-                  duration: 1.8,
-                  ease: "easeInOut",
-                }}
-                className="h-2.5 w-2.5 rounded-full bg-white"
-              />
-            </span>
           </a>
-        </motion.div>
-      </section>
 
-      <section className="relative overflow-hidden py-10">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,transparent,rgba(255,255,255,0.04),transparent)]" />
-        <motion.div
-          initial={{ x: 0 }}
-          animate={{ x: [0, -900] }}
-          transition={{ repeat: Infinity, duration: 18, ease: "linear" }}
-          className="flex whitespace-nowrap text-[13vw] font-semibold uppercase tracking-[-0.06em] text-white/[0.05]"
-        >
-          <span className="pr-24">
-            Miles Visual • Premium Photography • Cinematic Frames • Luxury
-            Portraits •
-          </span>
-          <span className="pr-24">
-            Miles Visual • Premium Photography • Cinematic Frames • Luxury
-            Portraits •
-          </span>
-        </motion.div>
-      </section>
-
-      <motion.section
-        {...fadeUp}
-        className="mx-auto max-w-7xl px-6 py-24 lg:px-10"
-      >
-        <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-          <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl">
-            <div className="relative h-[560px] overflow-hidden rounded-[2rem]">
-              <Image
-                src="https://images.unsplash.com/photo-1504593811423-6dd665756598?auto=format&fit=crop&w=1400&q=80"
-                alt="Sobre Miles Visual"
-                fill
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6">
-                <div className="inline-flex rounded-full border border-white/15 bg-black/35 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-neutral-300 backdrop-blur-md">
-                  About the vision
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-neutral-500">
-              Sobre Miles Visual
-            </p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-5xl">
-              Dirección visual para imágenes que se sientan exclusivas.
-            </h2>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-300">
-              Miles Visual trabaja cada sesión como una pieza editorial:
-              composición, emoción, luz y una estética cuidada hasta el detalle.
-              La intención no es solo documentar, sino construir una atmósfera
-              visual que eleve la percepción de cada historia, persona o marca.
-            </p>
-
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              {[
-                ["Estilo", "Cinematográfico y editorial"],
-                ["Enfoque", "Experiencia premium"],
-                ["Proceso", "Dirección 1:1"],
-                ["Resultado", "Imágenes memorables"],
-              ].map(([label, value]) => (
-                <div
-                  key={label}
-                  className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-5"
-                >
-                  <div className="text-sm text-neutral-500">{label}</div>
-                  <div className="mt-2 text-base font-medium text-white">
-                    {value}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </motion.section>
-
-      <section id="portfolio" className="mx-auto max-w-7xl px-6 py-8 lg:px-10">
-        <motion.div
-          {...fadeUp}
-          className="mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"
-        >
-          <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-neutral-500">
-              Portafolio
-            </p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-5xl">
-              {activeCategory
-                ? `${activeCategory} · 5 fotos destacadas`
-                : "Selecciona una categoría"}
-            </h2>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-neutral-300">
-              {activeCategory
-                ? "Haz clic en cualquier foto para verla grande y navegar entre imágenes."
-                : "Elige una categoría para ver una selección clara y directa de 5 fotos."}
-            </p>
-          </div>
-
-          {activeCategory ? (
-            <button
-              onClick={backToCategories}
-              className="inline-flex w-fit rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-medium text-white transition hover:bg-white hover:text-black"
-            >
-              ← Volver a categorías
-            </button>
-          ) : null}
-        </motion.div>
-
-        {!activeCategory ? (
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {categories.map((category, index) => (
-              <motion.button
-                key={category.name}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.6, delay: index * 0.08 }}
-                onClick={() => openCategory(category.name)}
-                className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-neutral-900 text-left"
+          <nav className="hidden items-center gap-7 xl:flex">
+            {navRight.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                className="group relative text-[11px] uppercase tracking-[0.3em] text-white/88 transition hover:text-white"
               >
-                <div className="relative h-[480px] overflow-hidden">
-                  <Image
-                    src={category.cover}
-                    alt={category.name}
-                    fill
-                    className="object-cover transition duration-700 ease-out group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-
-                  <div className="absolute right-4 top-4 rounded-full border border-white/15 bg-black/35 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-white backdrop-blur-md">
-                    Ver 5 fotos
-                  </div>
-
-                  <div className="absolute inset-x-0 bottom-0 p-6">
-                    <div className="mb-3 inline-flex rounded-full border border-white/15 bg-black/30 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-neutral-300 backdrop-blur-md">
-                      Categoría
-                    </div>
-                    <h3 className="text-3xl font-semibold tracking-tight">
-                      {category.name}
-                    </h3>
-                    <p className="mt-2 max-w-sm text-sm leading-6 text-neutral-300">
-                      {category.description}
-                    </p>
-                  </div>
-                </div>
-              </motion.button>
+                {item.label}
+                <span className="absolute -bottom-2 left-0 h-px w-0 bg-white/80 transition-all duration-300 group-hover:w-full" />
+              </a>
             ))}
-          </div>
-        ) : (
-          <div>
-            <div className="mb-8 flex flex-wrap gap-3">
-              {categories.map((category) => {
-                const isActive = activeCategory === category.name;
+          </nav>
 
-                return (
-                  <button
-                    key={category.name}
-                    onClick={() => openCategory(category.name)}
-                    className={`rounded-full border px-5 py-2.5 text-sm font-medium transition ${
-                      isActive
-                        ? "border-white bg-white text-black"
-                        : "border-white/15 bg-white/5 text-white hover:bg-white hover:text-black"
-                    }`}
-                  >
-                    {category.name}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {currentCategoryPhotos.map((photo, index) => (
-                <motion.button
-                  key={photo.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.15 }}
-                  transition={{ duration: 0.5, delay: index * 0.06 }}
-                  onClick={() => openPhoto(photo.id)}
-                  className="group overflow-hidden rounded-[2rem] border border-white/10 bg-neutral-900 text-left"
-                >
-                  <div className="relative h-[420px] overflow-hidden">
-                    <Image
-                      src={photo.image}
-                      alt={photo.title}
-                      fill
-                      className="object-cover transition duration-700 ease-out group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/15 to-transparent opacity-90" />
-
-                    <div className="absolute right-4 top-4 rounded-full border border-white/15 bg-black/35 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-white backdrop-blur-md">
-                      Abrir foto
-                    </div>
-
-                    <div className="absolute inset-x-0 bottom-0 p-6">
-                      <div className="mb-3 inline-flex rounded-full border border-white/15 bg-black/30 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-neutral-300 backdrop-blur-md">
-                        {photo.category}
-                      </div>
-                      <h3 className="text-2xl font-semibold tracking-tight">
-                        {photo.title}
-                      </h3>
-                      <p className="mt-2 max-w-sm text-sm leading-6 text-neutral-300">
-                        {photo.subtitle}
-                      </p>
-                    </div>
-                  </div>
-                </motion.button>
-              ))}
-            </div>
-          </div>
-        )}
-      </section>
-
-      <motion.section
-        {...fadeUp}
-        className="mx-auto max-w-7xl px-6 py-24 lg:px-10"
-      >
-        <div className="grid gap-6 lg:grid-cols-4">
-          {[
-            "Fotografía de bodas",
-            "Retrato profesional",
-            "Editorial y moda",
-            "Eventos privados",
-          ].map((service, index) => (
-            <motion.div
-              key={service}
-              whileHover={{ y: -8 }}
-              className="group relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-6 transition duration-300 hover:bg-white/[0.06]"
-            >
-              <span className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
-              <div className="text-xs uppercase tracking-[0.3em] text-neutral-500">
-                0{index + 1}
-              </div>
-              <h3 className="mt-6 text-xl font-medium tracking-tight">
-                {service}
-              </h3>
-            </motion.div>
-          ))}
-        </div>
-      </motion.section>
-
-      <motion.section
-        {...fadeUp}
-        className="mx-auto max-w-7xl px-6 py-24 lg:px-10"
-      >
-        <div className="mb-10 flex items-end justify-between gap-6">
-          <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-neutral-500">
-              Testimonios
-            </p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-5xl">
-              Lo que dicen quienes vivieron la experiencia.
-            </h2>
-          </div>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-3">
-          {testimonials.map((item, index) => (
-            <motion.div
-              key={item.name}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.6, delay: index * 0.08 }}
-              className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-7 backdrop-blur-xl"
-            >
-              <div className="mb-6 text-4xl leading-none text-white/30">“</div>
-              <p className="text-base leading-7 text-neutral-300">
-                {item.quote}
-              </p>
-              <div className="mt-8 border-t border-white/10 pt-5">
-                <div className="text-base font-medium text-white">
-                  {item.name}
-                </div>
-                <div className="mt-1 text-sm text-neutral-500">{item.role}</div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </motion.section>
-
-      <section className="mx-auto max-w-7xl px-6 py-6 lg:px-10">
-        <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] px-6 py-7">
-          <motion.div
-            initial={{ x: 0 }}
-            animate={{ x: [0, -500] }}
-            transition={{ repeat: Infinity, duration: 16, ease: "linear" }}
-            className="flex whitespace-nowrap text-xl font-medium tracking-[0.35em] text-neutral-500"
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-[11px] uppercase tracking-[0.28em] text-white xl:hidden"
           >
-            {[...brands, ...brands].map((brand, index) => (
-              <span key={`${brand}-${index}`} className="mr-14 inline-block">
-                {brand}
-              </span>
-            ))}
-          </motion.div>
+            Menú
+          </button>
         </div>
-      </section>
-
-      <motion.section
-        {...fadeUp}
-        className="mx-auto max-w-7xl px-6 pb-24 lg:px-10"
-      >
-        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-white/[0.09] to-white/[0.02] p-8 shadow-2xl sm:p-12 lg:p-16">
-          <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-emerald-400/20 blur-3xl" />
-          <div className="absolute -left-10 bottom-0 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
-
-          <div className="relative grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
-            <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-neutral-500">
-                Reserva
-              </p>
-              <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-5xl">
-                Agenda una sesión con una dirección visual premium.
-              </h2>
-              <p className="mt-5 max-w-3xl text-lg leading-8 text-neutral-300">
-                Escríbeme por WhatsApp para cotizar, reservar o contarme la idea
-                de tu sesión. Creamos imágenes que se sienten tan valiosas como
-                tu marca.
-              </p>
-            </div>
-
-            <a
-              href={whatsapp}
-              target="_blank"
-              rel="noreferrer"
-              className="group relative inline-flex overflow-hidden rounded-full bg-white px-8 py-4 text-sm font-medium text-black transition-transform duration-300 hover:scale-[1.03] active:scale-[0.98]"
-            >
-              <span className="relative z-10 transition-colors duration-300 group-hover:text-black">
-                Reservar por WhatsApp
-              </span>
-              <span className="absolute inset-0 translate-y-full bg-emerald-400 transition-transform duration-500 ease-out group-hover:translate-y-0" />
-            </a>
-          </div>
-        </div>
-      </motion.section>
+      </header>
 
       <AnimatePresence>
-        {selectedPhoto && (
+        {isMenuOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md"
-            onClick={closePhoto}
+            className="fixed inset-0 z-[70] bg-black/92 backdrop-blur-2xl xl:hidden"
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.98, y: 10 }}
-              transition={{ duration: 0.35 }}
-              className="relative h-full w-full overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="mx-auto flex min-h-full w-full max-w-6xl items-start p-4 sm:p-6 lg:items-center lg:p-8">
-                <div className="relative w-full overflow-hidden rounded-[2rem] border border-white/10 bg-neutral-950">
-                  <div className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-white/10 bg-neutral-950/90 px-4 py-4 backdrop-blur-md sm:px-6">
-                    <button
-                      onClick={closePhoto}
-                      className="rounded-full border border-white/15 bg-black/40 px-4 py-2 text-[11px] uppercase tracking-[0.25em] text-white"
-                    >
-                      Volver al portafolio
-                    </button>
-
-                    <div className="text-center">
-                      <div className="text-[11px] uppercase tracking-[0.25em] text-neutral-500">
-                        {selectedPhoto.category}
-                      </div>
-                      <div className="mt-1 text-sm text-neutral-300">
-                        {selectedPhotoIndex + 1} /{" "}
-                        {selectedPhotoCategoryPhotos.length}
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={closePhoto}
-                      className="rounded-full border border-white/15 bg-black/40 px-4 py-2 text-[11px] uppercase tracking-[0.25em] text-white"
-                    >
-                      Cerrar
-                    </button>
-                  </div>
-
-                  <div className="grid lg:grid-cols-[1.35fr_0.65fr]">
-                    <div className="relative">
-                      <div className="relative h-[55vh] w-full sm:h-[65vh] lg:h-[75vh]">
-                        <Image
-                          src={selectedPhoto.image}
-                          alt={selectedPhoto.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-
-                      <button
-                        onClick={goToPreviousPhoto}
-                        className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full border border-white/15 bg-black/45 px-4 py-3 text-lg text-white backdrop-blur-md transition hover:bg-white hover:text-black"
-                        aria-label="Foto anterior"
-                      >
-                        ←
-                      </button>
-
-                      <button
-                        onClick={goToNextPhoto}
-                        className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full border border-white/15 bg-black/45 px-4 py-3 text-lg text-white backdrop-blur-md transition hover:bg-white hover:text-black"
-                        aria-label="Foto siguiente"
-                      >
-                        →
-                      </button>
-                    </div>
-
-                    <div className="flex flex-col justify-between bg-neutral-950 p-6 lg:p-10">
-                      <div>
-                        <div className="mb-4 inline-flex w-fit rounded-full border border-white/15 bg-white/[0.04] px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-neutral-300">
-                          {selectedPhoto.category}
-                        </div>
-
-                        <h3 className="text-3xl font-semibold tracking-tight">
-                          {selectedPhoto.title}
-                        </h3>
-
-                        <p className="mt-4 max-w-md text-base leading-7 text-neutral-300">
-                          {selectedPhoto.subtitle}
-                        </p>
-                      </div>
-
-                      <div className="mt-8">
-                        <div className="mb-4 flex flex-wrap items-center gap-3">
-                          <button
-                            onClick={goToPreviousPhoto}
-                            className="rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-sm text-white transition hover:bg-white hover:text-black"
-                          >
-                            ← Anterior
-                          </button>
-
-                          <button
-                            onClick={goToNextPhoto}
-                            className="rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-sm text-white transition hover:bg-white hover:text-black"
-                          >
-                            Siguiente →
-                          </button>
-                        </div>
-
-                        <div className="mb-6 flex gap-3 overflow-x-auto pb-2">
-                          {selectedPhotoCategoryPhotos.map((photo) => {
-                            const isActive = selectedPhoto.id === photo.id;
-
-                            return (
-                              <button
-                                key={photo.id}
-                                onClick={() => setSelectedPhotoId(photo.id)}
-                                className={`relative h-20 w-16 shrink-0 overflow-hidden rounded-xl border ${
-                                  isActive
-                                    ? "border-white"
-                                    : "border-white/10"
-                                }`}
-                              >
-                                <Image
-                                  src={photo.image}
-                                  alt={photo.title}
-                                  fill
-                                  className="object-cover"
-                                />
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        <a
-                          href={whatsapp}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="group relative inline-flex w-fit overflow-hidden rounded-full bg-white px-6 py-3 text-sm font-medium text-black"
-                        >
-                          <span className="relative z-10">
-                            Reservar sesión
-                          </span>
-                          <span className="absolute inset-0 translate-y-full bg-emerald-400 transition-transform duration-500 ease-out group-hover:translate-y-0" />
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+            <div className="flex h-full flex-col px-6 py-6">
+              <div className="flex items-center justify-between">
+                <span className="font-serif text-2xl text-white">Miles Visual</span>
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="rounded-full border border-white/15 px-4 py-2 text-[11px] uppercase tracking-[0.25em] text-white"
+                >
+                  Cerrar
+                </button>
               </div>
-            </motion.div>
+
+              <div className="mt-16 flex flex-1 flex-col justify-center gap-7">
+                {[...navLeft, ...navRight].map((item) => (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="font-serif text-4xl tracking-tight text-white/90"
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <section id="top" className="relative h-[100svh] min-h-[720px] w-full overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={heroSlides[activeHeroSlide].id}
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.015 }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute inset-0"
+          >
+            <Image
+              src={heroSlides[activeHeroSlide].image}
+              alt={heroSlides[activeHeroSlide].alt}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
+            />
+          </motion.div>
+        </AnimatePresence>
+
+        <div className="absolute inset-0 bg-gradient-to-b from-black/28 via-black/10 to-black/42" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/18 via-transparent to-black/18" />
+
+        <button
+          onClick={prevHeroSlide}
+          aria-label="Imagen anterior"
+          className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/15 bg-black/20 p-4 text-white backdrop-blur-md transition duration-300 hover:bg-white hover:text-black sm:left-6 lg:left-8"
+        >
+          ←
+        </button>
+
+        <button
+          onClick={nextHeroSlide}
+          aria-label="Imagen siguiente"
+          className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/15 bg-black/20 p-4 text-white backdrop-blur-md transition duration-300 hover:bg-white hover:text-black sm:right-6 lg:right-8"
+        >
+          →
+        </button>
+
+        <div className="absolute bottom-7 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 sm:bottom-8">
+          {heroSlides.map((slide, index) => (
+            <button
+              key={slide.id}
+              onClick={() => setActiveHeroSlide(index)}
+              aria-label={`Ir a imagen ${index + 1}`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                activeHeroSlide === index ? "w-16 bg-white" : "w-8 bg-white/40"
+              }`}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-5xl px-4 py-24 text-center sm:px-6 lg:py-32">
+        <p className="text-[11px] uppercase tracking-[0.35em] text-white/40">
+          Fotografía · cine · memoria
+        </p>
+        <h2 className="mt-6 font-serif text-4xl font-medium leading-tight tracking-[-0.04em] text-white sm:text-6xl">
+          Imágenes que no solo documentan un momento: lo convierten en una memoria
+          visual elegante, sensible e imposible de olvidar.
+        </h2>
+        <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-white/65 sm:text-lg">
+          Cada historia se trabaja con intención visual, emoción real y una estética
+          premium para que el resultado se sienta cinematográfico y atemporal.
+        </p>
+      </section>
+
+      <section id="about" className="mx-auto max-w-[1500px] px-4 py-10 sm:px-6 lg:px-10 lg:py-20">
+        <div className="mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.35em] text-white/40">
+              Acerca de mí
+            </p>
+            <h2 className="mt-4 font-serif text-4xl font-medium tracking-[-0.04em] text-white sm:text-6xl">
+              Una presentación más editorial, romántica y elegante.
+            </h2>
+          </div>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
+          <div className="rounded-[2rem] border border-[#d2c4ad]/20 bg-[#f4efe5] p-7 text-[#3b3127] shadow-[0_20px_80px_rgba(0,0,0,0.16)] sm:p-10">
+            <p className="text-[11px] uppercase tracking-[0.35em] text-[#7b6f61]">
+              Acerca de mí
+            </p>
+            <h3 className="mt-4 font-serif text-4xl leading-none sm:text-5xl">
+              {aboutTitle}
+            </h3>
+
+            <div className="mt-8 space-y-6 text-[15px] leading-8 text-[#41362b] sm:text-base">
+              {aboutParagraphs.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
+
+            <div className="mt-8">
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex rounded-full border border-[#8c7a65]/40 px-6 py-3 text-sm font-medium text-[#3a2f26] transition duration-300 hover:bg-[#3a2f26] hover:text-[#f4efe5]"
+              >
+                Más acerca de mí
+              </a>
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] p-3">
+            <div className="relative h-[420px] overflow-hidden rounded-[1.5rem] sm:h-[560px] lg:h-[700px]">
+              <Image
+                src="https://i.pinimg.com/736x/a8/61/fe/a861fe93b9102f9edd73d3c8ff54955b.jpg"
+                alt="Retrato del fotógrafo Miles Visual"
+                fill
+                sizes="(max-width: 1024px) 100vw, 55vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-transparent" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="bodas" className="mx-auto max-w-[1500px] px-4 py-24 sm:px-6 lg:px-10 lg:py-32">
+        <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] p-3">
+            <div className="relative h-[420px] overflow-hidden rounded-[1.5rem] sm:h-[560px] lg:h-[680px]">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={weddingSlides[activeWeddingSlide].id}
+                  initial={{ opacity: 0, scale: 1.03 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.015 }}
+                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                  className="absolute inset-0"
+                >
+                  <Image
+                    src={weddingSlides[activeWeddingSlide].image}
+                    alt={weddingSlides[activeWeddingSlide].title}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 60vw"
+                    className="object-cover"
+                  />
+                </motion.div>
+              </AnimatePresence>
+
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/8 to-transparent" />
+
+              <button
+                onClick={prevWeddingSlide}
+                aria-label="Foto de boda anterior"
+                className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/15 bg-black/20 p-4 text-white backdrop-blur-md transition duration-300 hover:bg-white hover:text-black sm:left-6"
+              >
+                ←
+              </button>
+
+              <button
+                onClick={nextWeddingSlide}
+                aria-label="Foto de boda siguiente"
+                className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/15 bg-black/20 p-4 text-white backdrop-blur-md transition duration-300 hover:bg-white hover:text-black sm:right-6"
+              >
+                →
+              </button>
+
+              <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2">
+                {weddingSlides.map((item, index) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveWeddingSlide(index)}
+                    aria-label={`Ir a foto de boda ${index + 1}`}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      activeWeddingSlide === index ? "w-16 bg-white" : "w-8 bg-white/40"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="max-w-xl lg:pl-6">
+            <p className="text-[11px] uppercase tracking-[0.35em] text-white/40">
+              Bodas
+            </p>
+            <h2 className="mt-4 font-serif text-4xl font-medium tracking-[-0.04em] text-white sm:text-6xl">
+              {weddingSlides[activeWeddingSlide].title}
+            </h2>
+            <p className="mt-6 text-base leading-8 text-white/65 sm:text-lg">
+              {weddingSlides[activeWeddingSlide].subtitle}
+            </p>
+            <div className="mt-8 flex flex-wrap gap-4">
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex rounded-full bg-white px-7 py-3 text-sm font-medium text-black transition duration-300 hover:scale-[1.02]"
+              >
+                Cotizar boda
+              </a>
+              <a
+                href="#contacto"
+                className="inline-flex rounded-full border border-white/15 bg-white/5 px-7 py-3 text-sm font-medium text-white transition duration-300 hover:bg-white hover:text-black"
+              >
+                Reservar fecha
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="shootings" className="py-24 lg:py-32">
+        <div className="relative w-full overflow-hidden border-y border-white/10 bg-white/[0.03]">
+          <div className="relative h-[460px] overflow-hidden sm:h-[620px] lg:h-[820px]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={shootingSlides[activeShootingSlide].id}
+                initial={{ opacity: 0, scale: 1.03 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.015 }}
+                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                className="absolute inset-0"
+              >
+                <Image
+                  src={shootingSlides[activeShootingSlide].image}
+                  alt={shootingSlides[activeShootingSlide].alt}
+                  fill
+                  sizes="100vw"
+                  className="object-cover"
+                />
+              </motion.div>
+            </AnimatePresence>
+
+            <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/8 to-transparent" />
+
+            <button
+              onClick={prevShooting}
+              aria-label="Shooting anterior"
+              className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/15 bg-black/20 p-4 text-white backdrop-blur-md transition duration-300 hover:bg-white hover:text-black sm:left-6 lg:left-8"
+            >
+              ←
+            </button>
+
+            <button
+              onClick={nextShooting}
+              aria-label="Shooting siguiente"
+              className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/15 bg-black/20 p-4 text-white backdrop-blur-md transition duration-300 hover:bg-white hover:text-black sm:right-6 lg:right-8"
+            >
+              →
+            </button>
+
+            <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 sm:bottom-8">
+              {shootingSlides.map((item, index) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveShootingSlide(index)}
+                  aria-label={`Ir al shooting ${index + 1}`}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    activeShootingSlide === index ? "w-16 bg-white" : "w-8 bg-white/40"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mx-auto max-w-5xl px-4 pt-14 text-center sm:px-6 lg:pt-16">
+          <p className="text-[11px] uppercase tracking-[0.35em] text-white/40">
+            Shootings
+          </p>
+          <h2 className="mt-4 font-serif text-4xl font-medium tracking-[-0.04em] text-white sm:text-6xl">
+            Retratos y sesiones con presencia, dirección y estética editorial.
+          </h2>
+          <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-white/65 sm:text-lg">
+            Un lenguaje visual contemporáneo para personas, marcas y proyectos que
+            quieren verse memorables, sofisticados y profundamente intencionales.
+          </p>
+        </div>
+      </section>
+
+      <section id="planes" className="mx-auto max-w-[1500px] px-4 py-24 sm:px-6 lg:px-10 lg:py-32">
+        <div className="mb-12 text-center">
+          <p className="text-[11px] uppercase tracking-[0.35em] text-white/40">
+            Planes
+          </p>
+          <h2 className="mt-4 font-serif text-4xl font-medium tracking-[-0.04em] text-white sm:text-6xl">
+            Hay un plan esperando por ti.
+          </h2>
+          <p className="mx-auto mt-5 max-w-3xl text-base leading-8 text-white/65">
+            
+          </p>
+        </div>
+
+        <div className="mb-8 flex flex-wrap justify-center gap-3">
+          {plans.map((plan, index) => {
+            const active = index === activePlan;
+            return (
+              <button
+                key={plan.id}
+                onClick={() => setActivePlan(index)}
+                className={`rounded-full px-5 py-2.5 text-sm transition ${
+                  active
+                    ? "bg-white text-black"
+                    : "border border-white/15 bg-white/5 text-white hover:bg-white hover:text-black"
+                }`}
+              >
+                {plan.name}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="grid items-stretch overflow-hidden rounded-[2rem] border border-white/10 bg-[#f8f6f1] text-[#312820] shadow-[0_20px_80px_rgba(0,0,0,0.16)] lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="relative min-h-[420px] sm:min-h-[520px] lg:min-h-[700px]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedPlan.id}
+                initial={{ opacity: 0, scale: 1.02 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.01 }}
+                transition={{ duration: 0.6 }}
+                className="absolute inset-0"
+              >
+                <Image
+                  src={selectedPlan.image}
+                  alt={selectedPlan.name}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 45vw"
+                  className="object-cover"
+                />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          <div className="flex flex-col justify-center p-8 sm:p-12 lg:p-16">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedPlan.id + "-content"}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 12 }}
+                transition={{ duration: 0.4 }}
+              >
+                <h3 className="font-serif text-5xl font-medium tracking-tight sm:text-6xl">
+                  {selectedPlan.name}
+                </h3>
+
+                <div className="mt-8 space-y-4 text-sm leading-7 text-[#4a3f35] sm:text-base">
+                  {selectedPlan.details.map((detail) => (
+                    <p key={detail}>{detail}</p>
+                  ))}
+                </div>
+
+                <div className="mt-10">
+                  <p className="text-sm uppercase tracking-[0.25em] text-[#9c8b79]">
+                    Valor
+                  </p>
+                  <p className="mt-2 text-3xl font-medium sm:text-4xl">
+                    {selectedPlan.price}
+                  </p>
+                </div>
+
+                <div className="mt-10 flex flex-wrap gap-4">
+                  <button
+                    onClick={prevPlan}
+                    className="rounded-full border border-[#8c7a65]/30 px-5 py-3 text-sm transition hover:bg-[#312820] hover:text-[#f8f6f1]"
+                  >
+                    ← Anterior
+                  </button>
+                  <button
+                    onClick={nextPlan}
+                    className="rounded-full border border-[#8c7a65]/30 px-5 py-3 text-sm transition hover:bg-[#312820] hover:text-[#f8f6f1]"
+                  >
+                    Siguiente →
+                  </button>
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-full bg-[#312820] px-6 py-3 text-sm font-medium text-[#f8f6f1] transition hover:scale-[1.02]"
+                  >
+                    Cotizar este plan
+                  </a>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+      </section>
+
+      <section id="contacto" className="mx-auto max-w-[1500px] px-4 pb-10 sm:px-6 lg:px-10 lg:pb-20">
+        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.02] px-6 py-12 sm:px-10 sm:py-16 lg:px-16 lg:py-20">
+          <div className="absolute -left-12 bottom-0 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
+          <div className="absolute -right-8 top-0 h-56 w-56 rounded-full bg-[#d8c3a3]/20 blur-3xl" />
+
+          <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.35em] text-white/40">
+                Contacto
+              </p>
+              <h2 className="mt-4 max-w-4xl font-serif text-4xl font-medium tracking-[-0.04em] text-white sm:text-6xl">
+                Tu historia merece verse tan increíble como la imaginas.
+              </h2>
+              <p className="mt-5 max-w-3xl text-base leading-8 text-white/65 sm:text-lg">
+                Escríbeme para cotizar tu boda o tu shooting. Crearemos una
+                experiencia visual sofisticada, auténtica y profundamente memorable.
+              </p>
+            </div>
+
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex rounded-full bg-white px-8 py-4 text-sm font-medium text-black transition duration-300 hover:scale-[1.02]"
+            >
+              Reservar por WhatsApp
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-white/10 px-4 py-10 sm:px-6 lg:px-10">
+        <div className="mx-auto flex max-w-[1500px] flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="font-serif text-3xl text-white">Miles Visual</div>
+            <p className="mt-3 max-w-md text-sm leading-7 text-white/50">
+              Fotografía y producción audiovisual con una estética cinematográfica,
+              elegante y emocional.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-x-6 gap-y-3 text-[11px] uppercase tracking-[0.28em] text-white/55">
+            <a href="#bodas" className="transition hover:text-white">
+              Bodas
+            </a>
+            <a href="#shootings" className="transition hover:text-white">
+              Shootings
+            </a>
+            <a href="#planes" className="transition hover:text-white">
+              Planes
+            </a>
+            <a href="#about" className="transition hover:text-white">
+              Acerca de mí
+            </a>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="transition hover:text-white"
+            >
+              Contacto
+            </a>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
