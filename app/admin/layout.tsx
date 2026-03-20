@@ -26,6 +26,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight as ChevronRightIcon,
+  Menu,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -61,7 +62,7 @@ function GlassCard({
   return (
     <div
       className={cn(
-        'rounded-[28px] border border-white/10 bg-white/[0.06] backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.28)]',
+        'rounded-[24px] md:rounded-[28px] border border-white/10 bg-white/[0.06] backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.28)]',
         className,
       )}
     >
@@ -82,17 +83,19 @@ function SectionTitle({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="mb-5 flex items-start justify-between gap-4">
-      <div>
-        <p className="text-[11px] uppercase tracking-[0.28em] text-[#d7b48a]/70">
+    <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="min-w-0">
+        <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.24em] sm:tracking-[0.28em] text-[#d7b48a]/70">
           {eyebrow}
         </p>
-        <h2 className="mt-2 text-xl font-medium text-[#fff2e2]">{title}</h2>
+        <h2 className="mt-2 text-lg sm:text-xl font-medium text-[#fff2e2]">
+          {title}
+        </h2>
         {description ? (
           <p className="mt-1 text-sm text-white/55">{description}</p>
         ) : null}
       </div>
-      {action}
+      {action ? <div className="shrink-0">{action}</div> : null}
     </div>
   );
 }
@@ -108,10 +111,12 @@ function StatCard({
 }) {
   return (
     <GlassCard className="p-4">
-      <p className="text-[11px] uppercase tracking-[0.25em] text-white/45">
+      <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-white/45">
         {label}
       </p>
-      <h3 className="mt-3 text-2xl font-semibold text-[#fff2e2]">{value}</h3>
+      <h3 className="mt-3 text-xl sm:text-2xl font-semibold text-[#fff2e2] break-words">
+        {value}
+      </h3>
       <p className="mt-2 text-xs text-white/45">{helper}</p>
     </GlassCard>
   );
@@ -137,7 +142,7 @@ function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
     <input
       {...props}
       className={cn(
-        'w-full rounded-[18px] border border-white/10 bg-black/20 px-4 py-3 text-sm text-[#fff2e2] outline-none placeholder:text-white/30 focus:border-[#e1ab71]/30',
+        'w-full min-w-0 rounded-[16px] sm:rounded-[18px] border border-white/10 bg-black/20 px-4 py-3 text-sm text-[#fff2e2] outline-none placeholder:text-white/30 focus:border-[#e1ab71]/30',
         props.className,
       )}
     />
@@ -149,7 +154,7 @@ function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
     <select
       {...props}
       className={cn(
-        'w-full rounded-[18px] border border-white/10 bg-black/20 px-4 py-3 text-sm text-[#fff2e2] outline-none focus:border-[#e1ab71]/30',
+        'w-full min-w-0 rounded-[16px] sm:rounded-[18px] border border-white/10 bg-black/20 px-4 py-3 text-sm text-[#fff2e2] outline-none focus:border-[#e1ab71]/30',
         props.className,
       )}
     />
@@ -161,7 +166,7 @@ function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
     <textarea
       {...props}
       className={cn(
-        'w-full rounded-[18px] border border-white/10 bg-black/20 px-4 py-3 text-sm text-[#fff2e2] outline-none placeholder:text-white/30 focus:border-[#e1ab71]/30',
+        'w-full min-w-0 rounded-[16px] sm:rounded-[18px] border border-white/10 bg-black/20 px-4 py-3 text-sm text-[#fff2e2] outline-none placeholder:text-white/30 focus:border-[#e1ab71]/30',
         props.className,
       )}
     />
@@ -197,7 +202,7 @@ type Booking = {
   id: number;
   client: string;
   phone: string;
-  date: string; // datetime-local
+  date: string;
   place: string;
   plan: PlanName;
   status: BookingStatus;
@@ -378,6 +383,7 @@ export default function AdminDashboardPage() {
   const [view, setView] = useState<View>('overview');
   const [toast, setToast] = useState<string>('');
   const [search, setSearch] = useState('');
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const [bookings, setBookings] = useState<Booking[]>(bookingsSeed);
   const [finances, setFinances] = useState<FinanceRow[]>(financeSeed);
@@ -394,7 +400,9 @@ export default function AdminDashboardPage() {
   const [calendarMonth, setCalendarMonth] = useState(
     new Date(today.getFullYear(), today.getMonth(), 1),
   );
-  const [selectedDate, setSelectedDate] = useState(toDateOnly(new Date().toISOString()));
+  const [selectedDate, setSelectedDate] = useState(
+    toDateOnly(new Date().toISOString()),
+  );
 
   const [financeForm, setFinanceForm] = useState<{
     client: string;
@@ -756,9 +764,7 @@ export default function AdminDashboardPage() {
 
   const toggleMessageOpen = (id: number) => {
     setMessages((prev) =>
-      prev.map((msg) =>
-        msg.id === id ? { ...msg, open: !msg.open } : msg,
-      ),
+      prev.map((msg) => (msg.id === id ? { ...msg, open: !msg.open } : msg)),
     );
   };
 
@@ -768,7 +774,7 @@ export default function AdminDashboardPage() {
 
   const renderOverview = () => (
     <div className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4">
         <StatCard
           label="Ingresos"
           value={money(totalRevenue)}
@@ -791,8 +797,8 @@ export default function AdminDashboardPage() {
         />
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.3fr)_380px]">
-        <GlassCard className="p-5">
+      <div className="grid gap-4 grid-cols-1 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,380px)]">
+        <GlassCard className="p-4 sm:p-5 min-w-0">
           <SectionTitle
             eyebrow="Resumen"
             title="Ingresos y pendientes"
@@ -800,13 +806,13 @@ export default function AdminDashboardPage() {
             action={
               <button
                 onClick={() => setView('finanzas')}
-                className="rounded-full border border-[#e1ab71]/20 bg-[#e1ab71]/12 px-4 py-2 text-sm text-[#ffd8ac]"
+                className="rounded-full border border-[#e1ab71]/20 bg-[#e1ab71]/12 px-4 py-2 text-sm text-[#ffd8ac] w-full sm:w-auto"
               >
                 Ir a finanzas
               </button>
             }
           />
-          <div className="h-[300px]">
+          <div className="h-[240px] sm:h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={financeChart}
@@ -814,16 +820,8 @@ export default function AdminDashboardPage() {
               >
                 <defs>
                   <linearGradient id="incomeFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop
-                      offset="0%"
-                      stopColor="#e1ab71"
-                      stopOpacity={0.55}
-                    />
-                    <stop
-                      offset="100%"
-                      stopColor="#e1ab71"
-                      stopOpacity={0.03}
-                    />
+                    <stop offset="0%" stopColor="#e1ab71" stopOpacity={0.55} />
+                    <stop offset="100%" stopColor="#e1ab71" stopOpacity={0.03} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid
@@ -862,7 +860,7 @@ export default function AdminDashboardPage() {
           </div>
         </GlassCard>
 
-        <GlassCard className="p-5">
+        <GlassCard className="p-4 sm:p-5 min-w-0">
           <SectionTitle
             eyebrow="Actividad"
             title="Últimos movimientos"
@@ -872,7 +870,7 @@ export default function AdminDashboardPage() {
                   setFinanceTab('list');
                   setView('finanzas');
                 }}
-                className="text-sm text-[#f0c28f]"
+                className="text-sm text-[#f0c28f] w-full text-left sm:w-auto sm:text-right"
               >
                 Ver lista
               </button>
@@ -882,15 +880,15 @@ export default function AdminDashboardPage() {
             {finances.slice(0, 5).map((row) => (
               <div
                 key={row.id}
-                className="rounded-[22px] border border-white/8 bg-white/[0.04] p-4"
+                className="rounded-[18px] sm:rounded-[22px] border border-white/8 bg-white/[0.04] p-4"
               >
                 <p className="font-medium text-[#fff2e2]">{row.client}</p>
-                <p className="mt-1 text-sm text-white/55">
+                <p className="mt-1 text-sm text-white/55 break-words">
                   {row.plan} · {row.method}
                 </p>
-                <div className="mt-3 flex items-center justify-between">
-                  <span className="text-xs text-white/40">{row.date}</span>
-                  <span className="text-sm text-[#f0c28f]">
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <span className="text-xs text-white/40 break-words">{row.date}</span>
+                  <span className="text-sm text-[#f0c28f] text-right">
                     {money(row.amount)}
                   </span>
                 </div>
@@ -904,8 +902,8 @@ export default function AdminDashboardPage() {
 
   const renderReservas = () => (
     <div className="space-y-4">
-      <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
-        <GlassCard className="p-5">
+      <div className="grid gap-4 grid-cols-1 xl:grid-cols-[360px_minmax(0,1fr)]">
+        <GlassCard className="p-4 sm:p-5">
           <SectionTitle
             eyebrow="Formulario"
             title="Nueva reserva"
@@ -980,7 +978,7 @@ export default function AdminDashboardPage() {
           </div>
         </GlassCard>
 
-        <GlassCard className="p-5">
+        <GlassCard className="p-4 sm:p-5 min-w-0">
           <SectionTitle
             eyebrow="Calendario"
             title="Agenda visual"
@@ -1019,8 +1017,8 @@ export default function AdminDashboardPage() {
             }
           />
 
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-medium capitalize text-[#fff2e2]">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h3 className="text-base sm:text-lg font-medium capitalize text-[#fff2e2]">
               {monthTitle(calendarMonth)}
             </h3>
             <button
@@ -1029,85 +1027,96 @@ export default function AdminDashboardPage() {
                 setCalendarMonth(new Date(now.getFullYear(), now.getMonth(), 1));
                 setSelectedDate(toDateOnly(now.toISOString()));
               }}
-              className="rounded-full border border-[#e1ab71]/20 bg-[#e1ab71]/12 px-4 py-2 text-sm text-[#ffd8ac]"
+              className="rounded-full border border-[#e1ab71]/20 bg-[#e1ab71]/12 px-4 py-2 text-sm text-[#ffd8ac] w-full sm:w-auto"
             >
               Hoy
             </button>
           </div>
 
-          <div className="grid grid-cols-7 gap-2 text-center text-xs uppercase tracking-[0.18em] text-white/35">
-            {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day) => (
-              <div key={day} className="py-2">
-                {day}
+          <div className="overflow-x-auto">
+            <div className="min-w-[560px]">
+              <div className="grid grid-cols-7 gap-2 text-center text-[10px] sm:text-xs uppercase tracking-[0.14em] sm:tracking-[0.18em] text-white/35">
+                {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day) => (
+                  <div key={day} className="py-2">
+                    {day}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          <div className="grid grid-cols-7 gap-2">
-            {calendarDays.map((cell) => {
-              const isSelected = cell.dateKey === selectedDate;
-              const isToday = cell.dateKey === toDateOnly(new Date().toISOString());
+              <div className="grid grid-cols-7 gap-2">
+                {calendarDays.map((cell) => {
+                  const isSelected = cell.dateKey === selectedDate;
+                  const isToday =
+                    cell.dateKey === toDateOnly(new Date().toISOString());
 
-              return (
-                <button
-                  key={`${cell.dateKey}-${cell.currentMonth}`}
-                  onClick={() => setSelectedDate(cell.dateKey)}
-                  className={cn(
-                    'relative min-h-[88px] rounded-[20px] border p-3 text-left transition',
-                    cell.currentMonth
-                      ? 'border-white/8 bg-white/[0.04]'
-                      : 'border-white/[0.04] bg-white/[0.02]',
-                    isSelected && 'border-[#e1ab71]/30 bg-[#e1ab71]/12',
-                  )}
-                >
-                  <div className="flex items-center justify-between">
-                    <span
+                  return (
+                    <button
+                      key={`${cell.dateKey}-${cell.currentMonth}`}
+                      onClick={() => setSelectedDate(cell.dateKey)}
                       className={cn(
-                        'text-sm',
-                        cell.currentMonth ? 'text-[#fff2e2]' : 'text-white/25',
-                        isToday && 'font-semibold text-[#f3c792]',
+                        'relative min-h-[72px] sm:min-h-[88px] rounded-[16px] sm:rounded-[20px] border p-2 sm:p-3 text-left transition',
+                        cell.currentMonth
+                          ? 'border-white/8 bg-white/[0.04]'
+                          : 'border-white/[0.04] bg-white/[0.02]',
+                        isSelected && 'border-[#e1ab71]/30 bg-[#e1ab71]/12',
                       )}
                     >
-                      {cell.date.getDate()}
-                    </span>
-                    {cell.count > 0 ? (
-                      <span className="rounded-full bg-[#e1ab71]/15 px-2 py-0.5 text-[10px] text-[#ffd8ac]">
-                        {cell.count}
-                      </span>
-                    ) : null}
-                  </div>
-
-                  {cell.hasBookings ? (
-                    <div className="mt-4 flex flex-wrap gap-1">
-                      {Array.from({ length: Math.min(cell.count, 3) }).map((_, i) => (
+                      <div className="flex items-center justify-between gap-1">
                         <span
-                          key={i}
-                          className="h-2.5 w-2.5 rounded-full bg-[#efb16d]"
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="mt-4 h-2.5" />
-                  )}
+                          className={cn(
+                            'text-xs sm:text-sm',
+                            cell.currentMonth
+                              ? 'text-[#fff2e2]'
+                              : 'text-white/25',
+                            isToday && 'font-semibold text-[#f3c792]',
+                          )}
+                        >
+                          {cell.date.getDate()}
+                        </span>
+                        {cell.count > 0 ? (
+                          <span className="rounded-full bg-[#e1ab71]/15 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] text-[#ffd8ac]">
+                            {cell.count}
+                          </span>
+                        ) : null}
+                      </div>
 
-                  {isSelected ? (
-                    <div className="absolute inset-x-3 bottom-3 h-[2px] rounded-full bg-[#efb16d]" />
-                  ) : null}
-                </button>
-              );
-            })}
+                      {cell.hasBookings ? (
+                        <div className="mt-3 sm:mt-4 flex flex-wrap gap-1">
+                          {Array.from({ length: Math.min(cell.count, 3) }).map(
+                            (_, i) => (
+                              <span
+                                key={i}
+                                className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-[#efb16d]"
+                              />
+                            ),
+                          )}
+                        </div>
+                      ) : (
+                        <div className="mt-3 sm:mt-4 h-2.5" />
+                      )}
+
+                      {isSelected ? (
+                        <div className="absolute inset-x-2 sm:inset-x-3 bottom-2 sm:bottom-3 h-[2px] rounded-full bg-[#efb16d]" />
+                      ) : null}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </GlassCard>
       </div>
 
-      <GlassCard className="p-5">
+      <GlassCard className="p-4 sm:p-5">
         <SectionTitle
           eyebrow="Agenda del día"
-          title={selectedDate ? `Reservas del ${selectedDate}` : 'Selecciona una fecha'}
+          title={
+            selectedDate ? `Reservas del ${selectedDate}` : 'Selecciona una fecha'
+          }
           description="Aquí ves lo agendado para el día seleccionado."
         />
         {bookingsForSelectedDate.length === 0 ? (
-          <div className="rounded-[22px] border border-white/8 bg-white/[0.04] p-6 text-sm text-white/50">
+          <div className="rounded-[18px] sm:rounded-[22px] border border-white/8 bg-white/[0.04] p-6 text-sm text-white/50">
             No hay reservas para esta fecha.
           </div>
         ) : (
@@ -1115,31 +1124,31 @@ export default function AdminDashboardPage() {
             {bookingsForSelectedDate.map((item) => (
               <div
                 key={item.id}
-                className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4"
+                className="rounded-[20px] sm:rounded-[24px] border border-white/8 bg-white/[0.04] p-4"
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                  <div>
-                    <p className="text-lg font-medium text-[#fff2e2]">
+                  <div className="min-w-0">
+                    <p className="text-base sm:text-lg font-medium text-[#fff2e2]">
                       {item.client}
                     </p>
                     <div className="mt-3 grid gap-2 text-sm text-white/55 md:grid-cols-2">
-                      <p className="inline-flex items-center gap-2">
-                        <Phone className="h-4 w-4" />
+                      <p className="inline-flex items-center gap-2 break-words">
+                        <Phone className="h-4 w-4 shrink-0" />
                         {item.phone}
                       </p>
-                      <p className="inline-flex items-center gap-2">
-                        <CalendarClock className="h-4 w-4" />
+                      <p className="inline-flex items-center gap-2 break-words">
+                        <CalendarClock className="h-4 w-4 shrink-0" />
                         {formatBookingDate(item.date)}
                       </p>
-                      <p className="inline-flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
+                      <p className="inline-flex items-center gap-2 break-words">
+                        <MapPin className="h-4 w-4 shrink-0" />
                         {item.place}
                       </p>
                       <p>{item.plan}</p>
                     </div>
                   </div>
 
-                  <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs text-white/70">
+                  <span className="self-start rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs text-white/70">
                     {item.status}
                   </span>
                 </div>
@@ -1149,7 +1158,7 @@ export default function AdminDashboardPage() {
         )}
       </GlassCard>
 
-      <GlassCard className="p-5">
+      <GlassCard className="p-4 sm:p-5">
         <SectionTitle
           eyebrow="Lista"
           title="Todas las reservas"
@@ -1159,31 +1168,31 @@ export default function AdminDashboardPage() {
           {filteredBookings.map((item) => (
             <div
               key={item.id}
-              className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4"
+              className="rounded-[20px] sm:rounded-[24px] border border-white/8 bg-white/[0.04] p-4"
             >
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div>
-                  <p className="text-lg font-medium text-[#fff2e2]">
+                <div className="min-w-0">
+                  <p className="text-base sm:text-lg font-medium text-[#fff2e2]">
                     {item.client}
                   </p>
                   <div className="mt-3 grid gap-2 text-sm text-white/55 md:grid-cols-2">
-                    <p className="inline-flex items-center gap-2">
-                      <Phone className="h-4 w-4" />
+                    <p className="inline-flex items-center gap-2 break-words">
+                      <Phone className="h-4 w-4 shrink-0" />
                       {item.phone}
                     </p>
-                    <p className="inline-flex items-center gap-2">
-                      <CalendarClock className="h-4 w-4" />
+                    <p className="inline-flex items-center gap-2 break-words">
+                      <CalendarClock className="h-4 w-4 shrink-0" />
                       {formatBookingDate(item.date)}
                     </p>
-                    <p className="inline-flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
+                    <p className="inline-flex items-center gap-2 break-words">
+                      <MapPin className="h-4 w-4 shrink-0" />
                       {item.place}
                     </p>
                     <p>{item.plan}</p>
                   </div>
                 </div>
 
-                <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs text-white/70">
+                <span className="self-start rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs text-white/70">
                   {item.status}
                 </span>
               </div>
@@ -1200,13 +1209,15 @@ export default function AdminDashboardPage() {
     );
 
     return (
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
         {clientNames.map((name, i) => (
-          <GlassCard key={name} className="p-5">
-            <p className="text-[11px] uppercase tracking-[0.25em] text-white/40">
+          <GlassCard key={name} className="p-4 sm:p-5">
+            <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-white/40">
               Cliente {String(i + 1).padStart(2, '0')}
             </p>
-            <h3 className="mt-3 text-xl font-medium text-[#fff2e2]">{name}</h3>
+            <h3 className="mt-3 text-lg sm:text-xl font-medium text-[#fff2e2] break-words">
+              {name}
+            </h3>
             <p className="mt-2 text-sm text-white/55">
               Historial generado desde reservas y finanzas.
             </p>
@@ -1233,7 +1244,7 @@ export default function AdminDashboardPage() {
         <button
           onClick={() => setFinanceTab('form')}
           className={cn(
-            'rounded-full px-4 py-2 text-sm transition',
+            'rounded-full px-4 py-2 text-sm transition w-full sm:w-auto',
             financeTab === 'form'
               ? 'border border-[#e1ab71]/20 bg-[#e1ab71]/12 text-[#ffd8ac]'
               : 'border border-white/10 bg-white/[0.04] text-white/65',
@@ -1244,7 +1255,7 @@ export default function AdminDashboardPage() {
         <button
           onClick={() => setFinanceTab('list')}
           className={cn(
-            'rounded-full px-4 py-2 text-sm transition',
+            'rounded-full px-4 py-2 text-sm transition w-full sm:w-auto',
             financeTab === 'list'
               ? 'border border-[#e1ab71]/20 bg-[#e1ab71]/12 text-[#ffd8ac]'
               : 'border border-white/10 bg-white/[0.04] text-white/65',
@@ -1255,8 +1266,8 @@ export default function AdminDashboardPage() {
       </div>
 
       {financeTab === 'form' ? (
-        <div className="grid gap-4 xl:grid-cols-[380px_minmax(0,1fr)]">
-          <GlassCard className="p-5">
+        <div className="grid gap-4 grid-cols-1 xl:grid-cols-[380px_minmax(0,1fr)]">
+          <GlassCard className="p-4 sm:p-5">
             <SectionTitle
               eyebrow="Excel style"
               title="Registrar dinero recibido"
@@ -1321,7 +1332,7 @@ export default function AdminDashboardPage() {
                 />
               </Field>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                 <Field label="Método">
                   <Select
                     value={financeForm.method}
@@ -1365,7 +1376,7 @@ export default function AdminDashboardPage() {
             </div>
           </GlassCard>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
             <StatCard
               label="Cobrado"
               value={money(totalRevenue)}
@@ -1384,15 +1395,15 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       ) : (
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_380px]">
-          <GlassCard className="p-5">
+        <div className="grid gap-4 grid-cols-1 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,380px)]">
+          <GlassCard className="p-4 sm:p-5 min-w-0">
             <SectionTitle
               eyebrow="Lista"
               title="Movimientos registrados"
               description="Aquí sí ves la lista tipo hoja y luego el gráfico."
             />
             <div className="overflow-x-auto">
-              <table className="min-w-full text-left text-sm">
+              <table className="min-w-[760px] w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-white/10 text-white/45">
                     <th className="pb-3 pr-4 font-medium">Cliente</th>
@@ -1434,9 +1445,9 @@ export default function AdminDashboardPage() {
             </div>
           </GlassCard>
 
-          <GlassCard className="p-5">
+          <GlassCard className="p-4 sm:p-5 min-w-0">
             <SectionTitle eyebrow="Gráfico" title="Ingresos por mes" />
-            <div className="h-[320px]">
+            <div className="h-[260px] sm:h-[320px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={financeChart}
@@ -1494,7 +1505,7 @@ export default function AdminDashboardPage() {
         <button
           onClick={() => setPublicationTab('editor')}
           className={cn(
-            'rounded-full px-4 py-2 text-sm transition',
+            'rounded-full px-4 py-2 text-sm transition w-full sm:w-auto',
             publicationTab === 'editor'
               ? 'border border-[#e1ab71]/20 bg-[#e1ab71]/12 text-[#ffd8ac]'
               : 'border border-white/10 bg-white/[0.04] text-white/65',
@@ -1505,7 +1516,7 @@ export default function AdminDashboardPage() {
         <button
           onClick={() => setPublicationTab('feed')}
           className={cn(
-            'rounded-full px-4 py-2 text-sm transition',
+            'rounded-full px-4 py-2 text-sm transition w-full sm:w-auto',
             publicationTab === 'feed'
               ? 'border border-[#e1ab71]/20 bg-[#e1ab71]/12 text-[#ffd8ac]'
               : 'border border-white/10 bg-white/[0.04] text-white/65',
@@ -1516,8 +1527,8 @@ export default function AdminDashboardPage() {
       </div>
 
       {publicationTab === 'editor' ? (
-        <div className="grid gap-4 xl:grid-cols-[420px_minmax(0,1fr)]">
-          <GlassCard className="p-5">
+        <div className="grid gap-4 grid-cols-1 xl:grid-cols-[420px_minmax(0,1fr)]">
+          <GlassCard className="p-4 sm:p-5">
             <SectionTitle
               eyebrow="Social style"
               title="Editor de publicaciones"
@@ -1611,7 +1622,7 @@ export default function AdminDashboardPage() {
                 </Select>
               </Field>
 
-              <div className="grid gap-3 md:grid-cols-2">
+              <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
                 <button
                   onClick={savePublication}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#e1ab71]/20 bg-[#e1ab71]/12 px-4 py-3 text-sm font-medium text-[#ffd8ac]"
@@ -1641,9 +1652,9 @@ export default function AdminDashboardPage() {
             </div>
           </GlassCard>
 
-          <GlassCard className="overflow-hidden">
+          <GlassCard className="overflow-hidden min-w-0">
             <div
-              className="h-[260px] bg-cover bg-center"
+              className="h-[220px] sm:h-[260px] bg-cover bg-center"
               style={{
                 backgroundImage: `url(${
                   publicationForm.image ||
@@ -1651,18 +1662,18 @@ export default function AdminDashboardPage() {
                 })`,
               }}
             />
-            <div className="p-5">
-              <p className="text-[11px] uppercase tracking-[0.25em] text-white/40">
+            <div className="p-4 sm:p-5">
+              <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-white/40">
                 {publicationForm.section || 'Hero'}
               </p>
-              <h3 className="mt-3 text-3xl font-medium text-[#fff2e2]">
+              <h3 className="mt-3 text-2xl sm:text-3xl font-medium text-[#fff2e2] break-words">
                 {publicationForm.title || 'Previsualización de la sección'}
               </h3>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-white/55">
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-white/55 break-words">
                 {publicationForm.text ||
                   'Aquí verás cómo se siente la publicación antes de enviarla al feed interno.'}
               </p>
-              <div className="mt-5 flex items-center gap-3">
+              <div className="mt-5 flex flex-wrap items-center gap-3">
                 <button className="rounded-full border border-[#e1ab71]/20 bg-[#e1ab71]/12 px-4 py-2 text-sm text-[#ffd8ac]">
                   {publicationForm.buttonText || 'Botón'}
                 </button>
@@ -1674,16 +1685,16 @@ export default function AdminDashboardPage() {
           </GlassCard>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
           {filteredPublications.map((item) => (
-            <GlassCard key={item.id} className="overflow-hidden">
+            <GlassCard key={item.id} className="overflow-hidden min-w-0">
               <div
-                className="h-56 bg-cover bg-center"
+                className="h-48 sm:h-56 bg-cover bg-center"
                 style={{ backgroundImage: `url(${item.image})` }}
               />
               <div className="p-4">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-[11px] uppercase tracking-[0.25em] text-white/40">
+                  <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-white/40">
                     {item.section}
                   </p>
                   <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white/65">
@@ -1691,10 +1702,10 @@ export default function AdminDashboardPage() {
                   </span>
                 </div>
 
-                <h3 className="mt-3 text-lg font-medium text-[#fff2e2]">
+                <h3 className="mt-3 text-base sm:text-lg font-medium text-[#fff2e2] break-words">
                   {item.title}
                 </h3>
-                <p className="mt-2 text-sm leading-7 text-white/55">
+                <p className="mt-2 text-sm leading-7 text-white/55 break-words">
                   {item.text}
                 </p>
 
@@ -1736,18 +1747,18 @@ export default function AdminDashboardPage() {
   );
 
   const renderPlanes = () => (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
       {plans.map((plan) => (
-        <GlassCard key={plan.name} className="p-5">
-          <p className="text-[11px] uppercase tracking-[0.25em] text-white/40">
+        <GlassCard key={plan.name} className="p-4 sm:p-5">
+          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-white/40">
             Plan
           </p>
-          <h3 className="mt-3 text-xl font-medium text-[#fff2e2]">
+          <h3 className="mt-3 text-lg sm:text-xl font-medium text-[#fff2e2]">
             {plan.name}
           </h3>
           <p className="mt-2 text-sm text-white/50">{plan.info}</p>
-          <div className="mt-4 flex items-end justify-between">
-            <span className="text-2xl font-semibold text-[#f3c792]">
+          <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
+            <span className="text-xl sm:text-2xl font-semibold text-[#f3c792] break-words">
               {money(plan.price)}
             </span>
             <button
@@ -1757,7 +1768,7 @@ export default function AdminDashboardPage() {
                 setFinanceTab('form');
                 showToast(`Plan ${plan.name} cargado en finanzas.`);
               }}
-              className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm text-white/70"
+              className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm text-white/70 w-full sm:w-auto"
             >
               Usar plan
             </button>
@@ -1770,11 +1781,11 @@ export default function AdminDashboardPage() {
   const renderMensajes = () => (
     <div className="space-y-4">
       {messages.map((msg) => (
-        <GlassCard key={msg.id} className="p-5">
+        <GlassCard key={msg.id} className="p-4 sm:p-5">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-medium text-[#fff2e2]">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-base sm:text-lg font-medium text-[#fff2e2] break-words">
                   {msg.name}
                 </h3>
                 <span className="rounded-full border border-[#e1ab71]/18 bg-[#e1ab71]/10 px-3 py-1 text-xs text-[#f0c28f]">
@@ -1782,7 +1793,7 @@ export default function AdminDashboardPage() {
                 </span>
               </div>
               {msg.open ? (
-                <p className="mt-3 max-w-3xl text-sm leading-7 text-white/55">
+                <p className="mt-3 max-w-3xl text-sm leading-7 text-white/55 break-words">
                   {msg.text}
                 </p>
               ) : (
@@ -1793,7 +1804,7 @@ export default function AdminDashboardPage() {
             </div>
             <button
               onClick={() => toggleMessageOpen(msg.id)}
-              className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm text-white/70"
+              className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm text-white/70 w-full md:w-auto"
             >
               {msg.open ? 'Cerrar' : 'Abrir'}
             </button>
@@ -1804,15 +1815,15 @@ export default function AdminDashboardPage() {
   );
 
   const renderSettings = () => (
-    <div className="grid gap-4 xl:grid-cols-2">
-      <GlassCard className="p-5">
+    <div className="grid gap-4 grid-cols-1 xl:grid-cols-2">
+      <GlassCard className="p-4 sm:p-5">
         <SectionTitle eyebrow="Studio" title="Datos generales" />
         <div className="space-y-3">
           {['Nombre del estudio', 'Correo', 'Teléfono', 'Instagram'].map(
             (item) => (
               <div
                 key={item}
-                className="rounded-[20px] border border-white/8 bg-white/[0.04] px-4 py-3 text-sm text-white/60"
+                className="rounded-[18px] sm:rounded-[20px] border border-white/8 bg-white/[0.04] px-4 py-3 text-sm text-white/60"
               >
                 {item}
               </div>
@@ -1821,7 +1832,7 @@ export default function AdminDashboardPage() {
         </div>
       </GlassCard>
 
-      <GlassCard className="p-5">
+      <GlassCard className="p-4 sm:p-5">
         <SectionTitle eyebrow="Preferencias" title="Ajustes del panel" />
         <div className="space-y-3 text-sm text-white/65">
           {[
@@ -1836,12 +1847,12 @@ export default function AdminDashboardPage() {
               <button
                 key={key}
                 onClick={() => toggleSetting(typedKey)}
-                className="flex w-full items-center justify-between rounded-[20px] border border-white/8 bg-white/[0.04] px-4 py-3 text-left"
+                className="flex w-full items-center justify-between gap-4 rounded-[18px] sm:rounded-[20px] border border-white/8 bg-white/[0.04] px-4 py-3 text-left"
               >
-                <span>{label}</span>
+                <span className="min-w-0">{label}</span>
                 <span
                   className={cn(
-                    'h-6 w-11 rounded-full p-1 transition',
+                    'h-6 w-11 rounded-full p-1 transition shrink-0',
                     enabled ? 'bg-[#e1ab71]/20' : 'bg-white/10',
                   )}
                 >
@@ -1873,8 +1884,8 @@ export default function AdminDashboardPage() {
       />
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(225,171,113,0.12),transparent_24%),linear-gradient(180deg,rgba(10,10,12,0.54),rgba(10,10,12,0.88))]" />
 
-      <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1480px] grid-cols-1 gap-4 p-3 lg:p-4 xl:grid-cols-[92px_minmax(0,1fr)] xl:p-5">
-        <aside className="xl:sticky xl:top-5 xl:h-[calc(100vh-2.5rem)]">
+      <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1480px] grid-cols-1 gap-4 p-3 sm:p-4 xl:grid-cols-[92px_minmax(0,1fr)] xl:p-5">
+        <aside className="hidden xl:block xl:sticky xl:top-5 xl:h-[calc(100vh-2.5rem)]">
           <GlassCard className="flex h-full flex-col items-center p-3">
             <button
               onClick={() => {
@@ -1925,47 +1936,107 @@ export default function AdminDashboardPage() {
           </GlassCard>
         </aside>
 
-        <section className="space-y-4">
+        <section className="space-y-4 min-w-0">
           <GlassCard className="p-4 md:p-5">
-            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.34em] text-white/40">
-                  MILES VISUAL
-                </p>
-                <h1 className="mt-2 text-2xl font-medium text-[#fff2e2] md:text-[32px]">
-                  {currentTitle}
-                </h1>
-                <p className="mt-2 max-w-2xl text-sm text-white/50">
-                  Panel real para gestionar reservas, finanzas, publicaciones,
-                  clientes y planes.
-                </p>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-start justify-between gap-3 xl:hidden">
+                <button
+                  onClick={() => setMobileNavOpen((prev) => !prev)}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/75"
+                >
+                  <Menu className="h-5 w-5" />
+                </button>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => showToast('Usa la barra superior para buscar.')}
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/75"
+                  >
+                    <Search className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => showToast('No tienes notificaciones nuevas.')}
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/75"
+                  >
+                    <Bell className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
-                  <input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Buscar cliente, plan, publicación..."
-                    className="w-[260px] rounded-full border border-white/10 bg-white/[0.04] py-2 pl-9 pr-4 text-sm text-white outline-none placeholder:text-white/30"
-                  />
+              {mobileNavOpen ? (
+                <div className="xl:hidden">
+                  <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
+                    {nav.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            setView(item.id);
+                            setMobileNavOpen(false);
+                          }}
+                          className={cn(
+                            'flex flex-col items-center justify-center gap-2 rounded-[18px] border px-2 py-3 text-[11px] transition',
+                            view === item.id
+                              ? 'border-[#e1ab71]/22 bg-[#e1ab71]/12 text-[#ffd7aa]'
+                              : 'border-white/8 bg-white/[0.04] text-white/65',
+                          )}
+                        >
+                          <Icon className="h-4 w-4" />
+                          <span className="truncate">{item.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.28em] sm:tracking-[0.34em] text-white/40">
+                    MILES VISUAL
+                  </p>
+                  <h1 className="mt-2 text-xl sm:text-2xl font-medium text-[#fff2e2] md:text-[32px] break-words">
+                    {currentTitle}
+                  </h1>
+                  <p className="mt-2 max-w-2xl text-sm text-white/50">
+                    Panel real para gestionar reservas, finanzas, publicaciones,
+                    clientes y planes.
+                  </p>
                 </div>
 
-                <button
-                  onClick={() => showToast('Preview disponible cuando conectes la landing real.')}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/75"
-                >
-                  <Eye className="mr-2 inline h-4 w-4" />
-                  Ver landing
-                </button>
+                <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:flex-wrap lg:items-center">
+                  <div className="relative w-full lg:w-[260px]">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
+                    <input
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Buscar cliente, plan, publicación..."
+                      className="w-full rounded-full border border-white/10 bg-white/[0.04] py-2 pl-9 pr-4 text-sm text-white outline-none placeholder:text-white/30"
+                    />
+                  </div>
 
-                <button
-                  onClick={() => showToast('Cambios publicados localmente en el mockup.')}
-                  className="inline-flex items-center gap-2 rounded-full border border-[#e1ab71]/20 bg-[#e1ab71]/12 px-4 py-2 text-sm font-medium text-[#ffd8ac]"
-                >
-                  Publicar cambios
-                </button>
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <button
+                      onClick={() =>
+                        showToast('Preview disponible cuando conectes la landing real.')
+                      }
+                      className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/75 w-full sm:w-auto"
+                    >
+                      <Eye className="mr-2 inline h-4 w-4" />
+                      Ver landing
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        showToast('Cambios publicados localmente en el mockup.')
+                      }
+                      className="inline-flex items-center justify-center gap-2 rounded-full border border-[#e1ab71]/20 bg-[#e1ab71]/12 px-4 py-2 text-sm font-medium text-[#ffd8ac] w-full sm:w-auto"
+                    >
+                      Publicar cambios
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </GlassCard>
@@ -1982,7 +2053,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {toast ? (
-        <div className="fixed bottom-5 right-5 z-50 rounded-full border border-[#e1ab71]/20 bg-[#111111]/90 px-4 py-3 text-sm text-[#ffd8ac] backdrop-blur-xl">
+        <div className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-24px)] max-w-max -translate-x-1/2 rounded-full border border-[#e1ab71]/20 bg-[#111111]/90 px-4 py-3 text-center text-sm text-[#ffd8ac] backdrop-blur-xl sm:bottom-5 sm:left-auto sm:right-5 sm:w-auto sm:translate-x-0">
           {toast}
         </div>
       ) : null}

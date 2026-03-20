@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Cormorant_Garamond, Montserrat } from "next/font/google";
-import { useEffect, useState } from "react";
-import { LogIn } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { LogIn, Star } from "lucide-react";
 
 const serif = Cormorant_Garamond({
   subsets: ["latin"],
@@ -43,6 +43,20 @@ type PlanItem = {
   image: string;
   price: string;
   details: string[];
+};
+
+type TestimonialItem = {
+  id: string;
+  name: string;
+  role: string;
+  image: string;
+  rating: number;
+  text: string;
+};
+
+type BrandItem = {
+  id: string;
+  name: string;
 };
 
 const navLeft: NavItem[] = [
@@ -214,6 +228,47 @@ const plans: PlanItem[] = [
   },
 ];
 
+const testimonials: TestimonialItem[] = [
+  {
+    id: "t1",
+    name: "Valentina Rojas",
+    role: "Novia",
+    image:
+      "https://i.pinimg.com/736x/99/f7/61/99f761049c0db1a5b51de0fb92dea5e6.jpg",
+    rating: 5,
+    text: "Miles logró capturar nuestra boda con una sensibilidad increíble. Cada foto se siente elegante, íntima y profundamente emotiva.",
+  },
+  {
+    id: "t2",
+    name: "Camila Hernández",
+    role: "Sesión editorial",
+    image:
+      "https://i.pinimg.com/736x/4b/3a/9b/4b3a9b5e408f0c0de33d93a3e67e0277.jpg",
+    rating: 5,
+    text: "La experiencia fue impecable de principio a fin. La dirección, la estética y el resultado final superaron todo lo que imaginaba.",
+  },
+  {
+    id: "t3",
+    name: "Laura Méndez",
+    role: "Cliente premium",
+    image:
+      "https://i.pinimg.com/736x/9c/f3/84/9cf3841128b993807ecbd8f5f585b9be.jpg",
+    rating: 5,
+    text: "No solo entrega fotos hermosas, entrega una memoria visual con alma. Todo se ve sofisticado, limpio y lleno de emoción real.",
+  },
+];
+
+const alliedBrands: BrandItem[] = [
+  { id: "b1", name: "Atelier Bridal" },
+  { id: "b2", name: "Maison Events" },
+  { id: "b3", name: "Velvet Studio" },
+  { id: "b4", name: "Bloom Weddings" },
+  { id: "b5", name: "Aura Beauty" },
+  { id: "b6", name: "Golden Venue" },
+  { id: "b7", name: "Luna Decor" },
+  { id: "b8", name: "Élan Films" },
+];
+
 const whatsappUrl =
   "https://wa.me/573102345742?text=Hola%20Miles%20Visual%2C%20quiero%20cotizar%20mi%20evento";
 
@@ -230,7 +285,13 @@ export default function Page() {
   const [activeWeddingSlide, setActiveWeddingSlide] = useState(0);
   const [activeShootingSlide, setActiveShootingSlide] = useState(0);
   const [activePlan, setActivePlan] = useState(0);
+  const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [scrolled, setScrolled] = useState(false);
+
+  const brandsLoop = useMemo(
+    () => [...alliedBrands, ...alliedBrands],
+    []
+  );
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -250,6 +311,13 @@ export default function Page() {
     const interval = setInterval(() => {
       setActiveShootingSlide((prev) => (prev + 1) % shootingSlides.length);
     }, 4500);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
+    }, 4800);
     return () => clearInterval(interval);
   }, []);
 
@@ -358,7 +426,7 @@ export default function Page() {
             </nav>
 
             <Link
-              href="/admin"
+              href="/login"
               aria-label="Ir a login"
               className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/88 transition hover:bg-white hover:text-black"
             >
@@ -714,6 +782,152 @@ export default function Page() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-[1500px] px-4 py-24 sm:px-6 lg:px-10 lg:py-28">
+        <div className="mb-12 text-center">
+          <p className="text-[11px] uppercase tracking-[0.35em] text-white/40">
+            Testimonios
+          </p>
+          <h2 className="mt-4 font-serif text-4xl font-medium tracking-[-0.04em] text-white sm:text-6xl">
+            Palabras que nos inspiran.
+          </h2>
+          <p className="mx-auto mt-5 max-w-3xl text-base leading-8 text-white/65">
+            Historias reales de personas que confiaron en nosotros para guardar
+            sus recuerdos más valiosos.
+          </p>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] p-3">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={testimonials[activeTestimonial].id}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.45 }}
+                className="grid gap-6 rounded-[1.5rem] bg-white/[0.03] p-6 sm:p-8 lg:grid-cols-[220px_1fr] lg:items-center"
+              >
+                <div className="relative mx-auto h-56 w-full max-w-[220px] overflow-hidden rounded-[1.5rem] border border-white/10">
+                  <Image
+                    src={testimonials[activeTestimonial].image}
+                    alt={testimonials[activeTestimonial].name}
+                    fill
+                    sizes="220px"
+                    className="object-cover"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-1 text-[#f2d29f]">
+                    {Array.from({ length: testimonials[activeTestimonial].rating }).map(
+                      (_, index) => (
+                        <Star
+                          key={index}
+                          className="h-4 w-4 fill-current"
+                        />
+                      )
+                    )}
+                  </div>
+
+                  <p className="mt-6 font-serif text-3xl leading-tight tracking-[-0.03em] text-white sm:text-4xl">
+                    “{testimonials[activeTestimonial].text}”
+                  </p>
+
+                  <div className="mt-6">
+                    <p className="text-lg font-medium text-white">
+                      {testimonials[activeTestimonial].name}
+                    </p>
+                    <p className="mt-1 text-sm uppercase tracking-[0.25em] text-white/45">
+                      {testimonials[activeTestimonial].role}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          <div className="grid gap-4">
+            {testimonials.map((item, index) => {
+              const active = index === activeTestimonial;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTestimonial(index)}
+                  className={`rounded-[1.5rem] border p-5 text-left transition duration-300 ${
+                    active
+                      ? "border-white/20 bg-white/[0.08]"
+                      : "border-white/10 bg-white/[0.03] hover:bg-white/[0.05]"
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="relative h-16 w-16 overflow-hidden rounded-full border border-white/10">
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        sizes="64px"
+                        className="object-cover"
+                      />
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="truncate text-base font-medium text-white">
+                        {item.name}
+                      </p>
+                      <p className="mt-1 text-[11px] uppercase tracking-[0.24em] text-white/45">
+                        {item.role}
+                      </p>
+                      <div className="mt-2 flex items-center gap-1 text-[#f2d29f]">
+                        {Array.from({ length: item.rating }).map((_, i) => (
+                          <Star key={i} className="h-3.5 w-3.5 fill-current" />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="overflow-hidden py-20 lg:py-24">
+        <div className="mx-auto mb-10 max-w-[1500px] px-4 text-center sm:px-6 lg:px-10">
+          <p className="text-[11px] uppercase tracking-[0.35em] text-white/40">
+            Marcas aliadas
+          </p>
+          <h2 className="mt-4 font-serif text-4xl font-medium tracking-[-0.04em] text-white sm:text-5xl">
+            Alianzas que elevan cada experiencia.
+          </h2>
+        </div>
+
+        <div className="relative">
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 bg-gradient-to-r from-[#0a0a0a] to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 bg-gradient-to-l from-[#0a0a0a] to-transparent" />
+
+          <motion.div
+            className="flex gap-5 px-4 sm:px-6 lg:px-10"
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{
+              duration: 22,
+              ease: "linear",
+              repeat: Infinity,
+            }}
+          >
+            {brandsLoop.map((brand, index) => (
+              <div
+                key={`${brand.id}-${index}`}
+                className="flex min-w-[220px] items-center justify-center rounded-[1.6rem] border border-white/12 bg-white/[0.06] px-8 py-6 text-center shadow-[0_12px_30px_rgba(0,0,0,0.14)] backdrop-blur-2xl"
+              >
+                <span className="font-serif text-2xl tracking-[0.08em] text-white/88">
+                  {brand.name}
+                </span>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
       <section
         id="planes"
         className="mx-auto max-w-[1500px] px-4 py-24 sm:px-6 lg:px-10 lg:py-32"
@@ -892,7 +1106,7 @@ export default function Page() {
               Contacto
             </a>
             <Link
-              href="/admin"
+              href="/login"
               className="inline-flex items-center gap-2 transition hover:text-white"
             >
               <LogIn className="h-4 w-4" />
