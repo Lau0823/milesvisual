@@ -217,8 +217,8 @@ const whatsappUrl =
 
 const aboutTitle = "¿Quiénes somos?";
 const aboutParagraphs = [
-  "Hola, mi nombre es Miles Esteban Morales Andrade: fotógrafo y productor autoral audiovisual de bodas colombiano establecido en la ciudad de Valencia, Córdoba. Conectar y apasionar por estar entre arte es la fotografía.",
-  "Me dedico a plasmar recuerdos con calidad y creatividad para toda la vida, sumo un equipo capacitado y enfocado en brindar una experiencia única y diferente en cada evento, cubriendo tus momentos con un detalle digno de catedral y proporcionando una dirección visual que te hace diferenciar por estilosa creatividad por la emoción de que no encargarse para que lo que vivan con nosotros se la película.",
+  "Hola  mi nombre es Miles Esteban Morales Andrade  fotografo y productor audio visual de bodas colombiano",
+"establecido en la ciudad de villavicencio, amante  y apasionado por este arte que es la fotografia.", "Nos dedicamos a plasmar recuerdos  con  calidad y creatividad  para toda la vida, somos u equipo de trabajao capacitado  y enfocado  en brindar una xperiencia unica y diferente en cada evento  que cubrimos.",
 ];
 
 export default function Page() {
