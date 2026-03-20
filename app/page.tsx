@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Cormorant_Garamond, Montserrat } from "next/font/google";
 import { useEffect, useState } from "react";
+import { LogIn } from "lucide-react";
 
 const serif = Cormorant_Garamond({
   subsets: ["latin"],
@@ -218,7 +220,8 @@ const whatsappUrl =
 const aboutTitle = "¿Quiénes somos?";
 const aboutParagraphs = [
   "Hola  mi nombre es Miles Esteban Morales Andrade  fotografo y productor audio visual de bodas colombiano",
-"establecido en la ciudad de villavicencio, amante  y apasionado por este arte que es la fotografia.", "Nos dedicamos a plasmar recuerdos  con  calidad y creatividad  para toda la vida, somos u equipo de trabajao capacitado  y enfocado  en brindar una xperiencia unica y diferente en cada evento  que cubrimos.",
+  "establecido en la ciudad de villavicencio, amante  y apasionado por este arte que es la fotografia.",
+  "Nos dedicamos a plasmar recuerdos  con  calidad y creatividad  para toda la vida, somos u equipo de trabajao capacitado  y enfocado  en brindar una xperiencia unica y diferente en cada evento  que cubrimos.",
 ];
 
 export default function Page() {
@@ -264,7 +267,9 @@ export default function Page() {
         setActiveHeroSlide((prev) => (prev + 1) % heroSlides.length);
       }
       if (event.key === "ArrowLeft") {
-        setActiveHeroSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+        setActiveHeroSlide(
+          (prev) => (prev - 1 + heroSlides.length) % heroSlides.length
+        );
       }
     };
 
@@ -279,22 +284,30 @@ export default function Page() {
     };
   }, [isMenuOpen]);
 
-  const nextHeroSlide = () => setActiveHeroSlide((prev) => (prev + 1) % heroSlides.length);
+  const nextHeroSlide = () =>
+    setActiveHeroSlide((prev) => (prev + 1) % heroSlides.length);
   const prevHeroSlide = () =>
-    setActiveHeroSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+    setActiveHeroSlide(
+      (prev) => (prev - 1 + heroSlides.length) % heroSlides.length
+    );
 
   const nextWeddingSlide = () =>
     setActiveWeddingSlide((prev) => (prev + 1) % weddingSlides.length);
   const prevWeddingSlide = () =>
-    setActiveWeddingSlide((prev) => (prev - 1 + weddingSlides.length) % weddingSlides.length);
+    setActiveWeddingSlide(
+      (prev) => (prev - 1 + weddingSlides.length) % weddingSlides.length
+    );
 
   const nextShooting = () =>
     setActiveShootingSlide((prev) => (prev + 1) % shootingSlides.length);
   const prevShooting = () =>
-    setActiveShootingSlide((prev) => (prev - 1 + shootingSlides.length) % shootingSlides.length);
+    setActiveShootingSlide(
+      (prev) => (prev - 1 + shootingSlides.length) % shootingSlides.length
+    );
 
   const nextPlan = () => setActivePlan((prev) => (prev + 1) % plans.length);
-  const prevPlan = () => setActivePlan((prev) => (prev - 1 + plans.length) % plans.length);
+  const prevPlan = () =>
+    setActivePlan((prev) => (prev - 1 + plans.length) % plans.length);
 
   const selectedPlan = plans[activePlan];
 
@@ -330,18 +343,28 @@ export default function Page() {
             Miles Visual
           </a>
 
-          <nav className="hidden items-center gap-7 xl:flex">
-            {navRight.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="group relative text-[11px] uppercase tracking-[0.3em] text-white/88 transition hover:text-white"
-              >
-                {item.label}
-                <span className="absolute -bottom-2 left-0 h-px w-0 bg-white/80 transition-all duration-300 group-hover:w-full" />
-              </a>
-            ))}
-          </nav>
+          <div className="hidden items-center gap-7 xl:flex">
+            <nav className="flex items-center gap-7">
+              {navRight.map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  className="group relative text-[11px] uppercase tracking-[0.3em] text-white/88 transition hover:text-white"
+                >
+                  {item.label}
+                  <span className="absolute -bottom-2 left-0 h-px w-0 bg-white/80 transition-all duration-300 group-hover:w-full" />
+                </a>
+              ))}
+            </nav>
+
+            <Link
+              href="/admin"
+              aria-label="Ir a login"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/88 transition hover:bg-white hover:text-black"
+            >
+              <LogIn className="h-4 w-4" />
+            </Link>
+          </div>
 
           <button
             onClick={() => setIsMenuOpen(true)}
@@ -362,7 +385,9 @@ export default function Page() {
           >
             <div className="flex h-full flex-col px-6 py-6">
               <div className="flex items-center justify-between">
-                <span className="font-serif text-2xl text-white">Miles Visual</span>
+                <span className="font-serif text-2xl text-white">
+                  Miles Visual
+                </span>
                 <button
                   onClick={() => setIsMenuOpen(false)}
                   className="rounded-full border border-white/15 px-4 py-2 text-[11px] uppercase tracking-[0.25em] text-white"
@@ -382,13 +407,25 @@ export default function Page() {
                     {item.label}
                   </a>
                 ))}
+
+                <Link
+                  href="/login"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="mt-4 inline-flex items-center gap-3 font-serif text-4xl tracking-tight text-white/90"
+                >
+                  <LogIn className="h-8 w-8" />
+                  Login
+                </Link>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <section id="top" className="relative h-[100svh] min-h-[720px] w-full overflow-hidden">
+      <section
+        id="top"
+        className="relative h-[100svh] min-h-[720px] w-full overflow-hidden"
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={heroSlides[activeHeroSlide].id}
@@ -447,16 +484,20 @@ export default function Page() {
           Fotografía · cine · memoria
         </p>
         <h2 className="mt-6 font-serif text-4xl font-medium leading-tight tracking-[-0.04em] text-white sm:text-6xl">
-          Imágenes que no solo documentan un momento: lo convierten en una memoria
-          visual elegante, sensible e imposible de olvidar.
+          Imágenes que no solo documentan un momento: lo convierten en una
+          memoria visual elegante, sensible e imposible de olvidar.
         </h2>
         <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-white/65 sm:text-lg">
-          Cada historia se trabaja con intención visual, emoción real y una estética
-          premium para que el resultado se sienta cinematográfico y atemporal.
+          Cada historia se trabaja con intención visual, emoción real y una
+          estética premium para que el resultado se sienta cinematográfico y
+          atemporal.
         </p>
       </section>
 
-      <section id="about" className="mx-auto max-w-[1500px] px-4 py-10 sm:px-6 lg:px-10 lg:py-20">
+      <section
+        id="about"
+        className="mx-auto max-w-[1500px] px-4 py-10 sm:px-6 lg:px-10 lg:py-20"
+      >
         <div className="mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-[11px] uppercase tracking-[0.35em] text-white/40">
@@ -510,7 +551,10 @@ export default function Page() {
         </div>
       </section>
 
-      <section id="bodas" className="mx-auto max-w-[1500px] px-4 py-24 sm:px-6 lg:px-10 lg:py-32">
+      <section
+        id="bodas"
+        className="mx-auto max-w-[1500px] px-4 py-24 sm:px-6 lg:px-10 lg:py-32"
+      >
         <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
           <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] p-3">
             <div className="relative h-[420px] overflow-hidden rounded-[1.5rem] sm:h-[560px] lg:h-[680px]">
@@ -558,7 +602,9 @@ export default function Page() {
                     onClick={() => setActiveWeddingSlide(index)}
                     aria-label={`Ir a foto de boda ${index + 1}`}
                     className={`h-1.5 rounded-full transition-all duration-300 ${
-                      activeWeddingSlide === index ? "w-16 bg-white" : "w-8 bg-white/40"
+                      activeWeddingSlide === index
+                        ? "w-16 bg-white"
+                        : "w-8 bg-white/40"
                     }`}
                   />
                 ))}
@@ -643,7 +689,9 @@ export default function Page() {
                   onClick={() => setActiveShootingSlide(index)}
                   aria-label={`Ir al shooting ${index + 1}`}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
-                    activeShootingSlide === index ? "w-16 bg-white" : "w-8 bg-white/40"
+                    activeShootingSlide === index
+                      ? "w-16 bg-white"
+                      : "w-8 bg-white/40"
                   }`}
                 />
               ))}
@@ -659,13 +707,17 @@ export default function Page() {
             Retratos y sesiones con presencia, dirección y estética editorial.
           </h2>
           <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-white/65 sm:text-lg">
-            Un lenguaje visual contemporáneo para personas, marcas y proyectos que
-            quieren verse memorables, sofisticados y profundamente intencionales.
+            Un lenguaje visual contemporáneo para personas, marcas y proyectos
+            que quieren verse memorables, sofisticados y profundamente
+            intencionales.
           </p>
         </div>
       </section>
 
-      <section id="planes" className="mx-auto max-w-[1500px] px-4 py-24 sm:px-6 lg:px-10 lg:py-32">
+      <section
+        id="planes"
+        className="mx-auto max-w-[1500px] px-4 py-24 sm:px-6 lg:px-10 lg:py-32"
+      >
         <div className="mb-12 text-center">
           <p className="text-[11px] uppercase tracking-[0.35em] text-white/40">
             Planes
@@ -673,9 +725,7 @@ export default function Page() {
           <h2 className="mt-4 font-serif text-4xl font-medium tracking-[-0.04em] text-white sm:text-6xl">
             Hay un plan esperando por ti.
           </h2>
-          <p className="mx-auto mt-5 max-w-3xl text-base leading-8 text-white/65">
-            
-          </p>
+          <p className="mx-auto mt-5 max-w-3xl text-base leading-8 text-white/65"></p>
         </div>
 
         <div className="mb-8 flex flex-wrap justify-center gap-3">
@@ -775,7 +825,10 @@ export default function Page() {
         </div>
       </section>
 
-      <section id="contacto" className="mx-auto max-w-[1500px] px-4 pb-10 sm:px-6 lg:px-10 lg:pb-20">
+      <section
+        id="contacto"
+        className="mx-auto max-w-[1500px] px-4 pb-10 sm:px-6 lg:px-10 lg:pb-20"
+      >
         <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.02] px-6 py-12 sm:px-10 sm:py-16 lg:px-16 lg:py-20">
           <div className="absolute -left-12 bottom-0 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
           <div className="absolute -right-8 top-0 h-56 w-56 rounded-full bg-[#d8c3a3]/20 blur-3xl" />
@@ -790,7 +843,8 @@ export default function Page() {
               </h2>
               <p className="mt-5 max-w-3xl text-base leading-8 text-white/65 sm:text-lg">
                 Escríbeme para cotizar tu boda o tu shooting. Crearemos una
-                experiencia visual sofisticada, auténtica y profundamente memorable.
+                experiencia visual sofisticada, auténtica y profundamente
+                memorable.
               </p>
             </div>
 
@@ -811,12 +865,12 @@ export default function Page() {
           <div>
             <div className="font-serif text-3xl text-white">Miles Visual</div>
             <p className="mt-3 max-w-md text-sm leading-7 text-white/50">
-              Fotografía y producción audiovisual con una estética cinematográfica,
-              elegante y emocional.
+              Fotografía y producción audiovisual con una estética
+              cinematográfica, elegante y emocional.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-x-6 gap-y-3 text-[11px] uppercase tracking-[0.28em] text-white/55">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-[11px] uppercase tracking-[0.28em] text-white/55">
             <a href="#bodas" className="transition hover:text-white">
               Bodas
             </a>
@@ -837,6 +891,13 @@ export default function Page() {
             >
               Contacto
             </a>
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-2 transition hover:text-white"
+            >
+              <LogIn className="h-4 w-4" />
+              Login
+            </Link>
           </div>
         </div>
       </footer>
