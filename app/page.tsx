@@ -909,7 +909,7 @@ export default function Page() {
             className="flex gap-5 px-4 sm:px-6 lg:px-10"
             animate={{ x: ["0%", "-50%"] }}
             transition={{
-              duration: 22,
+              duration: 5,
               ease: "linear",
               repeat: Infinity,
             }}
