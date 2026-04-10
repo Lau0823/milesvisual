@@ -306,23 +306,7 @@ export default function InvitacionVioletaFinal() {
           </div>
 
           {/* TICKET FINAL */}
-          <div className="max-w-md mx-auto mt-20 px-2 pb-20">
-            <div className="glass-card relative overflow-hidden p-8 border-none bg-white/10 backdrop-blur-3xl shadow-2xl">
-              <div className="absolute top-1/2 -left-5 w-10 h-10 bg-black rounded-full -translate-y-1/2" />
-              <div className="absolute top-1/2 -right-5 w-10 h-10 bg-black rounded-full -translate-y-1/2" />
-              <div className="border-b-2 border-dashed border-white/20 pb-6 mb-6 flex justify-between items-start text-white/60">
-                <Ticket size={28} className="opacity-40" />
-                <div className="text-right font-mono text-[9px] font-black uppercase opacity-70">
-                  <p>ADMIT ONE</p>
-                  <p>SÁB. 02 MAYO 2026</p>
-                </div>
-              </div>
-              <div className="text-center text-white">
-                <p className="font-mono text-[8px] uppercase tracking-[0.5em] opacity-50 mb-2">Exclusive Event</p>
-                <h4 className="name-banner text-3xl uppercase leading-none">{DATA.names}</h4>
-              </div>
-            </div>
-          </div>
+      
 
           <p className="text-center text-white/30 text-[8px] tracking-[0.6em] uppercase pb-10">Design by Si Forever Studio</p>
         </motion.main>
