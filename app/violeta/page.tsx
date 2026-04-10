@@ -26,7 +26,7 @@ const DATA = {
   names: "VIOLETA GUTIÉRREZ VALLEJO",
   fullDate: "Sábado, 2 de mayo, 2026",
   eventDate: "2026-05-02T19:00:00", 
-  displayDate: "2 de Mayo de 2026", 
+  displayDate: "Sábado, 2 de Mayo de 2026", 
   displayTime: "7:00 PM",
   location: "JR CASA DE EVENTOS, KM5 Vía Restrepo vereda la popaya",
   // Se actualizó el enlace con las coordenadas exactas proporcionadas
@@ -189,22 +189,28 @@ export default function InvitacionVioletaFinal() {
 
           {/* DRESS CODE */}
           <div className="glass-card py-12 text-center overflow-hidden text-white">
-            <h3 className="section-title text-4xl mb-8 italic">Dress Code</h3>
+            <h3 className="section-title text-4xl mb-8 italic">Código de Vestuario</h3>
             <div className="grid grid-cols-1 gap-4 px-8 mb-10 font-bold">
               <div className="bg-white/10 p-5 rounded-[2.5rem] border border-white/20">
-                <p className="text-[10px] uppercase mb-1 opacity-60 tracking-widest">Damas</p>
-                <p className="text-xl italic uppercase tracking-tighter mb-1">Vestido Largo</p>
+                <p className="text-[10px] uppercase mb-1 opacity-60 tracking-widest">Mujer </p>
+                <p className="text-xl italic uppercase tracking-tighter mb-1">Vestido Largo unicolor</p>
                 <span className="inline-block bg-pink-500/20 text-pink-300 text-[10px] px-3 py-1 rounded-full border border-pink-500/30 uppercase tracking-widest font-black">
                   Sin Estampados
                 </span>
               </div>
               <div className="bg-white/10 p-5 rounded-[2.5rem] border border-white/20 flex flex-col justify-center">
-                <p className="text-[10px] uppercase mb-1 opacity-60 tracking-widest">Caballeros</p>
-                <p className="text-xl italic uppercase tracking-tighter">Traje Formal</p>
+                <p className="text-[10px] uppercase mb-1 opacity-60 tracking-widest">Hombres</p>
+                <p className="text-xl italic uppercase tracking-tighter">Camisa negra manga larga y pantalón negro </p>
               </div>
             </div>
             
-            <p className="font-black uppercase text-[10px] tracking-widest mb-6 text-pink-300">Colores Reservados</p>
+            <p className="font-black uppercase text-[10px] tracking-widest mb-6 text-pink-300">Colores Reservados
+              Se reservan estos colores:  
+              Rosados, 
+Morados, 
+Negro, 
+Plateado, *revisar anotacion*
+            </p>
             <div className="flex justify-center gap-6 mb-12">
               {[{l:'Rosa',c:COLORS.pink},{l:'Morado',c:'#8b5cf6'},{l:'Negro',c:'#000'},{l:'Plata',c:'linear-gradient(45deg,#bbb,#fff,#999)'}].map((c,i)=>(
                 <div key={i} className="flex flex-col items-center gap-2">
@@ -226,19 +232,25 @@ export default function InvitacionVioletaFinal() {
           {/* REGLAS */}
           <div className="glass-card p-10 text-center text-white">
             <ShieldCheck className="mx-auto mb-4" size={32} color={COLORS.pink} />
-            <h3 className="section-title text-3xl mb-6 italic">Reglas</h3>
+            <h3 className="section-title text-3xl mb-6 italic">Notas importantes:</h3>
             <div className="text-left space-y-4 max-w-xs mx-auto text-sm font-bold opacity-80 uppercase tracking-tighter">
               <p className="flex gap-3">
                 <Sparkles size={16} className="text-pink-400 flex-shrink-0" /> 
-                DERECHO DE ADMISIÓN: SI NO VAS A BAILAR, LAVA LOS PLATOS
+                No se permite mala actitud
               </p>
               <p className="flex gap-3">
                 <Sparkles size={16} className="text-pink-400 flex-shrink-0" /> 
-                No acompañantes sin confirmar
+                Prohibido quedarse sentado
               </p>
+
               <p className="flex gap-3">
                 <Sparkles size={16} className="text-pink-400 flex-shrink-0" /> 
                 Respetar el código de vestuario
+              </p>
+
+              <p className="flex gap-3">
+                <Sparkles size={16} className="text-pink-400 flex-shrink-0" /> 
+                Sonríe, baila, tomate fotos, y disfruta como si esta noche como si tambien fuera la tuya.
               </p>
             </div>
           </div>
@@ -265,16 +277,16 @@ export default function InvitacionVioletaFinal() {
           {/* SECCIÓN DE FOTO */}
           <div className="glass-card p-10 text-center text-white">
             <Camera className="mx-auto mb-4 text-pink-400" size={32} />
-            <h3 className="section-title text-3xl mb-4 italic">¡Papaparazzi Time!</h3>
+            <h3 className="section-title text-3xl mb-4 italic"></h3>
             <p className="section-title text-lg mb-6 opacity-90">
-                Dicen que una foto vale más que mil palabras... <br/> ¡Sube una conmigo y sé parte de mi historia! 📸✨
+                ¡Sube una foto conmigo y dejame un mensaje  que podamos compartir ! 
             </p>
-            <textarea value={photoMessage} onChange={(e)=>setPhotoMessage(e.target.value)} placeholder="CUÉNTAME ALGO DIVERTIDO..." className="w-full p-4 rounded-2xl mb-4 bg-white/10 border border-white/20 text-center text-sm font-bold h-24 text-white" />
+            <textarea value={photoMessage} onChange={(e)=>setPhotoMessage(e.target.value)} placeholder="TEXTO" className="w-full p-4 rounded-2xl mb-4 bg-white/10 border border-white/20 text-center text-sm font-bold h-24 text-white" />
             <label className="cursor-pointer bg-white/10 border-2 border-dashed border-pink-400/50 p-4 rounded-2xl w-full flex flex-col items-center justify-center gap-2 mb-4 font-black text-xs">
-              <Upload size={18} /> {selectedFile ? selectedFile : "SUBIR MI MEJOR MOMENTO"}
+              <Upload size={18} /> {selectedFile ? selectedFile : "SUBE TU RECUERDO"}
               <input type="file" className="hidden" onChange={handleFileChange} />
             </label>
-            <button onClick={() => sendAction("photo")} className="btn-pink w-full py-4 rounded-full font-black uppercase tracking-widest">¡ENVIAR A VIOLETA!</button>
+            <button onClick={() => sendAction("photo")} className="btn-pink w-full py-4 rounded-full font-black uppercase tracking-widest">¡ENVIAR!</button>
           </div>
 
           {/* LLUVIA DE SOBRES */}
@@ -282,7 +294,7 @@ export default function InvitacionVioletaFinal() {
             <Gift className="mx-auto mb-4" size={40} color={COLORS.pink} />
             <h3 className="section-title text-3xl mb-4 italic">Lluvia de Sobres</h3>
             <p className="text-sm font-bold italic opacity-90 px-4">
-              "Tu presencia es mi mayor regalo pero puedes llevar un sobrecito con mucho cariño para mi 🤍"
+              
             </p>
           </div>
 
@@ -290,25 +302,31 @@ export default function InvitacionVioletaFinal() {
           <div className="glass-card p-10 max-w-2xl mx-auto text-center border-l-4 border-pink-500 text-white">
             <Heart className="mx-auto mb-6 text-red-500 fill-red-500 animate-pulse" size={28} />
             <p className="section-title text-2xl italic leading-relaxed">
-              "Hoy celebramos la luz que traes a nuestras vidas. Eres nuestro mayor orgullo, y ver como floreces es el regalo más hermoso que Dios nos ha dado."
+            "Hoy celebramos la vida de Violeta, 
+            y nada nos haría más felices que compartir este sueño contigo."
+
+
             </p>
-            <p className="mt-6 font-black uppercase text-[10px] text-pink-300 tracking-[0.4em]">— Con amor, Tus Padres —</p>
+            <p className="mt-6 font-black uppercase text-[10px] text-pink-300 tracking-[0.4em]">
+              CON AMOR, 
+              <br>
+              </br>Andrés, Paula & Azul. </p>
           </div>
 
           {/* ASISTENCIA */}
           <div className="glass-card p-10 text-center text-white">
             <h3 className="section-title text-4xl mb-10 italic font-bold">Asistencia</h3>
-            <input value={guestName} onChange={(e)=>setGuestName(e.target.value)} placeholder="ESCRIBE TU NOMBRE" className="w-full p-5 rounded-2xl mb-6 bg-white text-black font-black text-center" />
+            <input value={guestName} onChange={(e)=>setGuestName(e.target.value)} placeholder="NOMBRE DEL INVITADO" className="w-full p-5 rounded-2xl mb-6 bg-white text-black font-black text-center" />
             <div className="space-y-4">
               <button onClick={() => sendAction("confirm")} className="btn-pink w-full py-5 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-2"><Send size={18} /> CONFIRMAR</button>
-              <button onClick={() => sendAction("mama")} className="btn-pink w-full py-4 rounded-2xl font-black uppercase text-[10px] flex items-center justify-center gap-2"><Phone size={16} /> HABLAR CON MAMÁ DE VIOLETA</button>
+              <button onClick={() => sendAction("mama")} className="btn-pink w-full py-4 rounded-2xl font-black uppercase text-[10px] flex items-center justify-center gap-2"><Phone size={16} /> HABLAR CON  LA MAMÁ DE VIOLETA</button>
             </div>
           </div>
 
           {/* TICKET FINAL */}
       
 
-          <p className="text-center text-white/30 text-[8px] tracking-[0.6em] uppercase pb-10">Design by Si Forever Studio</p>
+          <p className="text-center text-white/30 text-[8px] tracking-[0.6em] uppercase pb-10"></p>
         </motion.main>
       )}
 
