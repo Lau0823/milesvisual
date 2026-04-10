@@ -23,7 +23,7 @@ const COLORS = {
 
 const DATA = {
   coverBackground: "/violeta.jpeg",
-  youtubeVideoId: "VTH1zCgC1kI",
+  youtubeVideoId: "CUHOfhWi--g",
   names: "VIOLETA GUTIÉRREZ VALLEJO",
   fullDate: "Sábado, 2 de mayo, 2026",
   eventDate: "2026-05-02T19:00:00",
@@ -120,8 +120,7 @@ export default function InvitacionVioletaFinal() {
       <AnimatePresence>
         {!isOpen && (
           <motion.div 
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }} 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
             className="fixed inset-0 z-[100] flex items-center justify-center bg-cover bg-center" 
             style={{ backgroundImage: `url(${DATA.coverBackground})` }}
           >
@@ -141,10 +140,10 @@ export default function InvitacionVioletaFinal() {
         <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative z-10 w-full px-4 py-8 space-y-12">
           
           <section className="min-h-[85svh] flex flex-col items-center justify-center text-center">
-            {/* NOMBRE CON ESPACIADO REALZADO */}
-            <h1 className="name-banner text-5xl md:text-[8rem] text-white drop-shadow-[0_10px_20px_rgba(0,0,0,1)] uppercase mb-10">
+            {/* NOMBRE BANNER - SEPARACIÓN ESTÉTICA (mb-3) */}
+            <h1 className="name-banner text-5xl md:text-[7.5rem] text-white drop-shadow-[0_10px_20px_rgba(0,0,0,1)] uppercase mb-10 leading-[0.85]">
                 {DATA.names.split(' ').map((word, i) => (
-                    <span key={i} className="block mb-4 md:mb-6 leading-tight">{word}</span>
+                    <span key={i} className="block mb-3">{word}</span>
                 ))}
             </h1>
             <div className="grid grid-cols-4 gap-3 w-full max-w-sm">
@@ -157,9 +156,10 @@ export default function InvitacionVioletaFinal() {
             </div>
           </section>
 
-          <div className="glass-card p-10 max-w-2xl mx-auto">
-            <h3 className="section-title text-center text-4xl mb-10 italic text-white">Itinerario</h3>
-            <div className="space-y-8 max-w-xs mx-auto text-white">
+          {/* ITINERARIO */}
+          <div className="glass-card p-10 max-w-2xl mx-auto text-white">
+            <h3 className="section-title text-center text-4xl mb-10 italic">Itinerario</h3>
+            <div className="space-y-8 max-w-xs mx-auto">
               {DATA.itinerary.map((item, i) => (
                 <div key={i} className="flex gap-5 items-center border-l-2 border-dashed border-pink-500/30 pl-6 ml-2">
                   <div className="p-3 bg-pink-500 rounded-full">{item.icon}</div>
@@ -172,9 +172,10 @@ export default function InvitacionVioletaFinal() {
             </div>
           </div>
 
-          <div className="glass-card py-12 text-center overflow-hidden">
-            <h3 className="section-title text-4xl mb-8 italic text-white">Dress Code</h3>
-            <div className="grid grid-cols-1 gap-4 px-8 mb-10 text-white font-bold">
+          {/* DRESS CODE */}
+          <div className="glass-card py-12 text-center overflow-hidden text-white">
+            <h3 className="section-title text-4xl mb-8 italic">Dress Code</h3>
+            <div className="grid grid-cols-1 gap-4 px-8 mb-10 font-bold">
               <div className="bg-white/10 p-5 rounded-[2.5rem] border border-white/20">
                 <p className="text-[10px] uppercase mb-1 opacity-60 tracking-widest">Damas</p>
                 <p className="text-xl italic uppercase">Vestido largo unicolor</p>
@@ -189,7 +190,7 @@ export default function InvitacionVioletaFinal() {
               {[{l:'Rosa',c:COLORS.pink},{l:'Morado',c:'#8b5cf6'},{l:'Negro',c:'#000'},{l:'Plata',c:'linear-gradient(45deg,#bbb,#fff,#999)'}].map((c,i)=>(
                 <div key={i} className="flex flex-col items-center gap-2">
                   <div className="w-10 h-10 rounded-full border-2 border-white/50" style={{background:c.c}} />
-                  <span className="text-[8px] font-black text-white uppercase">{c.l}</span>
+                  <span className="text-[8px] font-black uppercase">{c.l}</span>
                 </div>
               ))}
             </div>
@@ -202,51 +203,56 @@ export default function InvitacionVioletaFinal() {
             </div>
           </div>
 
+          {/* LUGAR */}
           <div className="glass-card p-10 text-center text-white">
             <MapPin className="mx-auto mb-4" size={32} color={COLORS.pink} />
-            <h3 className="section-title text-4xl mb-4 italic text-white">Lugar</h3>
+            <h3 className="section-title text-4xl mb-4 italic">Lugar</h3>
             <p className="font-bold mb-8 text-sm opacity-80">{DATA.location}</p>
             <button onClick={() => sendAction("maps")} className="btn-pink w-full py-4 rounded-full font-black uppercase text-xs tracking-widest">CÓMO LLEGAR</button>
           </div>
 
+          {/* MÚSICA */}
           <div className="glass-card p-10 text-center text-white">
             <Music className="mx-auto mb-4 text-pink-400" size={32} />
-            <h3 className="section-title text-3xl mb-4 italic text-white">Ayúdame a armar la mejor playlist</h3>
-            <p className="text-[11px] mb-8 font-black uppercase opacity-60">¿Cuál canción crees que no puede faltar esta noche?</p>
+            <h3 className="section-title text-3xl mb-4 italic">Música</h3>
+            <p className="text-[11px] mb-8 font-black uppercase opacity-60">¿Qué canción no puede faltar?</p>
             <input value={songName} onChange={(e)=>setSongName(e.target.value)} placeholder="CANCIÓN / ARTISTA" className="w-full p-4 rounded-2xl mb-4 bg-white/10 border border-white/20 text-center font-bold text-white uppercase" />
-            <button onClick={() => sendAction("song")} className="btn-pink w-full py-4 rounded-full font-black uppercase tracking-widest">ENVIAR CANCIÓN</button>
+            <button onClick={() => sendAction("song")} className="btn-pink w-full py-4 rounded-full font-black uppercase tracking-widest">ENVIAR</button>
           </div>
 
+          {/* FOTO */}
           <div className="glass-card p-10 text-center text-white">
             <Camera className="mx-auto mb-4 text-pink-400" size={32} />
-            <h3 className="section-title text-3xl mb-4 italic text-white">Sube tu Foto</h3>
-            <p className="text-[11px] mb-8 font-black uppercase opacity-60 italic">Comparte un recuerdo conmigo antes de la fiesta</p>
+            <h3 className="section-title text-3xl mb-4 italic">Sube tu Foto</h3>
             <textarea value={photoMessage} onChange={(e)=>setPhotoMessage(e.target.value)} placeholder="ESCRIBE UN MENSAJE..." className="w-full p-4 rounded-2xl mb-4 bg-white/10 border border-white/20 text-center text-sm font-bold h-24 text-white" />
             <label className="cursor-pointer bg-white/10 border-2 border-dashed border-pink-400/50 p-4 rounded-2xl w-full flex flex-col items-center justify-center gap-2 mb-4 font-black text-xs">
               <Upload size={18} /> {selectedFile ? selectedFile : "SELECCIONAR FOTO"}
               <input type="file" className="hidden" onChange={handleFileChange} />
             </label>
-            <button onClick={() => sendAction("photo")} className="btn-pink w-full py-4 rounded-full font-black uppercase tracking-widest">ENVIAR AL WHATSAPP</button>
+            <button onClick={() => sendAction("photo")} className="btn-pink w-full py-4 rounded-full font-black uppercase tracking-widest">ENVIAR</button>
           </div>
 
+          {/* REGLAS */}
           <div className="glass-card p-10 text-center text-white">
             <ShieldCheck className="mx-auto mb-4" size={32} color={COLORS.pink} />
-            <h3 className="section-title text-3xl mb-6 italic text-white">Reglas del Evento</h3>
+            <h3 className="section-title text-3xl mb-6 italic">Reglas</h3>
             <div className="text-left space-y-4 max-w-xs mx-auto text-sm font-bold opacity-80 uppercase tracking-tighter">
               <p className="flex gap-3"><Sparkles size={16} className="text-pink-400 flex-shrink-0" /> DERECHO DE ADMISIÓN</p>
-              <p className="flex gap-3"><Sparkles size={16} className="text-pink-400 flex-shrink-0" /> No traer acompañantes sin confirmar</p>
+              <p className="flex gap-3"><Sparkles size={16} className="text-pink-400 flex-shrink-0" /> No acompañantes sin confirmar</p>
               <p className="flex gap-3"><Sparkles size={16} className="text-pink-400 flex-shrink-0" /> Respetar el código de vestuario</p>
             </div>
           </div>
 
+          {/* LLUVIA DE SOBRES */}
           <div className="glass-card p-10 text-center border-2 border-dashed border-pink-500/50 text-white">
             <Gift className="mx-auto mb-4" size={40} color={COLORS.pink} />
-            <h3 className="section-title text-3xl mb-4 italic text-white">Lluvia de Sobres</h3>
-            <p className="text-sm font-bold italic opacity-90 leading-relaxed px-4">
-              "Tu presencia es mi mayor regalo pero puedes llevar un sobrecito con muchos millones para mi 🤍"
+            <h3 className="section-title text-3xl mb-4 italic">Lluvia de Sobres</h3>
+            <p className="text-sm font-bold italic opacity-90 px-4">
+              "Tu presencia es mi mayor regalo pero puedes llevar un sobrecito con mucho cariño para mi 🤍"
             </p>
           </div>
 
+          {/* MENSAJE PADRES */}
           <div className="glass-card p-10 max-w-2xl mx-auto text-center border-l-4 border-pink-500 text-white">
             <Heart className="mx-auto mb-6 text-red-500 fill-red-500 animate-pulse" size={28} />
             <p className="text-2xl font-serif italic leading-relaxed">
@@ -255,24 +261,26 @@ export default function InvitacionVioletaFinal() {
             <p className="mt-6 font-black uppercase text-[10px] text-pink-300 tracking-[0.4em]">— Tus Padres —</p>
           </div>
 
+          {/* ASISTENCIA */}
           <div className="glass-card p-10 text-center text-white">
-            <h3 className="section-title text-4xl mb-10 italic text-white font-bold">Asistencia</h3>
+            <h3 className="section-title text-4xl mb-10 italic font-bold">Asistencia</h3>
             <input value={guestName} onChange={(e)=>setGuestName(e.target.value)} placeholder="ESCRIBE TU NOMBRE" className="w-full p-5 rounded-2xl mb-6 bg-white text-black font-black text-center" />
             <div className="space-y-4">
-              <button onClick={() => sendAction("confirm")} className="btn-pink w-full py-5 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-2"><Send size={18} /> CONFIRMAR WHATSAPP</button>
-              <button onClick={() => sendAction("mama")} className="btn-pink w-full py-4 rounded-2xl font-black uppercase text-[10px] flex items-center justify-center gap-2"><Phone size={16} /> HABLAR CON MAMÁ DE VIOLETA</button>
+              <button onClick={() => sendAction("confirm")} className="btn-pink w-full py-5 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-2"><Send size={18} /> CONFIRMAR ASISTENCIA</button>
+              <button onClick={() => sendAction("mama")} className="btn-pink w-full py-4 rounded-2xl font-black uppercase text-[10px] flex items-center justify-center gap-2"><Phone size={16} /> HABLAR CON MAMÁ</button>
             </div>
           </div>
 
+          {/* TICKET FINAL */}
           <div className="max-w-md mx-auto mt-20 px-2 pb-20">
             <div className="glass-card relative overflow-hidden p-8 border-none bg-white/10 backdrop-blur-3xl shadow-2xl">
               <div className="absolute top-1/2 -left-5 w-10 h-10 bg-black rounded-full -translate-y-1/2" />
               <div className="absolute top-1/2 -right-5 w-10 h-10 bg-black rounded-full -translate-y-1/2" />
               <div className="border-b-2 border-dashed border-white/20 pb-6 mb-6 flex justify-between items-start text-white/60">
                 <Ticket size={28} className="opacity-40" />
-                <div className="text-right">
-                  <p className="font-mono text-[9px] font-black uppercase tracking-widest">ADMIT ONE</p>
-                  <p className="font-mono text-[9px] font-black uppercase">SÁB. 02 MAYO 2026</p>
+                <div className="text-right font-mono text-[9px] font-black uppercase">
+                  <p>ADMIT ONE</p>
+                  <p>SÁB. 02 MAYO 2026</p>
                 </div>
               </div>
               <div className="text-center text-white">
@@ -280,12 +288,10 @@ export default function InvitacionVioletaFinal() {
                 <h4 className="name-banner text-3xl uppercase leading-none">{DATA.names}</h4>
                 <p className="font-serif italic text-sm mt-4 opacity-70">"A Night Full of Stars"</p>
               </div>
-              <div className="mt-8 flex flex-col items-center opacity-40">
-                <div className="h-12 w-full bg-[repeating-linear-gradient(90deg,white,white_1px,transparent_1px,transparent_4px)]" />
-                <p className="font-mono text-[8px] mt-2 tracking-[0.3em]">#VIOLETAXVCEREMONY</p>
-              </div>
+              <div className="mt-8 h-12 w-full bg-[repeating-linear-gradient(90deg,white,white_1px,transparent_1px,transparent_4px)] opacity-40" />
             </div>
           </div>
+
           <p className="text-center text-white/30 text-[8px] tracking-[0.6em] uppercase pb-10">Design by Si Forever Studio</p>
         </motion.main>
       )}
@@ -293,34 +299,17 @@ export default function InvitacionVioletaFinal() {
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,700&family=Montserrat:wght@400;700;900&family=Caveat:wght@700&family=Playfair+Display:wght@900&display=swap');
         
-        body { 
-          background: black; 
-          margin: 0; 
-          padding: 0; 
-          font-family: 'Montserrat', sans-serif; 
-          font-display: swap;
-        }
+        body { background: black; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
 
-        /* Banner con separación de palabras forzada */
-        .name-banner { 
-          font-family: 'Playfair Display', serif !important; 
-          font-weight: 900; 
-          letter-spacing: -1px;
-        }
+        .name-banner { font-family: 'Playfair Display', serif; font-weight: 900; letter-spacing: -1px; }
+        .section-title { font-family: 'Cormorant Garamond', serif; font-weight: 700; }
 
-        .section-title { 
-          font-family: 'Cormorant Garamond', serif; 
-          font-weight: 700; 
-        }
-
-        /* Portada fija sin flash visual */
         .cover-title-fixed { 
           font-family: 'Caveat', cursive !important; 
           font-size: 2.5rem; 
-          color: white;
+          color: #F587BE; /* Rosadito solo portada */
           font-weight: 700;
           letter-spacing: 1px;
-          text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
         }
 
         .glass-card { 
@@ -330,16 +319,8 @@ export default function InvitacionVioletaFinal() {
           border: 1px solid rgba(255, 255, 255, 0.15); 
         }
 
-        .btn-pink { 
-          background: #F587BE; 
-          color: white; 
-          transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        }
-
-        .btn-pink:active { 
-          transform: scale(0.94); 
-          filter: brightness(0.9); 
-        }
+        .btn-pink { background: #F587BE; color: white; transition: all 0.2s ease; }
+        .btn-pink:active { transform: scale(0.95); }
       `}</style>
     </div>
   );
