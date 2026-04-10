@@ -23,7 +23,7 @@ const COLORS = {
 
 const DATA = {
   coverBackground: "/violeta.jpeg",
-  youtubeVideoId: "CUHOfhWi--g",
+  youtubeVideoId: "VTH1zCgC1kI",
   names: "VIOLETA GUTIÉRREZ VALLEJO",
   fullDate: "Sábado, 2 de mayo, 2026",
   eventDate: "2026-05-02T19:00:00",
@@ -50,6 +50,7 @@ const DATA = {
 export default function InvitacionVioletaFinal() {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [fontLoaded, setFontLoaded] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ días: 0, horas: 0, min: 0, seg: 0 });
   const [guestName, setGuestName] = useState("");
   const [songName, setSongName] = useState("");
@@ -57,7 +58,11 @@ export default function InvitacionVioletaFinal() {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => { 
+    setMounted(true); 
+    // Detectar cuando la fuente Caveat está lista
+    document.fonts.load("1em Caveat").then(() => setFontLoaded(true));
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -127,7 +132,12 @@ export default function InvitacionVioletaFinal() {
             <div className="absolute inset-0 bg-black/40" />
             <div className="relative z-10 text-center px-4">
               <Sparkles className="mx-auto mb-4 animate-pulse text-white" size={45} />
-              <h2 className="cover-title-fixed mb-12">FOLLOW THE GLOW OF THE DISCO BALL</h2>
+              
+              {/* CORRECCIÓN: El texto solo aparece cuando la fuente está lista para evitar el salto */}
+              <h2 className={`cover-title-fixed mb-12 transition-opacity duration-500 ${fontLoaded ? 'opacity-100' : 'opacity-0'}`}>
+                FOLLOW THE GLOW OF THE DISCO BALL
+              </h2>
+
               <button onClick={handleOpen} className="btn-pink px-12 py-5 rounded-full font-black text-white uppercase tracking-widest text-sm shadow-[0_0_30px_rgba(245,135,190,0.6)]">
                 ABRIR INVITACIÓN
               </button>
@@ -140,7 +150,7 @@ export default function InvitacionVioletaFinal() {
         <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative z-10 w-full px-4 py-8 space-y-12">
           
           <section className="min-h-[85svh] flex flex-col items-center justify-center text-center">
-            {/* NOMBRE BANNER - SEPARACIÓN ESTÉTICA (mb-3) */}
+            {/* NOMBRE BANNER - SEPARACIÓN ESTÉTICA JUSTA (mb-3) */}
             <h1 className="name-banner text-5xl md:text-[7.5rem] text-white drop-shadow-[0_10px_20px_rgba(0,0,0,1)] uppercase mb-10 leading-[0.85]">
                 {DATA.names.split(' ').map((word, i) => (
                     <span key={i} className="block mb-3">{word}</span>
@@ -156,7 +166,6 @@ export default function InvitacionVioletaFinal() {
             </div>
           </section>
 
-          {/* ITINERARIO */}
           <div className="glass-card p-10 max-w-2xl mx-auto text-white">
             <h3 className="section-title text-center text-4xl mb-10 italic">Itinerario</h3>
             <div className="space-y-8 max-w-xs mx-auto">
@@ -172,7 +181,6 @@ export default function InvitacionVioletaFinal() {
             </div>
           </div>
 
-          {/* DRESS CODE */}
           <div className="glass-card py-12 text-center overflow-hidden text-white">
             <h3 className="section-title text-4xl mb-8 italic">Dress Code</h3>
             <div className="grid grid-cols-1 gap-4 px-8 mb-10 font-bold">
@@ -203,7 +211,6 @@ export default function InvitacionVioletaFinal() {
             </div>
           </div>
 
-          {/* LUGAR */}
           <div className="glass-card p-10 text-center text-white">
             <MapPin className="mx-auto mb-4" size={32} color={COLORS.pink} />
             <h3 className="section-title text-4xl mb-4 italic">Lugar</h3>
@@ -211,7 +218,6 @@ export default function InvitacionVioletaFinal() {
             <button onClick={() => sendAction("maps")} className="btn-pink w-full py-4 rounded-full font-black uppercase text-xs tracking-widest">CÓMO LLEGAR</button>
           </div>
 
-          {/* MÚSICA */}
           <div className="glass-card p-10 text-center text-white">
             <Music className="mx-auto mb-4 text-pink-400" size={32} />
             <h3 className="section-title text-3xl mb-4 italic">Música</h3>
@@ -220,7 +226,6 @@ export default function InvitacionVioletaFinal() {
             <button onClick={() => sendAction("song")} className="btn-pink w-full py-4 rounded-full font-black uppercase tracking-widest">ENVIAR</button>
           </div>
 
-          {/* FOTO */}
           <div className="glass-card p-10 text-center text-white">
             <Camera className="mx-auto mb-4 text-pink-400" size={32} />
             <h3 className="section-title text-3xl mb-4 italic">Sube tu Foto</h3>
@@ -232,7 +237,6 @@ export default function InvitacionVioletaFinal() {
             <button onClick={() => sendAction("photo")} className="btn-pink w-full py-4 rounded-full font-black uppercase tracking-widest">ENVIAR</button>
           </div>
 
-          {/* REGLAS */}
           <div className="glass-card p-10 text-center text-white">
             <ShieldCheck className="mx-auto mb-4" size={32} color={COLORS.pink} />
             <h3 className="section-title text-3xl mb-6 italic">Reglas</h3>
@@ -243,7 +247,6 @@ export default function InvitacionVioletaFinal() {
             </div>
           </div>
 
-          {/* LLUVIA DE SOBRES */}
           <div className="glass-card p-10 text-center border-2 border-dashed border-pink-500/50 text-white">
             <Gift className="mx-auto mb-4" size={40} color={COLORS.pink} />
             <h3 className="section-title text-3xl mb-4 italic">Lluvia de Sobres</h3>
@@ -252,7 +255,6 @@ export default function InvitacionVioletaFinal() {
             </p>
           </div>
 
-          {/* MENSAJE PADRES */}
           <div className="glass-card p-10 max-w-2xl mx-auto text-center border-l-4 border-pink-500 text-white">
             <Heart className="mx-auto mb-6 text-red-500 fill-red-500 animate-pulse" size={28} />
             <p className="text-2xl font-serif italic leading-relaxed">
@@ -261,7 +263,6 @@ export default function InvitacionVioletaFinal() {
             <p className="mt-6 font-black uppercase text-[10px] text-pink-300 tracking-[0.4em]">— Tus Padres —</p>
           </div>
 
-          {/* ASISTENCIA */}
           <div className="glass-card p-10 text-center text-white">
             <h3 className="section-title text-4xl mb-10 italic font-bold">Asistencia</h3>
             <input value={guestName} onChange={(e)=>setGuestName(e.target.value)} placeholder="ESCRIBE TU NOMBRE" className="w-full p-5 rounded-2xl mb-6 bg-white text-black font-black text-center" />
@@ -271,7 +272,6 @@ export default function InvitacionVioletaFinal() {
             </div>
           </div>
 
-          {/* TICKET FINAL */}
           <div className="max-w-md mx-auto mt-20 px-2 pb-20">
             <div className="glass-card relative overflow-hidden p-8 border-none bg-white/10 backdrop-blur-3xl shadow-2xl">
               <div className="absolute top-1/2 -left-5 w-10 h-10 bg-black rounded-full -translate-y-1/2" />
@@ -307,9 +307,10 @@ export default function InvitacionVioletaFinal() {
         .cover-title-fixed { 
           font-family: 'Caveat', cursive !important; 
           font-size: 2.5rem; 
-          color: #F587BE; /* Rosadito solo portada */
+          color: #F587BE; /* Rosadito solo en la portada */
           font-weight: 700;
           letter-spacing: 1px;
+          text-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
         .glass-card { 
