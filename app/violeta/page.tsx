@@ -192,7 +192,7 @@ export default function InvitacionVioletaFinal() {
             <div className="grid grid-cols-1 gap-4 px-8 mb-10 font-bold">
               <div className="bg-white/10 p-5 rounded-[2.5rem] border border-white/20">
                 <p className="text-[10px] uppercase mb-1 opacity-60 tracking-widest">Damas</p>
-                <p className="text-xl italic uppercase tracking-tighter">Vestido Largo sin estampados</p>
+                <p className="text-xl italic uppercase tracking-tighter">Vestido Largo / sin estampados</p>
               </div>
               <div className="bg-white/10 p-5 rounded-[2.5rem] border border-white/20">
                 <p className="text-[10px] uppercase mb-1 opacity-60 tracking-widest">Caballeros</p>
