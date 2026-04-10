@@ -29,7 +29,8 @@ const DATA = {
   displayDate: "2 de Mayo de 2026", 
   displayTime: "7:00 PM",
   location: "JR CASA DE EVENTOS, KM5 Vía Restrepo vereda la popaya",
-  mapsUrl: "https://maps.app.goo.gl/9",
+  // Se actualizó el enlace con las coordenadas exactas proporcionadas
+  mapsUrl: "https://www.google.com/maps/search/?api=1&query=4.1844722,-73.5841667",
   whatsappConfirmaciones: "573226158713",
   whatsappMama: "573125433541",
   dressCodePhotos: [
@@ -41,8 +42,8 @@ const DATA = {
   ],
   itinerary: [
     { time: "7:00 PM", event: "Recepción de Invitados", icon: <Flower2 size={20} /> },
-    { time: "8:30 PM", event: "Entrada ", icon: <Sparkles size={20} /> },
-    { time: "9:00 PM", event: "El Vals ", icon: <Heart size={20} /> },
+    { time: "8:30 PM", event: "Entrada de violeta ", icon: <Sparkles size={20} /> },
+    { time: "9:00 PM", event: "Vals ", icon: <Heart size={20} /> },
     { time: "10:00 PM", event: "Cena ", icon: <Flower2 size={20} /> },
     { time: "11:30 PM", event: "Party Time ", icon: <Music size={20} /> },
   ],
@@ -154,7 +155,7 @@ export default function InvitacionVioletaFinal() {
                 ))}
             </h1>
 
-            <div className="grid grid-cols-4 gap-3 w-full max-w-sm mx-auto mb-6">
+            <div className="grid grid-cols-4 gap-3 w-full max-sm mx-auto mb-6">
               {Object.entries(timeLeft).map(([unit, val], i) => (
                 <motion.div key={i} animate={{ scale: [1, 1.03, 1] }} transition={{ duration: 1.5, repeat: Infinity }} className="bg-white/95 p-3 rounded-2xl border-t-4 border-pink-400">
                   <span className="text-2xl font-black block text-pink-600 leading-none">{val}</span>
@@ -186,7 +187,7 @@ export default function InvitacionVioletaFinal() {
             </div>
           </div>
 
-          {/* DRESS CODE CORREGIDO */}
+          {/* DRESS CODE */}
           <div className="glass-card py-12 text-center overflow-hidden text-white">
             <h3 className="section-title text-4xl mb-8 italic">Dress Code</h3>
             <div className="grid grid-cols-1 gap-4 px-8 mb-10 font-bold">
@@ -227,9 +228,18 @@ export default function InvitacionVioletaFinal() {
             <ShieldCheck className="mx-auto mb-4" size={32} color={COLORS.pink} />
             <h3 className="section-title text-3xl mb-6 italic">Reglas</h3>
             <div className="text-left space-y-4 max-w-xs mx-auto text-sm font-bold opacity-80 uppercase tracking-tighter">
-              <p className="flex gap-3"><Sparkles size={16} className="text-pink-400 flex-shrink-0" /> Prohibido traer los pies pegados al piso. ¡El que no baile, paga la cuenta!</p>
-              <p className="flex gap-3"><Sparkles size={16} className="text-pink-400 flex-shrink-0" /> No acompañantes sin confirmar</p>
-              <p className="flex gap-3"><Sparkles size={16} className="text-pink-400 flex-shrink-0" /> Respetar el código de vestuario</p>
+              <p className="flex gap-3">
+                <Sparkles size={16} className="text-pink-400 flex-shrink-0" /> 
+                DERECHO DE ADMISIÓN: SI NO VAS A BAILAR, LAVA LOS PLATOS
+              </p>
+              <p className="flex gap-3">
+                <Sparkles size={16} className="text-pink-400 flex-shrink-0" /> 
+                No acompañantes sin confirmar
+              </p>
+              <p className="flex gap-3">
+                <Sparkles size={16} className="text-pink-400 flex-shrink-0" /> 
+                Respetar el código de vestuario
+              </p>
             </div>
           </div>
 
@@ -291,7 +301,7 @@ export default function InvitacionVioletaFinal() {
             <input value={guestName} onChange={(e)=>setGuestName(e.target.value)} placeholder="ESCRIBE TU NOMBRE" className="w-full p-5 rounded-2xl mb-6 bg-white text-black font-black text-center" />
             <div className="space-y-4">
               <button onClick={() => sendAction("confirm")} className="btn-pink w-full py-5 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-2"><Send size={18} /> CONFIRMAR</button>
-              <button onClick={() => sendAction("mama")} className="btn-pink w-full py-4 rounded-2xl font-black uppercase text-[10px] flex items-center justify-center gap-2"><Phone size={16} /> HABLAR CON MAMÁ</button>
+              <button onClick={() => sendAction("mama")} className="btn-pink w-full py-4 rounded-2xl font-black uppercase text-[10px] flex items-center justify-center gap-2"><Phone size={16} /> HABLAR CON MAMÁ DE VIOLETA</button>
             </div>
           </div>
 
