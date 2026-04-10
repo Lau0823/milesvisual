@@ -227,7 +227,7 @@ export default function InvitacionVioletaFinal() {
             <ShieldCheck className="mx-auto mb-4" size={32} color={COLORS.pink} />
             <h3 className="section-title text-3xl mb-6 italic">Reglas</h3>
             <div className="text-left space-y-4 max-w-xs mx-auto text-sm font-bold opacity-80 uppercase tracking-tighter">
-              <p className="flex gap-3"><Sparkles size={16} className="text-pink-400 flex-shrink-0" /> DERECHO DE ADMISIÓN</p>
+              <p className="flex gap-3"><Sparkles size={16} className="text-pink-400 flex-shrink-0" /> Prohibido traer los pies pegados al piso. ¡El que no baile, paga la cuenta!</p>
               <p className="flex gap-3"><Sparkles size={16} className="text-pink-400 flex-shrink-0" /> No acompañantes sin confirmar</p>
               <p className="flex gap-3"><Sparkles size={16} className="text-pink-400 flex-shrink-0" /> Respetar el código de vestuario</p>
             </div>
