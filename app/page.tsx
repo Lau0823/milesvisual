@@ -1,844 +1,652 @@
 "use client";
+import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
+import {
+  Music, MapPin, Phone, Play,
+  Gift, Camera, Sparkles, HelpCircle,
+  Heart, Flower2
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Menu, X, Play } from "lucide-react";
+const DATA = {
+  names: { first: "VIOLETA", second: "GUTIERREZ VALLEJO" },
+  year: 2026,
+  whatsappNumber: "573125433541",
+  fullDate: "Sábado, 2 de mayo, 2026",
+  eventDate: "2026-05-02T19:00:00",
+  location: "JR CASA DE EVENTOS, KM5 Vía Restrepo vereda la popaya",
+  bannerImages: [
+    'https://i.pinimg.com/1200x/6c/03/29/6c0329355b84a5149742e19c6af7dcfd.jpg',
+    'https://i.pinimg.com/736x/d4/36/ea/d436ea07e97fa7c122c8232f822fc19c.jpg',
+    'https://i.pinimg.com/736x/11/30/80/1130802fbd7ea08ede704dda2593e971.jpg',
+  ],
+  camilaPhotos: [
+    'https://i.pinimg.com/1200x/6c/03/29/6c0329355b84a5149742e19c6af7dcfd.jpg',
+    'https://i.pinimg.com/736x/d4/36/ea/d436ea07e97fa7c122c8232f822fc19c.jpg',
+    'https://i.pinimg.com/736x/11/30/80/1130802fbd7ea08ede704dda2593e971.jpg',
+  ],
+  dressCodePhotos: [
+    'https://i.pinimg.com/1200x/7a/cb/74/7acb74a70cbe107abd77b6b702d052ec.jpg',
+    'https://i.pinimg.com/736x/d0/c9/f1/d0c9f144aaebf47db4f1cf39aebf7adc.jpg',
+    'https://i.pinimg.com/736x/c3/31/aa/c331aa228e2d0d7a1515ff39d41b1eda.jpg',
+    'https://i.pinimg.com/736x/07/52/19/07521996aba5ad6734e593ac87e5741c.jpg',
+    'https://i.pinimg.com/1200x/c4/28/cb/c428cbfb0e03334c2615a644c8fc41d5.jpg',
+  ],
+  timelinePhotos: [
+    { past: 'https://i.pinimg.com/736x/16/d6/52/16d652439537e05b26fdaed859ff8708.jpg', now: 'https://i.pinimg.com/736x/5d/20/04/5d2004c22cfd6a54c0165a7d2ea7a6d2.jpg' },
+    { past: 'https://i.pinimg.com/736x/fd/74/ac/fd74ac5bdbc14ba0c03d39ad6cc736ab.jpg', now: 'https://i.pinimg.com/736x/64/3d/2f/643d2f47880985dabe65ebb5875200da.jpg' },
+    { past: 'https://i.pinimg.com/1200x/9b/51/07/9b51074f25bdbea1de5b7bbf4314c2c5.jpg', now: 'https://i.pinimg.com/736x/b0/ce/f0/b0cef0dff5b4bbb6bf666ae4ea22dceb.jpg' },
+    { past: 'https://i.pinimg.com/736x/f3/9c/0c/f39c0c346367b5cb8d176ba369375994.jpg', now: 'https://i.pinimg.com/736x/b6/05/4b/b6054b46a52cb00c6f85576c19e0a02f.jpg' },
+  ],
+  itinerary: [
+    { time: "7:00 PM", event: "Recepción de Invitados", icon: <Flower2 size={20} /> },
+    { time: "8:30 PM", event: "Entrada Triunfal", icon: <Sparkles size={20} /> },
+    { time: "9:00 PM", event: "El Vals de los Sueños", icon: <Heart size={20} /> },
+    { time: "10:00 PM", event: "Cena de Gala", icon: <Flower2 size={20} /> },
+    { time: "11:30 PM", event: "Party Time & Sorpresas", icon: <Music size={20} /> },
+  ],
+  giftBrands: [
+    { name: 'PANDORA', url: 'https://www.pandora.net/' },
+    { name: 'O BOTICARIO', url: 'https://www.oboticario.com/' },
+    { name: 'ZARA', url: 'https://www.zara.com/' }
+  ],
+  trivia: [
+    { question: "¿Cuál es el destino soñado de Camila?", options: ["París", "Tokio", "Nueva York"], correct: 0 },
+    { question: "¿Cuál es el color favorito de Camila?", options: ["Azul Cielo", "Rosa Pastel", "Lila"], correct: 1 },
+    { question: "¿Qué postre prefiere Camila?", options: ["Helado", "Brownie con helado", "Cheesecake"], correct: 2 }
+  ]
+};
 
-const heroSlides = [
-  {
-    id: 1,
-    image:
-      "https://i.pinimg.com/1200x/da/91/0b/da910b0f6c710366c73c7a449dcfb17f.jpg",
-    alt: "Novia editorial",
-  },
-  {
-    id: 2,
-    image:
-      "https://i.pinimg.com/736x/e4/4b/ca/e44bcaa99e49d2f7c26b309620549c1b.jpg",
-    alt: "Sesión de boda",
-  },
-  {
-    id: 3,
-    image:
-      "https://i.pinimg.com/736x/9d/74/19/9d74193e5f836944495af87a260e203d.jpg",
-    alt: "Sesión en exterior",
-  },
-  {
-    id: 4,
-    image:
-      "https://i.pinimg.com/736x/b3/2b/b3/b32bb378642d7db14178ebe74f2644f8.jpg",
-    alt: "Retrato editorial",
-  },
-];
+const FlipCard = ({ photoPair }: { photoPair: { past: string; now: string } }) => {
+  const [isFlipped, setIsFlipped] = useState(false);
 
-const planes = [
-  {
-    id: 1,
-    nombre: "Basic",
-    imagen:
-      "https://i.pinimg.com/736x/b9/79/83/b97983433a17dd40ed26c91d844def10.jpg",
-    detalles: [
-      "5 fotos impresas tamaño 15x20cm",
-      "Cubrimiento del evento en formato digital (Aprox 200 fotos)",
-      "USB con el material del evento",
-      "Protocolo, decoración, recepción, maquillaje, hora loca",
-    ],
-    precio: "$1.500.000",
-    whatsapp:
-      "https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20el%20plan%20Basic",
-  },
-  {
-    id: 2,
-    nombre: "Clasic",
-    imagen:
-      "https://i.pinimg.com/736x/d3/28/56/d32856afbc9b2d989a58c207fbc13e15.jpg",
-    detalles: [
-      "10 fotos impresas tamaño 15x20cm",
-      "Photobook de 30x30cm (5 hojas con 30 fotos plasmadas)",
-      "Cubrimiento del evento en formato digital (Aprox 300 fotos)",
-      "USB con material del evento",
-      "Decoración, recepción, maquillaje, hora loca",
-    ],
-    precio: "$1.850.000",
-    whatsapp:
-      "https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20el%20plan%20Clasic",
-  },
-  {
-    id: 3,
-    nombre: "Premium",
-    imagen:
-      "https://i.pinimg.com/1200x/95/27/3c/95273c7af4a9cc0cfb73ab9f45d03fd0.jpg",
-    detalles: [
-      "15 fotos impresas tamaño 15x20cm",
-      "Photobook de 30x30cm (10 hojas con 70 fotos plasmadas)",
-      "Cubrimiento del evento en formato digital (Aprox 400 fotos)",
-      "USB con material del evento",
-      "Decoración, recepción, maquillaje, hora loca",
-    ],
-    precio: "$2.400.000",
-    whatsapp:
-      "https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20el%20plan%20Premium",
-  },
-  {
-    id: 4,
-    nombre: "Diamante",
-    imagen:
-      "https://i.pinimg.com/736x/2b/b5/7d/2bb57dd049225a223aa3100be0b9d977.jpg",
-    detalles: [
-      "Pre boda",
-      "20 fotos impresas tamaño 15x20cm",
-      "Photobook 30x30 (15 hojas con 90 fotos plasmadas)",
-      "Cubrimiento del evento en formato digital",
-      "USB con todo el material del evento",
-      "Video clip",
-    ],
-    precio: "$2.850.000",
-    whatsapp:
-      "https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20el%20plan%20Diamante",
-  },
-  {
-    id: 5,
-    nombre: "Gold",
-    imagen:
-      "https://i.pinimg.com/736x/7d/17/7e/7d177ef98e5ab73b8024941f7db9e4f1.jpg",
-    detalles: [
-      "Pre boda",
-      "15 fotos impresas tamaño 15x20cm",
-      "Photobook 15x20 (5 hojas con 30 fotos plasmadas)",
-      "Photobook 30x30 (18 hojas con 100 fotos plasmadas)",
-      "USB con todo el material del evento",
-      "Tomas de dron",
-      "Video de tus sueños",
-    ],
-    precio: "$3.600.000",
-    whatsapp:
-      "https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20el%20plan%20Gold",
-  },
-];
+  return (
+    <div
+      className="h-[320px] md:h-[450px] [perspective:1000px] cursor-pointer"
+      onClick={() => setIsFlipped(!isFlipped)}
+    >
+      <motion.div
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative h-full w-full rounded-2xl md:rounded-[3rem] shadow-xl [transform-style:preserve-3d]"
+      >
+        <div className="absolute inset-0 rounded-2xl md:rounded-[3rem] overflow-hidden border-4 md:border-8 border-white [backface-visibility:hidden]">
+          <Image src={photoPair.past} fill className="object-cover" alt="Past" />
+          <div className="absolute bottom-4 inset-x-0 text-center">
+            <span className="bg-white/90 px-3 py-1 rounded-full text-[10px] font-black text-pink-400 uppercase">
+              Toca para girar
+            </span>
+          </div>
+        </div>
 
-export default function HomePage() {
-  const [current, setCurrent] = useState(0);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [touchEndX, setTouchEndX] = useState<number | null>(null);
-  const [currentPlan, setCurrentPlan] = useState(0);
+        <div className="absolute inset-0 h-full w-full rounded-2xl md:rounded-[3rem] bg-pink-100 [transform:rotateY(180deg)] [backface-visibility:hidden] overflow-hidden border-4 md:border-pink-200">
+          <Image src={photoPair.now} fill className="object-cover" alt="Now" />
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
-  const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
-  const bannerVideoSrc = "/Sesión fotográfica Pre Boda, sesión en exteriores [1].MP4";
-  const bannerPoster =
-    "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1600&q=80";
+export default function InvitacionCamilaVIP() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [currentImg, setCurrentImg] = useState(0);
+  const [guestName, setGuestName] = useState("");
+  const [songLink, setSongLink] = useState("");
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [triviaStatus, setTriviaStatus] = useState<null | 'correct' | 'wrong'>(null);
+  const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const goToNext = () => {
-    setCurrent((prev) => (prev + 1) % heroSlides.length);
-  };
-
-  const goToPrev = () => {
-    setCurrent((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
-  };
-
-  const goToSlide = (index: number) => {
-    setCurrent(index);
-  };
-
-  const goToNextPlan = () => {
-    setCurrentPlan((prev) => (prev + 1) % planes.length);
-  };
-
-  const goToPrevPlan = () => {
-    setCurrentPlan((prev) => (prev - 1 + planes.length) % planes.length);
-  };
-
-  const goToPlan = (index: number) => {
-    setCurrentPlan(index);
-  };
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % heroSlides.length);
-    }, 5000);
+      const target = new Date(DATA.eventDate).getTime();
+      const now = new Date().getTime();
+      const difference = target - now;
+      if (difference > 0) {
+        setTimeLeft({
+          d: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          h: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          m: Math.floor((difference / 1000 / 60) % 60),
+          s: Math.floor((difference / 1000) % 60),
+        });
+      } else {
+        setTimeLeft({ d: 0, h: 0, m: 0, s: 0 });
+      }
+    }, 1000);
 
     return () => clearInterval(timer);
   }, []);
 
-  const minSwipeDistance = 50;
+  useEffect(() => {
+    if (!isOpen) return;
+    const timer = setInterval(() => setCurrentImg((prev) => (prev + 1) % DATA.bannerImages.length), 4000);
+    return () => clearInterval(timer);
+  }, [isOpen]);
 
-  const onTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    setTouchEndX(null);
-    setTouchStartX(e.targetTouches[0].clientX);
+  const handleOpen = () => {
+    setIsOpen(true);
+    if (audioRef.current) audioRef.current.play().catch(() => {});
   };
 
-  const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    setTouchEndX(e.targetTouches[0].clientX);
+  const checkTrivia = (index: number) => {
+    if (index === DATA.trivia[currentQuestion].correct) {
+      setTriviaStatus('correct');
+      setTimeout(() => {
+        if (currentQuestion < DATA.trivia.length - 1) {
+          setCurrentQuestion(prev => prev + 1);
+          setTriviaStatus(null);
+        }
+      }, 1500);
+    } else {
+      setTriviaStatus('wrong');
+      setTimeout(() => setTriviaStatus(null), 1000);
+    }
   };
 
-  const onTouchEnd = () => {
-    if (touchStartX === null || touchEndX === null) return;
-
-    const distance = touchStartX - touchEndX;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe) goToNext();
-    if (isRightSwipe) goToPrev();
-  };
-
-  const navLinksLeft = [
-    { href: "/bodas", label: "Bodas" },
-    { href: "/prebodas", label: "Pre-Bodas" },
-    { href: "/estudio", label: "Foto Estudio" },
-  ];
-
-  const navLinksRight = [
-    { href: "/acercademi", label: "Acerca de mi" },
-    { href: "/contacto", label: "Contacto" },
-  ];
+  if (!mounted) return null;
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#f7f5f2] text-[#1f1c1a]">
-      {/* NAVBAR */}
-      <header className="relative mx-auto flex w-full max-w-[1180px] items-center justify-between px-4 py-6 sm:px-5 sm:py-8 md:px-8">
-        <nav className="hidden gap-6 md:flex lg:gap-8">
-          {navLinksLeft.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-[12px] tracking-[0.18em] text-neutral-700 transition hover:text-black"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+    <div className="min-h-screen bg-[#FFF9FB] text-pink-400 font-sans overflow-x-hidden w-full">
+      <audio ref={audioRef} src="/audio/Bad Bunny - Enséñame a Bailar.MP3" loop />
 
-        {/* LOGO CENTRADO Y GRANDE */}
-        <Link href="/" className="absolute left-1/2 -translate-x-1/2">
-          <img
-            src={logoSrc}
-            alt="Miles Visual"
-            className="h-[95px] w-auto max-w-[72vw] object-contain sm:h-[120px] md:h-[120px] lg:h-[135px]"
-          />
-        </Link>
-
-        <nav className="hidden gap-6 md:flex lg:gap-8">
-          {navLinksRight.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-[12px] tracking-[0.18em] text-neutral-700 transition hover:text-black"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        <button
-          onClick={() => setMenuOpen(true)}
-          aria-label="Abrir menú"
-          className="ml-auto flex h-10 w-10 items-center justify-center text-neutral-800 md:hidden"
-        >
-          <Menu className="h-6 w-6" />
-        </button>
-
-        {/* MOBILE MENU */}
-        <div
-          className={`fixed inset-0 z-50 transition ${
-            menuOpen
-              ? "pointer-events-auto opacity-100"
-              : "pointer-events-none opacity-0"
-          }`}
-        >
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setMenuOpen(false)}
-          />
-
-          <div
-            className={`absolute right-0 top-0 flex h-full w-[82%] max-w-[360px] flex-col bg-[#f7f5f2] p-6 shadow-2xl transition-transform duration-300 ${
-              menuOpen ? "translate-x-0" : "translate-x-full"
-            }`}
+      <AnimatePresence>
+        {!isOpen && (
+          <motion.div
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[url('/violeta.jpeg')] bg-cover bg-center"
           >
-            <div className="flex items-center justify-between">
-              <img
-                src={logoSrc}
-                alt="Miles Visual"
-                className="h-[62px] w-auto object-contain"
-              />
+            <div className="absolute inset-0 bg-black/40" />
+
+            <div className="relative z-10 text-center w-full max-sm:max-w-xs">
+              <Sparkles className="text-pink-300 mx-auto mb-4 animate-pulse" size={32} />
+
+              <h2 className="caveat-title mb-3">
+                Violeta
+              </h2>
+
+              <p className="text-white/85 text-sm tracking-[0.35em] uppercase mb-6">
+                Mis XV
+              </p>
 
               <button
-                onClick={() => setMenuOpen(false)}
-                aria-label="Cerrar menú"
-                className="flex h-10 w-10 items-center justify-center text-neutral-800"
+                onClick={handleOpen}
+                className="w-full bg-gradient-to-r from-[#CA0AD8] via-[#ED1D69] to-[#F8A807] text-white px-8 py-5 rounded-full font-black flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-transform uppercase tracking-widest"
               >
-                <X className="h-6 w-6" />
+                <Play size={18} fill="white" /> ABRIR INVITACIÓN
               </button>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-            <nav className="mt-12 flex flex-col gap-5">
-              {[...navLinksLeft, ...navLinksRight].map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMenuOpen(false)}
-                  className="border-b border-neutral-200 pb-4 text-[13px] uppercase tracking-[0.22em] text-neutral-800"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      {/* VIDEO BANNER */}
-      <section className="mx-auto w-full max-w-[1180px] px-4 pt-4 sm:px-5 md:px-8 md:pt-6">
-        <div className="relative overflow-hidden bg-black">
-          <div className="relative h-[65vh] min-h-[460px] max-h-[860px] sm:h-[72vh] md:h-[82vh]">
-            <video
-              className="h-full w-full object-cover"
-              src={bannerVideoSrc}
-              poster={bannerPoster}
-              autoPlay
-              muted
-              loop
-              playsInline
-            />
-
-            <div className="absolute inset-0 bg-black/35" />
-
-            <div className="absolute inset-0 flex items-end md:items-center">
-              <div className="w-full px-5 pb-8 text-white sm:px-6 sm:pb-10 md:max-w-[620px] md:px-12 md:pb-0">
-                <p className="text-[10px] uppercase tracking-[0.28em] text-white/70 sm:text-[11px] sm:tracking-[0.34em]">
-                  Fotografía y audiovisual
-                </p>
-
-                <h1 className="mt-4 font-serif text-[32px] leading-[0.95] sm:text-[38px] md:text-[68px]">
-                  Historias que se
-                  <br />
-                  sienten en foto
-                  <br />y en video
-                </h1>
-
-                <p className="mt-5 max-w-[520px] text-[13px] leading-6 text-white/80 sm:text-sm sm:leading-7 md:text-[15px]">
-                  Una propuesta visual elegante y cinematográfica para parejas,
-                  marcas y memorias que merecen verse con emoción, detalle y
-                  belleza real.
-                </p>
-
-                <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-                  <Link
-                    href="/contacto"
-                    className="inline-flex items-center justify-center gap-2 bg-white px-6 py-3 text-[10px] uppercase tracking-[0.22em] text-neutral-900 transition hover:opacity-90 sm:text-[11px] sm:tracking-[0.24em]"
-                  >
-                    <Play className="h-4 w-4" />
-                    Ver propuesta
-                  </Link>
-
-                  <a
-                    href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20foto%20y%20video"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center border border-white/40 px-6 py-3 text-[10px] uppercase tracking-[0.22em] text-white transition hover:bg-white hover:text-black sm:text-[11px] sm:tracking-[0.24em]"
-                  >
-                    Cotizar
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CARRUSEL DE FOTOS DEBAJO DEL VIDEO */}
-      <section className="mx-auto w-full max-w-[1180px] px-4 pt-5 sm:px-5 md:px-8 md:pt-8">
-        <div
-          className="relative overflow-hidden bg-[#ece8e1]"
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={onTouchEnd}
-        >
-          <div className="relative h-[46vh] min-h-[320px] max-h-[620px] sm:h-[52vh] md:h-[60vh] lg:h-[64vh]">
-            {heroSlides.map((slide, index) => (
-              <div
-                key={slide.id}
-                className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-                  index === current
-                    ? "z-10 opacity-100"
-                    : "pointer-events-none z-0 opacity-0"
-                }`}
+      {isOpen && (
+        <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full">
+          {/* BANNER CON CUENTA REGRESIVA */}
+          <section className="relative h-screen flex items-center justify-center overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentImg}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1.5 }}
+                className="absolute inset-0"
               >
-                <img
-                  src={slide.image}
-                  alt={slide.alt}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            ))}
-          </div>
+                <Image src={DATA.bannerImages[currentImg]} fill className="object-cover" alt="Banner" priority />
+                <div className="absolute inset-0 bg-black/30" />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#FFF9FB]" />
+              </motion.div>
+            </AnimatePresence>
 
-          <div className="pointer-events-none absolute inset-0 bg-black/5" />
-
-          <button
-            onClick={goToPrev}
-            aria-label="Slide anterior"
-            className="absolute left-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-black/20 text-white backdrop-blur-sm transition hover:bg-black/35 sm:left-3 sm:h-10 sm:w-10 md:left-5 md:h-12 md:w-12"
-          >
-            <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
-          </button>
-
-          <button
-            onClick={goToNext}
-            aria-label="Siguiente slide"
-            className="absolute right-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-black/20 text-white backdrop-blur-sm transition hover:bg-black/35 sm:right-3 sm:h-10 sm:w-10 md:right-5 md:h-12 md:w-12"
-          >
-            <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
-          </button>
-
-          <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 md:bottom-6">
-            {heroSlides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goToSlide(index)}
-                aria-label={`Ir al slide ${index + 1}`}
-                className={`h-2.5 rounded-full transition-all duration-300 ${
-                  current === index
-                    ? "w-8 bg-white"
-                    : "w-2.5 bg-white/50 hover:bg-white/80"
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FRASE CENTRAL */}
-      <section className="mx-auto max-w-[1180px] px-4 py-8 sm:px-5 md:px-8 md:py-20">
-        <div className="mx-auto max-w-[680px] text-center">
-          <p className="font-serif text-[24px] italic leading-[1.45] text-neutral-800 sm:text-[30px] md:text-[44px]">
-            La foto perfecta,
-            <br />
-            es aquella que capta momentos inolvidables,
-            <br />
-            esos que solo suceden una sola vez.
-          </p>
-
-          <p className="mx-auto mt-6 max-w-[560px] text-[13px] leading-7 text-neutral-600 sm:text-sm md:text-[15px]">
-            Cada imagen está pensada para capturar la atmósfera, la emoción y la
-            esencia de una historia real con una estética limpia, honesta y
-            atemporal.
-          </p>
-        </div>
-      </section>
-
-      {/* ABOUT DARK */}
-      <section className="bg-[#042510] py-16 md:py-24">
-        <div className="mx-auto max-w-[1180px] px-4 sm:px-5 md:px-8">
-          <div className="grid items-center gap-10 md:grid-cols-[0.8fr_1.1fr_0.7fr]">
-            <div className="text-white">
-              <img
-                src={logoSrc}
-                alt="Miles Visual"
-                className="h-[60px] w-auto object-contain md:h-[78px]"
-              />
-
-              <p className="mt-6 max-w-[240px] text-[13px] leading-7 text-white/70 sm:text-sm">
-                Mi nombre es Miles Esteban Morales Andrade, fotógrafo y productor
-                audiovisual de bodas colombiano, establecido en la ciudad de
-                Villavicencio, amante y apasionado por este arte que es la
-                fotografía.
+            <div className="relative z-10 text-center px-4 w-full flex flex-col items-center gap-6">
+              <h1 className="text-6xl sm:text-8xl md:text-[11rem] font-black tracking-tighter italic leading-[0.85] text-white drop-shadow-2xl">
+                {DATA.names.first}
                 <br />
-                Nos dedicamos a plasmar recuerdos con calidad y creatividad para
-                toda la vida. Somos un equipo capacitado y enfocado en brindar
-                una experiencia única y diferente.
-              </p>
+                <span className="text-transparent" style={{ WebkitTextStroke: '1px white' }}>
+                  {DATA.names.second}
+                </span>
+              </h1>
 
-              <Link
-                href="/acercademi"
-                className="mt-8 inline-flex border border-white/30 px-6 py-3 text-[10px] uppercase tracking-[0.22em] text-white transition hover:bg-white hover:text-black sm:text-[11px] sm:tracking-[0.24em]"
-              >
-                Acerca de mi
-              </Link>
-            </div>
-
-            <div className="relative h-[420px] overflow-hidden md:h-[500px]">
-              <img
-                src="https://images.unsplash.com/photo-1504593811423-6dd665756598?auto=format&fit=crop&w=1400&q=80"
-                alt="Fotógrafa"
-                className="h-full w-full object-cover grayscale"
-              />
-            </div>
-
-            <div className="text-white">
-              <div className="relative h-[240px] overflow-hidden md:h-[280px]">
-                <img
-                  src="https://i.pinimg.com/1200x/e0/a1/31/e0a1319a4d121b1092ea4a8909ee0d64.jpg"
-                  alt="Retrato editorial"
-                  className="h-full w-full object-cover grayscale"
-                />
+              <div className="bg-white/10 backdrop-blur-md px-6 py-3 rounded-full border border-white/20 flex items-center gap-2">
+                <MapPin size={16} className="text-white" />
+                <span className="text-white font-black uppercase tracking-[0.2em] text-[10px] md:text-sm">
+                  {DATA.location}
+                </span>
               </div>
 
-              <p className="mt-4 max-w-[220px] text-[13px] leading-7 text-white/70 sm:text-sm">
-                Una mirada natural, editorial y sensible para crear imágenes con
-                identidad propia.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* BODAS */}
-      <section className="mx-auto max-w-[1180px] px-4 py-16 sm:px-5 md:px-8 md:py-24">
-        <div className="grid items-center gap-12 md:grid-cols-2">
-          <div className="max-w-[420px]">
-            <p className="text-[13px] italic tracking-[0.02em] text-neutral-600">
-              capturamos momentos
-            </p>
-
-            <h2 className="mt-3 font-serif text-[38px] leading-none sm:text-[46px] md:text-[62px]">
-              BODAS
-            </h2>
-
-            <p className="mt-6 text-[13px] leading-8 text-neutral-700 sm:text-sm md:text-[15px]">
-              Cobertura visual para parejas que quieren recordar su día con
-              emoción, delicadeza y una narrativa estética que permanezca con el
-              tiempo.
-            </p>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-              <Link
-                href="/bodas"
-                className="inline-flex justify-center border border-neutral-500 px-6 py-3 text-[10px] uppercase tracking-[0.22em] text-neutral-800 transition hover:bg-neutral-900 hover:text-white sm:text-[11px] sm:tracking-[0.24em]"
-              >
-                Ver galeria de Bodas
-              </Link>
-
-              <a
-                href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20mi%20boda"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex justify-center bg-[#042510] px-6 py-3 text-[10px] uppercase tracking-[0.22em] text-white transition hover:opacity-90 sm:text-[11px] sm:tracking-[0.24em]"
-              >
-                Cotizar boda
-              </a>
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <div className="h-[460px] w-full max-w-[340px] overflow-hidden md:h-[540px]">
-              <img
-                src="https://i.pinimg.com/736x/d2/1d/fa/d21dfadec8c43260e22b20c4d0c01675.jpg"
-                alt="Sesión de bodas"
-                className="h-full w-full object-cover"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SHOOTINGS */}
-      <section className="mx-auto max-w-[1180px] px-4 py-16 sm:px-5 md:px-8 md:py-24">
-        <div className="grid items-center gap-12 md:grid-cols-2 md:[&>*:first-child]:order-2">
-          <div className="max-w-[420px]">
-            <p className="text-[13px] italic tracking-[0.02em] text-neutral-600">
-              Momentos autenticos
-            </p>
-
-            <h2 className="mt-3 font-serif text-[38px] leading-none sm:text-[46px] md:text-[62px]">
-              PRE-BODAS
-            </h2>
-
-            <p className="mt-6 text-[13px] leading-8 text-neutral-700 sm:text-sm md:text-[15px]">
-              Pareja, familia o retrato personal. Sesiones íntimas y naturales
-              para retratar la esencia con una dirección visual sobria y
-              elegante.
-            </p>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-              <Link
-                href="/prebodas"
-                className="inline-flex justify-center border border-neutral-500 px-6 py-3 text-[10px] uppercase tracking-[0.22em] text-neutral-800 transition hover:bg-neutral-900 hover:text-white sm:text-[11px] sm:tracking-[0.24em]"
-              >
-                Ver galeria Pre-bodas
-              </Link>
-
-              <a
-                href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20una%20preboda"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex justify-center bg-[#042510] px-6 py-3 text-[10px] uppercase tracking-[0.22em] text-white transition hover:opacity-90 sm:text-[11px] sm:tracking-[0.24em]"
-              >
-                Cotizar preboda
-              </a>
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <div className="h-[460px] w-full max-w-[340px] overflow-hidden md:h-[540px]">
-              <img
-                src="https://i.pinimg.com/1200x/27/aa/85/27aa858375f9b77c92dc8ed22e4699a7.jpg"
-                alt="Shootings"
-                className="h-full w-full object-cover"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* STUDIO DAYS */}
-      <section className="mx-auto max-w-[1180px] px-4 py-16 sm:px-5 md:px-8 md:py-24">
-        <div className="grid items-center gap-12 md:grid-cols-2">
-          <div className="max-w-[420px]">
-            <p className="text-[13px] italic tracking-[0.02em] text-neutral-600">
-              Editorial Creativa
-            </p>
-
-            <h2 className="mt-3 font-serif text-[38px] leading-none sm:text-[46px] md:text-[62px]">
-              FOTO ESTUDIO
-            </h2>
-
-            <p className="mt-6 text-[13px] leading-8 text-neutral-700 sm:text-sm md:text-[15px]">
-              Imágenes limpias y refinadas para retratos personales, sesiones
-              artísticas o contenido visual con una composición minimalista y
-              una luz suave.
-            </p>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-              <Link
-                href="/estudio"
-                className="inline-flex justify-center border border-neutral-500 px-6 py-3 text-[10px] uppercase tracking-[0.22em] text-neutral-800 transition hover:bg-neutral-900 hover:text-white sm:text-[11px] sm:tracking-[0.24em]"
-              >
-                ver galeria Foto estudio
-              </Link>
-
-              <a
-                href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20una%20sesion%20de%20foto%20estudio"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex justify-center bg-[#042510] px-6 py-3 text-[10px] uppercase tracking-[0.22em] text-white transition hover:opacity-90 sm:text-[11px] sm:tracking-[0.24em]"
-              >
-                Cotizar estudio
-              </a>
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <div className="h-[460px] w-full max-w-[340px] overflow-hidden md:h-[540px]">
-              <img
-                src="https://i.pinimg.com/736x/0e/74/e1/0e74e1c2359ecc58ae37b7c405abd0d5.jpg"
-                alt="Studio Days"
-                className="h-full w-full object-cover grayscale"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* PLANES CARRUSEL */}
-      <section className="mx-auto max-w-[1180px] px-4 py-16 sm:px-5 md:px-8 md:py-24">
-        <div className="mx-auto max-w-[760px] text-center">
-          <p className="text-[11px] uppercase tracking-[0.24em] text-neutral-500 sm:text-[12px] sm:tracking-[0.28em]">
-            paquetes disponibles
-          </p>
-          <h2 className="mt-4 font-serif text-[32px] leading-none sm:text-[38px] md:text-[58px]">
-            PLANES DE BODA
-          </h2>
-          <p className="mx-auto mt-6 max-w-[620px] text-[13px] leading-8 text-neutral-600 sm:text-sm">
-            Elige el plan que mejor se adapte a tu historia. Puedes deslizar o
-            usar los botones para ver los 5 paquetes disponibles.
-          </p>
-        </div>
-
-        <div className="relative mt-12 overflow-hidden rounded-[1.5rem] border border-neutral-200 bg-white/70 shadow-sm sm:rounded-[2rem]">
-          <div className="grid md:grid-cols-2">
-            <div className="relative h-[360px] md:h-[620px]">
-              <img
-                src={planes[currentPlan].imagen}
-                alt={planes[currentPlan].nombre}
-                className="h-full w-full object-cover"
-              />
-            </div>
-
-            <div className="flex flex-col justify-center px-5 py-8 sm:px-6 sm:py-10 md:px-12">
-              <h3 className="text-center font-serif text-[34px] leading-none sm:text-[40px] md:text-[64px]">
-                {planes[currentPlan].nombre}
-              </h3>
-
-              <div className="mx-auto mt-8 max-w-[420px] space-y-4 text-center text-[14px] leading-7 text-neutral-700 sm:text-[15px]">
-                {planes[currentPlan].detalles.map((detalle, index) => (
-                  <p key={index}>{detalle}</p>
+              <div className="grid grid-cols-4 gap-2 md:gap-4 mt-4">
+                {[
+                  { label: 'Días', val: timeLeft.d },
+                  { label: 'Hrs', val: timeLeft.h },
+                  { label: 'Min', val: timeLeft.m },
+                  { label: 'Seg', val: timeLeft.s }
+                ].map((item, i) => (
+                  <div
+                    key={i}
+                    className="bg-white/90 backdrop-blur-lg w-16 h-16 md:w-24 md:h-24 rounded-2xl flex flex-col items-center justify-center shadow-2xl"
+                  >
+                    <span className="text-xl md:text-3xl font-black text-pink-400">{item.val}</span>
+                    <span className="text-[8px] font-black uppercase text-pink-200">{item.label}</span>
+                  </div>
                 ))}
               </div>
+            </div>
+          </section>
 
-              <div className="mt-10 text-center">
-                <p className="font-serif text-[28px] italic text-neutral-700 sm:text-[30px]">
-                  Valor
-                </p>
-                <p className="mt-2 text-[30px] font-medium text-neutral-900 md:text-[42px]">
-                  {planes[currentPlan].precio}
+          {/* ITINERARIO */}
+          <section className="py-20 bg-white px-6">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-16">
+                <Flower2 className="mx-auto text-[#6d0675] mb-4" size={40} />
+                <h3 className="text-4xl font-black italic uppercase tracking-tighter text-[#6d0675]">
+                  Itinerario
+                </h3>
+                <p className="text-[#6d0675] font-bold uppercase text-xs tracking-widest mt-2">
+                  Momentos inolvidables
                 </p>
               </div>
 
-              <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-                <a
-                  href={planes[currentPlan].whatsapp}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex w-full justify-center bg-[#042510] px-8 py-3 text-[10px] uppercase tracking-[0.22em] text-white transition hover:opacity-90 sm:w-auto sm:text-[11px] sm:tracking-[0.24em]"
-                >
-                  Cotizar este plan
-                </a>
-
-                <Link
-                  href="/contacto"
-                  className="inline-flex w-full justify-center border border-neutral-500 px-8 py-3 text-[10px] uppercase tracking-[0.22em] text-neutral-800 transition hover:bg-neutral-900 hover:text-white sm:w-auto sm:text-[11px] sm:tracking-[0.24em]"
-                >
-                  Más información
-                </Link>
+              <div className="relative border-l-2 border-dashed border-[#6d0675] ml-4 md:mx-auto md:w-fit">
+                {DATA.itinerary.map((item, i) => (
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    key={i}
+                    className="mb-12 ml-8 relative group"
+                  >
+                    <div className="absolute -left-[45px] top-0 bg-white border-2 border-pink-200 p-2 rounded-full text-[#6d0675] group-hover:rotate-45 transition-transform">
+                      {item.icon}
+                    </div>
+                    <div className="bg-pink-50/50 p-6 rounded-[2rem] border border-pink-50 hover:bg-pink-50 transition-colors">
+                      <span className="block text-[#6d0675] font-black text-sm mb-1">{item.time}</span>
+                      <h4 className="text-xl font-black text-[#6d0675] uppercase italic tracking-tight">
+                        {item.event}
+                      </h4>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
             </div>
-          </div>
+          </section>
 
-          <button
-            onClick={goToPrevPlan}
-            aria-label="Plan anterior"
-            className="absolute left-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-black/25 text-white backdrop-blur-sm transition hover:bg-black/40 sm:left-3 sm:h-10 sm:w-10 md:left-5 md:h-12 md:w-12"
-          >
-            <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
-          </button>
+          {/* GALERÍA */}
+          <section className="py-16 bg-white px-4 md:px-6 text-[#6d0675]">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex items-center gap-4 mb-8">
+                <Camera size={24} />
+                <h3 className="text-3xl font-black italic uppercase tracking-tighter text-[#6d0675]">
+                  The Gallery
+                </h3>
+                <div className="h-px flex-1 bg-[#6d0675]" />
+              </div>
 
-          <button
-            onClick={goToNextPlan}
-            aria-label="Siguiente plan"
-            className="absolute right-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-black/25 text-white backdrop-blur-sm transition hover:bg-black/40 sm:right-3 sm:h-10 sm:w-10 md:right-5 md:h-12 md:w-12"
-          >
-            <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
-          </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {DATA.camilaPhotos.map((img, i) => (
+                  <div key={i} className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-xl border-4 border-white">
+                    <Image src={img} fill className="object-cover" alt="VIOLETA" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
 
-          <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 md:bottom-6">
-            {planes.map((_, index) => (
+          {/* DRESS CODE */}
+          <section className="py-16 md:py-32 overflow-hidden bg-white border-y border-pink-50">
+            <div className="text-center max-w-3xl mx-auto px-6 mb-12">
+              <h3 className="text-4xl md:text-5xl italic uppercase mb-6 text-[#6d0675]">
+                Dress Code
+              </h3>
+
+              <p className="text-[#6d0675] md:text-lg italic mb-6">
+                Mujeres: vestido largo, un solo tono
+              </p>
+
+              <div className="flex justify-center items-center gap-5 mb-4">
+                <span className="color-dot bg-black"></span>
+                <span className="color-dot bg-pink-300"></span>
+                <span className="color-dot bg-purple-400"></span>
+                <span className="color-dot bg-gray-300"></span>
+              </div>
+
+              <p className="text-sm tracking-widest uppercase mb-6 text-[#6d0675]">
+                colores reservados
+              </p>
+
+              <p className="text-base md:text-lg text-[#B69DB0] italic mb-4">
+                Negro, gama de rosados, gamas morados y plateado.
+              </p>
+
+              <p className="text-base md:text-lg text-[#B69DB0] italic mb-4">
+                Hombres: pantalón negro, camisa negra manga larga
+              </p>
+
+              <p className="text-sm text-pink-400 tracking-wide">
+                No usar tennis si tienes más de 15 años
+              </p>
+            </div>
+
+            <div className="flex gap-6 animate-scroll">
+              {[...DATA.dressCodePhotos, ...DATA.dressCodePhotos].map((img, i) => (
+                <div
+                  key={i}
+                  className={`bg-white p-3 md:p-5 pb-10 shadow-2xl w-64 md:w-80 flex-shrink-0 border border-pink-50 transition-transform ${
+                    i % 2 === 0 ? 'rotate-2' : '-rotate-2'
+                  }`}
+                >
+                  <div className="aspect-[3/4] relative mb-4 overflow-hidden rounded-lg">
+                    <Image src={img} fill className="object-cover" alt="Dress Style" />
+                  </div>
+                  <p className="font-sacramento text-3xl md:text-5xl text-center text-pink-400">
+                    Style {(i % DATA.dressCodePhotos.length) + 1}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ESCENARIO */}
+          <section className="py-16 px-6 max-w-6xl mx-auto flex flex-col md:flex-row gap-10 items-center">
+            <div className="w-full md:flex-1 aspect-square relative rounded-[2rem] overflow-hidden shadow-2xl border-[8px] border-white">
+              <Image src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3" fill className="object-cover" alt="Lugar" />
+            </div>
+
+            <div className="flex-1 text-center md:text-left">
+              <MapPin size={40} className="mb-4 mx-auto md:mx-0 text-[#ed1d69]" />
+              <h3 className="text-4xl font-black mb-4 italic uppercase text-[#ed1d69]">El Escenario</h3>
+              <p className="text-xl font-bold text-black mb-8">{DATA.location}</p>
               <button
-                key={index}
-                onClick={() => goToPlan(index)}
-                aria-label={`Ir al plan ${index + 1}`}
-                className={`h-2.5 rounded-full transition-all duration-300 ${
-                  currentPlan === index
-                    ? "w-8 bg-white"
-                    : "w-2.5 bg-white/60 hover:bg-white"
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* TESTIMONIAL */}
-      <section className="bg-[#042510] py-16 md:py-20">
-        <div className="mx-auto max-w-[1180px] px-4 sm:px-5 md:px-8">
-          <div className="grid items-center gap-10 md:grid-cols-[340px_1fr]">
-            <div className="h-[360px] overflow-hidden md:h-[430px]">
-              <img
-                src="https://i.pinimg.com/1200x/ae/8c/61/ae8c6124ec8e06911d82c07f143940df.jpg"
-                alt="Pareja testimonial"
-                className="h-full w-full object-cover"
-              />
+                onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(DATA.location)}`, '_blank')}
+                className="bg-[#f587be] text-white px-10 py-5 rounded-full font-black shadow-lg uppercase text-sm active:scale-95 transition-transform"
+              >
+                CÓMO LLEGAR
+              </button>
             </div>
+          </section>
 
-            <div className="text-white">
-              <p className="text-[10px] uppercase tracking-[0.24em] text-white/50 sm:text-[11px] sm:tracking-[0.28em]">
-                Love Stories
+          {/* PLAYLIST */}
+          <section className="py-16 px-4">
+            <div className="max-w-3xl mx-auto p-8 md:p-12 text-center bg-white rounded-[2.5rem] border-2 border-dashed border-pink-200 shadow-xl">
+              <Music className="mx-auto mb-6 text-pink-400 animate-pulse" size={40} />
+              <h3 className="text-3xl font-black mb-4 italic uppercase tracking-tighter">
+                Armar la Playlist
+              </h3>
+              <p className="text-pink-300 font-bold mb-8">
+                ¿Qué canción no puede faltar en la fiesta?
               </p>
 
-              <blockquote className="mt-5 max-w-[680px] font-serif text-[24px] italic leading-[1.35] sm:text-[28px] md:text-[42px]">
-                “Supimos inmediatamente después de nuestra primera reunión
-                que tenías que ser nuestro fotógrafo de bodas..”
-              </blockquote>
+              <div className="grid gap-4">
+                <input
+                  value={songLink}
+                  onChange={(e) => setSongLink(e.target.value)}
+                  className="bg-[#f587be] border-none p-5 rounded-2xl outline-none font-black text-center text-pink-400 placeholder:text-white"
+                  placeholder="DEJA AQUÍ EL LINK DE LA CANCIÓN"
+                />
+                <button
+                  onClick={() => window.open(`https://wa.me/${DATA.whatsappNumber}?text=¡Hola! Sugiero esta canción: ${songLink}`)}
+                  className="bg-pink-400 text-white font-black py-5 rounded-2xl text-lg shadow-lg uppercase active:scale-95 transition-transform"
+                >
+                  SUGERIR CANCIÓN
+                </button>
+              </div>
+            </div>
+          </section>
 
-              <p className="mt-8 max-w-[700px] text-[13px] leading-8 text-white/70 sm:text-sm">
-                Cada imagen refleja calma, elegancia y emoción real. El
-                resultado no solo es hermoso visualmente, también se siente
-                auténtico y profundamente nuestro.
+          {/* PAST & NOW */}
+          <section className="py-16 px-4 max-w-6xl mx-auto">
+            <h3 className="text-center text-3xl font-black mb-12 italic uppercase tracking-tighter">
+              Past & Now
+            </h3>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+              {DATA.timelinePhotos.map((photoPair, i) => (
+                <FlipCard key={i} photoPair={photoPair} />
+              ))}
+            </div>
+          </section>
+
+          {/* TRIVIA */}
+          <section className="py-16 px-4 text-center max-w-2xl mx-auto">
+            <HelpCircle className="mx-auto mb-4 text-pink-300" size={32} />
+            <h3 className="text-2xl font-black mb-8 italic uppercase">
+              ¿Cuánto sabes de mí? ({currentQuestion + 1}/3)
+            </h3>
+
+            <div className="bg-white p-6 md:p-10 border-2 border-pink-100 rounded-[2rem] shadow-xl">
+              <AnimatePresence mode="wait">
+                <motion.div key={currentQuestion} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <p className="font-black text-lg md:text-2xl mb-8 text-pink-400">
+                    {DATA.trivia[currentQuestion].question}
+                  </p>
+                  <div className="grid gap-3">
+                    {DATA.trivia[currentQuestion].options.map((opt, i) => (
+                      <button
+                        key={i}
+                        onClick={() => checkTrivia(i)}
+                        className={`p-4 rounded-2xl font-black transition-all border-2 ${
+                          triviaStatus === 'correct' && i === DATA.trivia[currentQuestion].correct
+                            ? 'bg-yellow-50 border-green-400 text-green-600'
+                            : triviaStatus === 'wrong'
+                            ? 'bg-red-50 border-red-200 text-red-600'
+                            : 'bg-pink-50 border-pink-100'
+                        }`}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </section>
+
+          {/* LLUVIA DE SOBRES */}
+          <section className="relative py-20 px-4 overflow-hidden bg-[#6d0675]">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(196,181,253,0.18),transparent_30%),radial-gradient(circle_at_bottom,rgba(244,114,182,0.12),transparent_35%)]" />
+
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              {Array.from({ length: 18 }).map((_, i) => (
+                <span
+                  key={i}
+                  className={`envelope-mobile envelope-${(i % 6) + 1}`}
+                  style={{ left: `${(i * 5.5) % 100}%` }}
+                >
+                  ✉️
+                </span>
+              ))}
+            </div>
+
+            <div className="relative z-10 max-w-md mx-auto">
+              <div className="rounded-[2rem] border border-white/15 bg-white/10 backdrop-blur-md shadow-2xl px-6 py-10 text-center">
+                <Gift className="mx-auto mb-5 text-violet-200" size={34} />
+
+                <h3 className="text-3xl md:text-4xl italic uppercase tracking-wide text-violet-100 mb-4">
+                  Lluvia de Sobres
+                </h3>
+
+                <div className="w-20 h-px mx-auto mb-5 bg-gradient-to-r from-transparent via-violet-200 to-transparent" />
+
+                <p className="text-white/80 text-sm md:text-base leading-relaxed">
+                  Tu presencia es mi mejor regalo, pero si deseas tener un detalle conmigo,
+                  lo recibiré con mucho cariño.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* FRASE FINAL */}
+          <section className="py-20 px-6 bg-white text-center">
+            <div className="max-w-3xl mx-auto">
+              <Heart className="mx-auto text-pink-400 mb-6 animate-pulse" size={32} />
+              <p className="text-2xl md:text-3xl font-sacramento text-pink-400 mb-4">
+                "Hoy celebramos la vida de nuestra hija, y nada nos haría más felices que compartir este sueño contigo."
               </p>
+              <h5 className="font-black text-pink-300 uppercase tracking-[0.3em] text-xs mb-12">
+                - Con amor, Papá y Mamá
+              </h5>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={() => window.open(`https://wa.me/${DATA.whatsappNumber}?text=Hola Papá de Camila, tengo una duda sobre la fiesta...`, '_blank')}
+                  className="flex-1 bg-white border-2 border-pink-200 text-pink-400 px-8 py-5 rounded-[2rem] font-black uppercase text-xs flex items-center justify-center gap-3 hover:bg-pink-50 transition-colors shadow-lg"
+                >
+                  <Phone size={16} /> LLAMAR A PAPÁ
+                </button>
+
+                <button
+                  onClick={() => window.open(`https://wa.me/${DATA.whatsappNumber}?text=Hola Mamá de Camila, tengo una duda sobre la fiesta...`, '_blank')}
+                  className="flex-1 bg-white border-2 border-pink-200 text-pink-400 px-8 py-5 rounded-[2rem] font-black uppercase text-xs flex items-center justify-center gap-3 hover:bg-pink-50 transition-colors shadow-lg"
+                >
+                  <Phone size={16} /> LLAMAR A MAMÁ
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
 
-      {/* CTA */}
-      <section className="mx-auto max-w-[900px] px-4 py-20 text-center sm:px-5 md:px-8 md:py-24">
-        <p className="font-serif text-[24px] uppercase tracking-[0.05em] text-neutral-900 sm:text-[28px] md:text-[34px]">
-          Tus momentos en imágenes
-        </p>
-
-        <p className="mx-auto mt-6 max-w-[620px] text-[13px] leading-8 text-neutral-600 sm:text-sm">
-          Si buscas una estética elegante, natural y atemporal para contar tu
-          historia, estaré encantado de acompañarte y crear imágenes con emoción
-          y belleza real.
-        </p>
-
-        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-          <Link
-            href="/contacto"
-            className="inline-flex w-full justify-center bg-[#042510] px-8 py-3 text-[10px] uppercase tracking-[0.22em] text-white transition hover:opacity-90 sm:w-auto sm:text-[11px] sm:tracking-[0.24em]"
-          >
-            Consultas
-          </Link>
-
-          <a
-            href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20una%20cotizacion"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex w-full justify-center border border-neutral-500 px-8 py-3 text-[10px] uppercase tracking-[0.22em] text-neutral-800 transition hover:bg-neutral-900 hover:text-white sm:w-auto sm:text-[11px] sm:tracking-[0.24em]"
-          >
-            Cotizar ahora
-          </a>
-        </div>
-      </section>
-
-      {/* INSTAGRAM */}
-      <section className="mx-auto max-w-[1180px] px-4 pb-16 sm:px-5 md:px-8">
-        <div className="flex flex-col items-center gap-8">
-          <p className="text-[10px] uppercase tracking-[0.24em] text-neutral-500 sm:text-[11px] sm:tracking-[0.28em]">
-            @MILESVISUAL
-          </p>
-
-          <div className="grid w-full max-w-[520px] grid-cols-3 gap-2 sm:gap-3">
-            <div className="aspect-[1/1.15] overflow-hidden">
-              <img
-                src="https://i.pinimg.com/736x/f8/0e/4c/f80e4cab67957b5ebef436c1f0e7b82d.jpg"
-                alt="Instagram 1"
-                className="h-full w-full object-cover"
-              />
+          {/* RSVP */}
+          <section className="py-16 px-4 bg-[#FFF9FB]">
+            <div className="max-w-3xl mx-auto p-8 md:p-12 text-center bg-white/60 backdrop-blur-md rounded-[2.5rem] border border-pink-200 shadow-xl">
+              <h2 className="text-3xl font-black mb-8 italic uppercase tracking-tighter">
+                Reservar Ticket
+              </h2>
+              <div className="grid gap-4">
+                <input
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.target.value)}
+                  className="bg-[#ca0ad8] border-none p-5 rounded-2xl outline-none font-black text-center text-pink-400 placeholder:text-white"
+                  placeholder="ESCRIBE TU NOMBRE"
+                />
+                <button
+                  onClick={() => window.open(`https://wa.me/${DATA.whatsappNumber}?text=¡Hola! Confirmo mi asistencia para ${guestName}`)}
+                  className="bg-pink-400 text-white font-black py-6 rounded-2xl text-lg shadow-lg uppercase tracking-widest active:scale-95 transition-transform"
+                >
+                  CONFIRMAR ASISTENCIA
+                </button>
+              </div>
             </div>
-            <div className="aspect-[1/1.15] overflow-hidden">
-              <img
-                src="https://i.pinimg.com/736x/70/eb/f6/70ebf6d0a9aef32ad61104b306b0deb3.jpg"
-                alt="Instagram 2"
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <div className="aspect-[1/1.15] overflow-hidden">
-              <img
-                src="https://i.pinimg.com/736x/85/87/8f/85878f51753ff09ca3f915cced285f8b.jpg"
-                alt="Instagram 3"
-                className="h-full w-full object-cover"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
+          </section>
 
-      {/* FOOTER */}
-      <footer className="bg-[#232120] text-white">
-        <div className="mx-auto flex max-w-[1180px] flex-col gap-6 px-4 py-10 sm:px-5 md:px-8 lg:flex-row lg:items-center lg:justify-between">
-          <nav className="flex flex-wrap gap-6 text-[12px] uppercase tracking-[0.18em] text-white/70">
-            <Link href="/">Inicio</Link>
-            <Link href="/bodas">Bodas</Link>
-            <Link href="/prebodas">Pre-bodas</Link>
-            <Link href="/estudio">Foto estudio</Link>
-            <Link href="/contacto">Contacto</Link>
-          </nav>
+          <footer className="py-16 bg-white text-center border-t border-pink-50">
+            <div className="w-24 h-24 bg-pink-50 rounded-3xl mx-auto flex items-center justify-center border-2 border-dashed border-pink-200 mb-8 rotate-12">
+              <span className="text-pink-300 font-black text-[10px] uppercase tracking-widest">
+                VIOLETA XV
+              </span>
+            </div>
+            <p className="font-black text-[10px] tracking-[1em] uppercase opacity-30">
+              Violeta Gutierrez Vallejo • 2026
+            </p>
+          </footer>
+        </motion.main>
+      )}
 
-          <p className="text-xs text-white/45">© 2026 MILES VISUAL</p>
-        </div>
-      </footer>
-    </main>
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;800&family=Sacramento&family=Caveat:wght@400;600;700&display=swap');
+
+        .font-sacramento { font-family: 'Sacramento', cursive; }
+
+        body {
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          background: #FFF9FB;
+          margin: 0;
+        }
+
+        .caveat-title {
+          font-family: 'Caveat', cursive;
+          font-size: 4rem;
+          line-height: 1;
+          color: #ff8ae7;
+          letter-spacing: 0.03em;
+          text-shadow:
+            0 0 6px #ff8ae7,
+            0 0 15px #ff8ae7,
+            0 0 30px #CA0AD8,
+            0 0 50px #ED1D69;
+        }
+
+        @media (min-width: 768px) {
+          .caveat-title {
+            font-size: 6rem;
+          }
+        }
+
+        .animate-scroll {
+          display: flex;
+          width: max-content;
+          animation: scroll 25s linear infinite;
+        }
+
+        @keyframes scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+
+        .color-dot {
+          width: 22px;
+          height: 22px;
+          border-radius: 9999px;
+          display: inline-block;
+          animation: discoGlow 2.5s ease-in-out infinite alternate;
+        }
+
+        .color-dot:nth-child(1) { animation-delay: 0s; }
+        .color-dot:nth-child(2) { animation-delay: 0.4s; }
+        .color-dot:nth-child(3) { animation-delay: 0.8s; }
+        .color-dot:nth-child(4) { animation-delay: 1.2s; }
+
+        @keyframes discoGlow {
+          0% {
+            transform: scale(1);
+            box-shadow: 0 0 5px rgba(255,255,255,0.2);
+            opacity: 0.8;
+          }
+          100% {
+            transform: scale(1.2);
+            box-shadow:
+              0 0 10px rgba(255,255,255,0.6),
+              0 0 20px rgba(255,105,180,0.6),
+              0 0 30px rgba(168,85,247,0.6);
+            opacity: 1;
+          }
+        }
+
+        .envelope-mobile {
+          position: absolute;
+          top: -12%;
+          font-size: 22px;
+          opacity: 0.8;
+          filter: drop-shadow(0 0 10px rgba(255,255,255,0.18));
+          animation-name: fallMobile;
+          animation-timing-function: linear;
+          animation-iteration-count: infinite;
+        }
+
+        .envelope-1 { animation-duration: 7s; animation-delay: 0s; }
+        .envelope-2 { animation-duration: 8s; animation-delay: 1s; }
+        .envelope-3 { animation-duration: 6.5s; animation-delay: 2s; }
+        .envelope-4 { animation-duration: 9s; animation-delay: 0.5s; }
+        .envelope-5 { animation-duration: 7.5s; animation-delay: 1.5s; }
+        .envelope-6 { animation-duration: 8.5s; animation-delay: 2.5s; }
+
+        @keyframes fallMobile {
+          0% {
+            transform: translateY(-10%) translateX(0px) rotate(0deg);
+            opacity: 0;
+          }
+          15% {
+            opacity: 0.85;
+          }
+          50% {
+            transform: translateY(50vh) translateX(10px) rotate(12deg);
+            opacity: 0.9;
+          }
+          100% {
+            transform: translateY(110vh) translateX(-12px) rotate(-10deg);
+            opacity: 0;
+          }
+        }
+      `}</style>
+    </div>
   );
 }
