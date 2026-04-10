@@ -154,7 +154,7 @@ export default function InvitacionVioletaFinal() {
                 ))}
             </h1>
 
-            <div className="grid grid-cols-4 gap-3 w-full max-sm mx-auto mb-6">
+            <div className="grid grid-cols-4 gap-3 w-full max-w-sm mx-auto mb-6">
               {Object.entries(timeLeft).map(([unit, val], i) => (
                 <motion.div key={i} animate={{ scale: [1, 1.03, 1] }} transition={{ duration: 1.5, repeat: Infinity }} className="bg-white/95 p-3 rounded-2xl border-t-4 border-pink-400">
                   <span className="text-2xl font-black block text-pink-600 leading-none">{val}</span>
@@ -186,15 +186,18 @@ export default function InvitacionVioletaFinal() {
             </div>
           </div>
 
-          {/* DRESS CODE */}
+          {/* DRESS CODE CORREGIDO */}
           <div className="glass-card py-12 text-center overflow-hidden text-white">
             <h3 className="section-title text-4xl mb-8 italic">Dress Code</h3>
             <div className="grid grid-cols-1 gap-4 px-8 mb-10 font-bold">
               <div className="bg-white/10 p-5 rounded-[2.5rem] border border-white/20">
                 <p className="text-[10px] uppercase mb-1 opacity-60 tracking-widest">Damas</p>
-                <p className="text-xl italic uppercase tracking-tighter">Vestido Largo / sin estampados</p>
+                <p className="text-xl italic uppercase tracking-tighter mb-1">Vestido Largo</p>
+                <span className="inline-block bg-pink-500/20 text-pink-300 text-[10px] px-3 py-1 rounded-full border border-pink-500/30 uppercase tracking-widest font-black">
+                  Sin Estampados
+                </span>
               </div>
-              <div className="bg-white/10 p-5 rounded-[2.5rem] border border-white/20">
+              <div className="bg-white/10 p-5 rounded-[2.5rem] border border-white/20 flex flex-col justify-center">
                 <p className="text-[10px] uppercase mb-1 opacity-60 tracking-widest">Caballeros</p>
                 <p className="text-xl italic uppercase tracking-tighter">Traje Formal</p>
               </div>
@@ -249,7 +252,7 @@ export default function InvitacionVioletaFinal() {
             <button onClick={() => sendAction("song")} className="btn-pink w-full py-4 rounded-full font-black uppercase tracking-widest">SUGERIR CANCIÓN</button>
           </div>
 
-          {/* SECCIÓN DE FOTO - DIVERTIDA */}
+          {/* SECCIÓN DE FOTO */}
           <div className="glass-card p-10 text-center text-white">
             <Camera className="mx-auto mb-4 text-pink-400" size={32} />
             <h3 className="section-title text-3xl mb-4 italic">¡Papaparazzi Time!</h3>
