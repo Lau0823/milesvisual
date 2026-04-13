@@ -2,751 +2,667 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
 
 const heroSlides = [
   {
     id: 1,
     image:
-      "https://i.pinimg.com/1200x/da/91/0b/da910b0f6c710366c73c7a449dcfb17f.jpg",
-    alt: "Novia editorial",
+      "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1600&q=80",
   },
   {
     id: 2,
     image:
-      "https://i.pinimg.com/736x/e4/4b/ca/e44bcaa99e49d2f7c26b309620549c1b.jpg",
-    alt: "Sesión de boda",
+      "https://images.unsplash.com/photo-1525258946800-98cfd641d0de?auto=format&fit=crop&w=1600&q=80",
   },
   {
     id: 3,
     image:
-      "https://i.pinimg.com/736x/9d/74/19/9d74193e5f836944495af87a260e203d.jpg",
-    alt: "Sesión en exterior",
-  },
-  {
-    id: 4,
-    image:
-      "https://i.pinimg.com/736x/b3/2b/b3/b32bb378642d7db14178ebe74f2644f8.jpg",
-    alt: "Retrato editorial",
+      "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1600&q=80",
   },
 ];
 
-const planes = [
+const bodasImages = [
+  "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
+];
+
+const prebodasImages = [
+  "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=1200&q=80",
+];
+
+const estudioImages = [
+  "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1493666438817-866a91353ca9?auto=format&fit=crop&w=1200&q=80",
+];
+
+const plans = [
   {
     id: 1,
-    nombre: "Basic",
-    imagen:
-      "https://i.pinimg.com/736x/b9/79/83/b97983433a17dd40ed26c91d844def10.jpg",
-    detalles: [
-      "5 fotos impresas tamaño 15x20cm",
-      "Cubrimiento del evento en formato digital (Aprox 200 fotos)",
-      "USB con el material del evento",
-      "Protocolo, decoración, recepción, maquillaje, hora loca",
+    name: "Premium",
+    subtitle: "Fotografía",
+    items: [
+      "Cubrimiento fotográfico de 10 a 12 horas por el fotógrafo y asistente.",
+      "450 fotografías editadas en alta resolución.",
+      "Galería online privada con todas las fotografías.",
+      "Memoria USB con el material fotográfico.",
+      "1 retablo o portarretrato 30x40 cm.",
+      "Presentación de las fotos con musicalización.",
+      "Photobook 30x30 cm de lujo personalizado.",
+      "Sesión preboda de 40 fotografías editadas.",
     ],
-    precio: "$1.500.000",
-    whatsapp:
-      "https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20el%20plan%20Basic",
+    price: "COP 4'499.000",
+    image:
+      "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: 2,
-    nombre: "Clasic",
-    imagen:
-      "https://i.pinimg.com/736x/d3/28/56/d32856afbc9b2d989a58c207fbc13e15.jpg",
-    detalles: [
-      "10 fotos impresas tamaño 15x20cm",
-      "Photobook de 30x30cm (5 hojas con 30 fotos plasmadas)",
-      "Cubrimiento del evento en formato digital (Aprox 300 fotos)",
-      "USB con material del evento",
-      "Decoración, recepción, maquillaje, hora loca",
+    name: "Gold",
+    subtitle: "Fotografía",
+    items: [
+      "Cobertura completa del evento con narrativa fotográfica.",
+      "Más de 500 fotografías editadas en alta resolución.",
+      "Galería privada para compartir con familiares.",
+      "Caja premium con USB personalizado.",
+      "Photobook de lujo 30x30 cm.",
+      "Sesión preboda incluida.",
+      "Acompañamiento visual en momentos clave del evento.",
+      "Entrega cuidada con estética editorial.",
     ],
-    precio: "$1.850.000",
-    whatsapp:
-      "https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20el%20plan%20Clasic",
+    price: "COP 5'200.000",
+    image:
+      "https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: 3,
-    nombre: "Premium",
-    imagen:
-      "https://i.pinimg.com/1200x/95/27/3c/95273c7af4a9cc0cfb73ab9f45d03fd0.jpg",
-    detalles: [
-      "15 fotos impresas tamaño 15x20cm",
-      "Photobook de 30x30cm (10 hojas con 70 fotos plasmadas)",
-      "Cubrimiento del evento en formato digital (Aprox 400 fotos)",
-      "USB con material del evento",
-      "Decoración, recepción, maquillaje, hora loca",
+    name: "Diamond",
+    subtitle: "Foto + Video",
+    items: [
+      "Cobertura extendida con equipo audiovisual.",
+      "Fotografía editorial completa del día.",
+      "Selección final curada y editada.",
+      "Galería online y entrega premium.",
+      "Photobook y pieza impresa fine art.",
+      "Sesión preboda premium.",
+      "Tomas especiales y dirección visual.",
+      "Propuesta integral para una historia inolvidable.",
     ],
-    precio: "$2.400.000",
-    whatsapp:
-      "https://i.pinimg.com/1200x/e5/da/bd/e5dabd0a8fafbdd3b1453772160e2139.jpg",
-  },
-  {
-    id: 4,
-    nombre: "Diamante",
-    imagen:
-      "https://i.pinimg.com/736x/2b/b5/7d/2bb57dd049225a223aa3100be0b9d977.jpg",
-    detalles: [
-      "Pre boda",
-      "20 fotos impresas tamaño 15x20cm",
-      "Photobook 30x30 (15 hojas con 90 fotos plasmadas)",
-      "Cubrimiento del evento en formato digital",
-      "USB con todo el material del evento",
-      "Video clip",
-    ],
-    precio: "$2.850.000",
-    whatsapp:
-      "https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20el%20plan%20Diamante",
-  },
-  {
-    id: 5,
-    nombre: "Gold",
-    imagen:
-      "https://i.pinimg.com/736x/7d/17/7e/7d177ef98e5ab73b8024941f7db9e4f1.jpg",
-    detalles: [
-      "Pre boda",
-      "15 fotos impresas tamaño 15x20cm",
-      "Photobook 15x20 (5 hojas con 30 fotos plasmadas)",
-      "Photobook 30x30 (18 hojas con 100 fotos plasmadas)",
-      "USB con todo el material del evento",
-      "Tomas de dron",
-      "Video de tus sueños",
-    ],
-    precio: "$3.600.000",
-    whatsapp:
-      "https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20el%20plan%20Gold",
+    price: "COP 6'100.000",
+    image:
+      "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1200&q=80",
   },
 ];
 
+function FadeCarousel({
+  images,
+  currentIndex,
+  alt,
+  heightClass = "h-[420px] md:h-[580px]",
+}: {
+  images: string[];
+  currentIndex: number;
+  alt: string;
+  heightClass?: string;
+}) {
+  return (
+    <div className="mv-service-frame">
+      {images.map((image, index) => (
+        <img
+          key={image}
+          src={image}
+          alt={alt}
+          className={`absolute inset-0 h-full w-full object-cover transition-all duration-700 ${
+            currentIndex === index ? "opacity-100 scale-100" : "opacity-0 scale-[1.03]"
+          }`}
+        />
+      ))}
+      <div className={`relative ${heightClass}`} />
+    </div>
+  );
+}
+
 export default function HomePage() {
-  const [current, setCurrent] = useState(0);
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [touchEndX, setTouchEndX] = useState<number | null>(null);
+  const [showIntro, setShowIntro] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const [heroIndex, setHeroIndex] = useState(0);
+  const [bodasIndex, setBodasIndex] = useState(0);
+  const [prebodasIndex, setPrebodasIndex] = useState(0);
+  const [estudioIndex, setEstudioIndex] = useState(0);
   const [currentPlan, setCurrentPlan] = useState(0);
 
   const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
   const bannerVideoSrc = "/Sesión fotográfica Pre Boda, sesión en exteriores [1].MP4";
-  const bannerPoster =
-    "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1600&q=80";
 
-  const goToNext = () => {
-    setCurrent((prev) => (prev + 1) % heroSlides.length);
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowIntro(false);
+    }, 2200);
 
-  const goToPrev = () => {
-    setCurrent((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
-  };
-
-  const goToSlide = (index: number) => {
-    setCurrent(index);
-  };
-
-  const goToNextPlan = () => {
-    setCurrentPlan((prev) => (prev + 1) % planes.length);
-  };
-
-  const goToPrevPlan = () => {
-    setCurrentPlan((prev) => (prev - 1 + planes.length) % planes.length);
-  };
-
-  const goToPlan = (index: number) => {
-    setCurrentPlan(index);
-  };
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % heroSlides.length);
+      setHeroIndex((prev) => (prev + 1) % heroSlides.length);
     }, 5000);
 
     return () => clearInterval(timer);
   }, []);
 
-  const minSwipeDistance = 50;
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setBodasIndex((prev) => (prev + 1) % bodasImages.length);
+      setPrebodasIndex((prev) => (prev + 1) % prebodasImages.length);
+      setEstudioIndex((prev) => (prev + 1) % estudioImages.length);
+    }, 3500);
 
-  const onTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    setTouchEndX(null);
-    setTouchStartX(e.targetTouches[0].clientX);
-  };
+    return () => clearInterval(timer);
+  }, []);
 
-  const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    setTouchEndX(e.targetTouches[0].clientX);
-  };
+  const navLinks = [
+    { href: "/bodas", label: "Bodas" },
+    { href: "/prebodas", label: "Pre-Bodas" },
+    { href: "/estudio", label: "Foto Estudio" },
+    { href: "/acercademi", label: "Acerca de mí" },
+    { href: "/contacto", label: "Contacto" },
+  ];
 
-  const onTouchEnd = () => {
-    if (touchStartX === null || touchEndX === null) return;
+  const nextHero = () => setHeroIndex((prev) => (prev + 1) % heroSlides.length);
+  const prevHero = () =>
+    setHeroIndex((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
 
-    const distance = touchStartX - touchEndX;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe) goToNext();
-    if (isRightSwipe) goToPrev();
-  };
+  const nextPlan = () => setCurrentPlan((prev) => (prev + 1) % plans.length);
+  const prevPlan = () =>
+    setCurrentPlan((prev) => (prev - 1 + plans.length) % plans.length);
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#f7f5f2] text-[#1f1c1a]">
-      {/* HEADER SOLO LOGO GRANDE CENTRADO */}
-      <header className="mx-auto flex w-full max-w-[1180px] items-center justify-center px-4 py-6 sm:px-5 sm:py-8 md:px-8 md:py-10">
-        <Link href="/" className="flex items-center justify-center">
-          <img
-            src={logoSrc}
-            alt="Miles Visual"
-            className="h-[90px] w-auto max-w-[85vw] object-contain sm:h-[120px] md:h-[160px]"
-          />
-        </Link>
-      </header>
-
-      {/* VIDEO BANNER */}
-      <section className="mx-auto w-full max-w-[1180px] px-4 pt-2 sm:px-5 md:px-8 md:pt-4">
-        <div className="relative overflow-hidden rounded-none bg-black sm:rounded-sm">
-          <div className="relative h-[62vh] min-h-[420px] max-h-[860px] sm:h-[70vh] md:h-[82vh]">
-            <video
-              className="h-full w-full object-cover"
-              src={bannerVideoSrc}
-              poster={bannerPoster}
-              autoPlay
-              muted
-              loop
-              playsInline
+    <>
+      {showIntro && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-[#789894]">
+          <div className="animate-[introReveal_1.6s_ease_forwards] text-center">
+            <img
+              src={logoSrc}
+              alt="Miles Visual"
+              className="mx-auto h-[120px] w-auto object-contain sm:h-[150px] md:h-[190px]"
             />
-
-            <div className="absolute inset-0 bg-black/35" />
-
-            <div className="absolute inset-0 flex items-end">
-              <div className="w-full px-5 pb-8 text-white sm:px-6 sm:pb-10 md:max-w-[620px] md:px-12 md:pb-12">
-                <p className="text-[10px] uppercase tracking-[0.28em] text-white/70 sm:text-[11px] sm:tracking-[0.34em]">
-                  Fotografía y audiovisual
-                </p>
-
-                <h1 className="mt-3 font-serif text-[30px] leading-[0.95] sm:text-[38px] md:mt-4 md:text-[68px]">
-                  Historias que se
-                  <br />
-                  sienten en foto
-                  <br />y en video
-                </h1>
-
-                <p className="mt-4 max-w-[520px] text-[13px] leading-6 text-white/80 sm:text-sm sm:leading-7 md:mt-5 md:text-[15px]">
-                  Una propuesta visual elegante y cinematográfica para parejas,
-                  marcas y memorias que merecen verse con emoción, detalle y
-                  belleza real.
-                </p>
-
-                <div className="mt-6 flex flex-col gap-3 sm:mt-7 sm:flex-row sm:flex-wrap sm:gap-4">
-                  <Link
-                    href="/contacto"
-                    className="inline-flex items-center justify-center gap-2 bg-white px-5 py-3 text-[10px] uppercase tracking-[0.22em] text-neutral-900 transition hover:opacity-90 sm:px-6 sm:text-[11px] sm:tracking-[0.24em]"
-                  >
-                    <Play className="h-4 w-4" />
-                    Ver propuesta
-                  </Link>
-
-                  <a
-                    href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20foto%20y%20video"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center border border-white/40 px-5 py-3 text-[10px] uppercase tracking-[0.22em] text-white transition hover:bg-white hover:text-black sm:px-6 sm:text-[11px] sm:tracking-[0.24em]"
-                  >
-                    Cotizar
-                  </a>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
-      </section>
+      )}
 
-      {/* CARRUSEL DE FOTOS */}
-      <section className="mx-auto w-full max-w-[1180px] px-4 pt-4 sm:px-5 sm:pt-5 md:px-8 md:pt-8">
-        <div
-          className="relative overflow-hidden bg-[#ece8e1]"
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={onTouchEnd}
-        >
-          <div className="relative h-[42vh] min-h-[280px] max-h-[620px] sm:h-[50vh] md:h-[60vh] lg:h-[64vh]">
-            {heroSlides.map((slide, index) => (
-              <div
-                key={slide.id}
-                className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-                  index === current
-                    ? "z-10 opacity-100"
-                    : "pointer-events-none z-0 opacity-0"
-                }`}
-              >
-                <img
-                  src={slide.image}
-                  alt={slide.alt}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            ))}
-          </div>
+      <main className="min-h-screen overflow-x-hidden bg-[var(--mv-cream)] text-[var(--mv-ink)]">
+        {/* HERO */}
+        <section className="relative min-h-screen overflow-hidden bg-black">
+          <video
+            className="absolute inset-0 h-full w-full object-cover"
+            src={bannerVideoSrc}
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,16,20,0.16)_0%,rgba(7,16,20,0.28)_36%,rgba(7,16,20,0.68)_100%)]" />
 
-          <div className="pointer-events-none absolute inset-0 bg-black/5" />
+         
 
-          <button
-            onClick={goToPrev}
-            aria-label="Slide anterior"
-            className="absolute left-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-black/20 text-white backdrop-blur-sm transition hover:bg-black/35 sm:left-3 sm:h-10 sm:w-10 md:left-5 md:h-12 md:w-12"
-          >
-            <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
-          </button>
+          {/* NAVBAR */}
+          <header className="relative z-30 mx-auto flex w-full max-w-[1320px] items-center justify-between px-4 py-6 md:px-8 md:py-8">
+            <nav className="hidden items-center gap-8 lg:flex">
+              {navLinks.slice(0, 3).map((item) => (
+                <Link key={item.href} href={item.href} className="mv-nav-link-light">
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
 
-          <button
-            onClick={goToNext}
-            aria-label="Siguiente slide"
-            className="absolute right-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-black/20 text-white backdrop-blur-sm transition hover:bg-black/35 sm:right-3 sm:h-10 sm:w-10 md:right-5 md:h-12 md:w-12"
-          >
-            <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
-          </button>
-
-          <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 sm:bottom-4 md:bottom-6">
-            {heroSlides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goToSlide(index)}
-                aria-label={`Ir al slide ${index + 1}`}
-                className={`h-2.5 rounded-full transition-all duration-300 ${
-                  current === index
-                    ? "w-8 bg-white"
-                    : "w-2.5 bg-white/50 hover:bg-white/80"
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FRASE CENTRAL */}
-      <section className="mx-auto max-w-[1180px] px-4 py-10 sm:px-5 md:px-8 md:py-20">
-        <div className="mx-auto max-w-[680px] text-center">
-          <p className="font-serif text-[24px] italic leading-[1.45] text-neutral-800 sm:text-[30px] md:text-[44px]">
-            La foto perfecta,
-            <br />
-            es aquella que capta momentos inolvidables,
-            <br />
-            esos que solo suceden una sola vez.
-          </p>
-
-          <p className="mx-auto mt-5 max-w-[560px] text-[13px] leading-7 text-neutral-600 sm:text-sm md:mt-6 md:text-[15px]">
-            Cada imagen está pensada para capturar la atmósfera, la emoción y la
-            esencia de una historia real con una estética limpia, honesta y
-            atemporal.
-          </p>
-        </div>
-      </section>
-
-      {/* ABOUT DARK */}
-      <section className="bg-[#042510] py-14 sm:py-16 md:py-24">
-        <div className="mx-auto max-w-[1180px] px-4 sm:px-5 md:px-8">
-          <div className="grid items-center gap-8 md:grid-cols-[0.8fr_1.1fr_0.7fr] md:gap-10">
-            <div className="text-white">
+            <Link
+              href="/"
+              className="absolute left-1/2 top-5 z-30 -translate-x-1/2 md:top-6"
+            >
               <img
                 src={logoSrc}
                 alt="Miles Visual"
-                className="h-[52px] w-auto object-contain md:h-[78px]"
+                className="h-[120px] w-auto max-w-[84vw] object-contain sm:h-[150px] md:h-[190px] lg:h-[230px]"
+              />
+            </Link>
+
+            <nav className="hidden items-center gap-8 lg:flex">
+              {navLinks.slice(3).map((item) => (
+                <Link key={item.href} href={item.href} className="mv-nav-link-light">
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+
+            <button
+              onClick={() => setMenuOpen(true)}
+              className="ml-auto flex h-10 w-10 items-center justify-center text-white lg:hidden"
+              aria-label="Abrir menú"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+
+            <div
+              className={`fixed inset-0 z-50 transition ${
+                menuOpen
+                  ? "pointer-events-auto opacity-100"
+                  : "pointer-events-none opacity-0"
+              }`}
+            >
+              <div
+                className="absolute inset-0 bg-black/50"
+                onClick={() => setMenuOpen(false)}
               />
 
-              <p className="mt-6 max-w-[280px] text-[13px] leading-7 text-white/70 sm:text-sm">
-                Mi nombre es Miles Esteban Morales Andrade, fotógrafo y productor
-                audiovisual de bodas colombiano, establecido en la ciudad de
-                Villavicencio, amante y apasionado por este arte que es la
-                fotografía.
-                <br />
-                Nos dedicamos a plasmar recuerdos con calidad y creatividad para
-                toda la vida. Somos un equipo capacitado y enfocado en brindar
-                una experiencia única y diferente.
+              <div
+                className={`absolute right-0 top-0 flex h-full w-[86%] max-w-[360px] flex-col bg-[var(--mv-cream)] p-6 transition-transform duration-300 ${
+                  menuOpen ? "translate-x-0" : "translate-x-full"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <img
+                    src={logoSrc}
+                    alt="Miles Visual"
+                    className="h-[60px] w-auto object-contain"
+                  />
+                  <button
+                    onClick={() => setMenuOpen(false)}
+                    className="flex h-10 w-10 items-center justify-center"
+                    aria-label="Cerrar menú"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+
+                <nav className="mt-12 flex flex-col gap-5">
+                  {navLinks.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="border-b border-black/10 pb-4 font-sans text-[13px] uppercase tracking-[0.12em] text-[var(--mv-ink)]"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+            </div>
+          </header>
+
+          {/* HERO CONTENT */}
+          <div className="relative z-20 mx-auto flex min-h-screen w-full max-w-[1320px] items-end px-4 pb-14 pt-[220px] sm:pt-[250px] md:px-8 md:pb-16 lg:items-center lg:pt-[170px]">
+            <div className="max-w-[920px] text-white">
+              <span className="mv-chip">Fotografía + audiovisual</span>
+
+              <p className="mt-6 font-sans text-[18px] font-light uppercase tracking-[0.12em] sm:text-[24px] md:text-[32px]">
+                HAGAMOS <span className="normal-case tracking-normal">de TUS</span>
               </p>
 
-              <Link
-                href="/acercademi"
-                className="mt-8 inline-flex border border-white/30 px-6 py-3 text-[10px] uppercase tracking-[0.22em] text-white transition hover:bg-white hover:text-black sm:text-[11px] sm:tracking-[0.24em]"
-              >
-                Acerca de mi
-              </Link>
-            </div>
+              <h1 className="mt-1 font-sans text-[34px] font-semibold uppercase leading-[0.95] tracking-[0.02em] sm:text-[52px] md:text-[82px]">
+                FOTOS SOÑADAS
+              </h1>
 
-            <div className="relative h-[380px] overflow-hidden sm:h-[420px] md:h-[500px]">
-              <img
-                src="https://images.unsplash.com/photo-1504593811423-6dd665756598?auto=format&fit=crop&w=1400&q=80"
-                alt="Fotógrafa"
-                className="h-full w-full object-cover grayscale"
-              />
-            </div>
-
-            <div className="text-white">
-              <div className="relative h-[220px] overflow-hidden sm:h-[240px] md:h-[280px]">
-                <img
-                  src="https://i.pinimg.com/1200x/e0/a1/31/e0a1319a4d121b1092ea4a8909ee0d64.jpg"
-                  alt="Retrato editorial"
-                  className="h-full w-full object-cover grayscale"
-                />
-              </div>
-
-              <p className="mt-4 max-w-[220px] text-[13px] leading-7 text-white/70 sm:text-sm">
-                Una mirada natural, editorial y sensible para crear imágenes con
-                identidad propia.
+              <p className="mv-script mt-1 text-[50px] leading-none text-white sm:text-[78px] md:text-[122px]">
+                una realidad
               </p>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* BODAS */}
-      <section className="mx-auto max-w-[1180px] px-4 py-14 sm:px-5 md:px-8 md:py-24">
-        <div className="grid items-center gap-10 md:grid-cols-2 md:gap-12">
-          <div className="max-w-[420px]">
-            <p className="text-[13px] italic tracking-[0.02em] text-neutral-600">
-              capturamos momentos
-            </p>
+              <p className="mt-6 max-w-[720px] font-sans text-[14px] leading-7 text-white/85 md:text-[18px] md:leading-8">
+                Fotografía y audiovisual con una mirada editorial, emocional y
+                cinematográfica para parejas que quieren recuerdos que realmente
+                se sientan.
+              </p>
 
-            <h2 className="mt-3 font-serif text-[38px] leading-none sm:text-[46px] md:text-[62px]">
-              BODAS
-            </h2>
-
-            <p className="mt-6 text-[13px] leading-8 text-neutral-700 sm:text-sm md:text-[15px]">
-              Cobertura visual para parejas que quieren recordar su día con
-              emoción, delicadeza y una narrativa estética que permanezca con el
-              tiempo.
-            </p>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-              <Link
-                href="/bodas"
-                className="inline-flex justify-center border border-neutral-500 px-6 py-3 text-[10px] uppercase tracking-[0.22em] text-neutral-800 transition hover:bg-neutral-900 hover:text-white sm:text-[11px] sm:tracking-[0.24em]"
-              >
-                Ver galeria de Bodas
-              </Link>
-
-              <a
-                href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20mi%20boda"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex justify-center bg-[#042510] px-6 py-3 text-[10px] uppercase tracking-[0.22em] text-white transition hover:opacity-90 sm:text-[11px] sm:tracking-[0.24em]"
-              >
-                Cotizar boda
-              </a>
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <div className="h-[420px] w-full max-w-[340px] overflow-hidden sm:h-[460px] md:h-[540px]">
-              <img
-                src="https://i.pinimg.com/736x/d2/1d/fa/d21dfadec8c43260e22b20c4d0c01675.jpg"
-                alt="Sesión de bodas"
-                className="h-full w-full object-cover"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* PRE-BODAS */}
-      <section className="mx-auto max-w-[1180px] px-4 py-14 sm:px-5 md:px-8 md:py-24">
-        <div className="grid items-center gap-10 md:grid-cols-2 md:[&>*:first-child]:order-2 md:gap-12">
-          <div className="max-w-[420px]">
-            <p className="text-[13px] italic tracking-[0.02em] text-neutral-600">
-              Momentos autenticos
-            </p>
-
-            <h2 className="mt-3 font-serif text-[38px] leading-none sm:text-[46px] md:text-[62px]">
-              PRE-BODAS
-            </h2>
-
-            <p className="mt-6 text-[13px] leading-8 text-neutral-700 sm:text-sm md:text-[15px]">
-              Pareja, familia o retrato personal. Sesiones íntimas y naturales
-              para retratar la esencia con una dirección visual sobria y
-              elegante.
-            </p>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-              <Link
-                href="/prebodas"
-                className="inline-flex justify-center border border-neutral-500 px-6 py-3 text-[10px] uppercase tracking-[0.22em] text-neutral-800 transition hover:bg-neutral-900 hover:text-white sm:text-[11px] sm:tracking-[0.24em]"
-              >
-                Ver galeria Pre-bodas
-              </Link>
-
-              <a
-                href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20una%20preboda"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex justify-center bg-[#042510] px-6 py-3 text-[10px] uppercase tracking-[0.22em] text-white transition hover:opacity-90 sm:text-[11px] sm:tracking-[0.24em]"
-              >
-                Cotizar preboda
-              </a>
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <div className="h-[420px] w-full max-w-[340px] overflow-hidden sm:h-[460px] md:h-[540px]">
-              <img
-                src="https://i.pinimg.com/1200x/27/aa/85/27aa858375f9b77c92dc8ed22e4699a7.jpg"
-                alt="Shootings"
-                className="h-full w-full object-cover"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FOTO ESTUDIO */}
-      <section className="mx-auto max-w-[1180px] px-4 py-14 sm:px-5 md:px-8 md:py-24">
-        <div className="grid items-center gap-10 md:grid-cols-2 md:gap-12">
-          <div className="max-w-[420px]">
-            <p className="text-[13px] italic tracking-[0.02em] text-neutral-600">
-              Editorial Creativa
-            </p>
-
-            <h2 className="mt-3 font-serif text-[38px] leading-none sm:text-[46px] md:text-[62px]">
-              FOTO ESTUDIO
-            </h2>
-
-            <p className="mt-6 text-[13px] leading-8 text-neutral-700 sm:text-sm md:text-[15px]">
-              Imágenes limpias y refinadas para retratos personales, sesiones
-              artísticas o contenido visual con una composición minimalista y
-              una luz suave.
-            </p>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-              <Link
-                href="/estudio"
-                className="inline-flex justify-center border border-neutral-500 px-6 py-3 text-[10px] uppercase tracking-[0.22em] text-neutral-800 transition hover:bg-neutral-900 hover:text-white sm:text-[11px] sm:tracking-[0.24em]"
-              >
-                Ver galeria Foto estudio
-              </Link>
-
-              <a
-                href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20una%20sesion%20de%20foto%20estudio"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex justify-center bg-[#042510] px-6 py-3 text-[10px] uppercase tracking-[0.22em] text-white transition hover:opacity-90 sm:text-[11px] sm:tracking-[0.24em]"
-              >
-                Cotizar estudio
-              </a>
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <div className="h-[420px] w-full max-w-[340px] overflow-hidden sm:h-[460px] md:h-[540px]">
-              <img
-                src="https://i.pinimg.com/736x/0e/74/e1/0e74e1c2359ecc58ae37b7c405abd0d5.jpg"
-                alt="Studio Days"
-                className="h-full w-full object-cover grayscale"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* PLANES */}
-      <section className="mx-auto max-w-[1180px] px-4 py-14 sm:px-5 md:px-8 md:py-24">
-        <div className="mx-auto max-w-[760px] text-center">
-          <p className="text-[11px] uppercase tracking-[0.24em] text-neutral-500 sm:text-[12px] sm:tracking-[0.28em]">
-            paquetes disponibles
-          </p>
-          <h2 className="mt-4 font-serif text-[32px] leading-none sm:text-[38px] md:text-[58px]">
-            PLANES DE BODA
-          </h2>
-          <p className="mx-auto mt-6 max-w-[620px] text-[13px] leading-8 text-neutral-600 sm:text-sm">
-            Elige el plan que mejor se adapte a tu historia. Puedes deslizar o
-            usar los botones para ver los 5 paquetes disponibles.
-          </p>
-        </div>
-
-        <div className="relative mt-10 overflow-hidden rounded-[1.5rem] border border-neutral-200 bg-white/70 shadow-sm sm:mt-12 sm:rounded-[2rem]">
-          <div className="grid md:grid-cols-2">
-            <div className="relative h-[320px] sm:h-[360px] md:h-[620px]">
-              <img
-                src={planes[currentPlan].imagen}
-                alt={planes[currentPlan].nombre}
-                className="h-full w-full object-cover"
-              />
-            </div>
-
-            <div className="flex flex-col justify-center px-5 py-8 sm:px-6 sm:py-10 md:px-12">
-              <h3 className="text-center font-serif text-[34px] leading-none sm:text-[40px] md:text-[64px]">
-                {planes[currentPlan].nombre}
-              </h3>
-
-              <div className="mx-auto mt-7 max-w-[420px] space-y-3 text-center text-[14px] leading-7 text-neutral-700 sm:mt-8 sm:space-y-4 sm:text-[15px]">
-                {planes[currentPlan].detalles.map((detalle, index) => (
-                  <p key={index}>{detalle}</p>
-                ))}
-              </div>
-
-              <div className="mt-8 text-center sm:mt-10">
-                <p className="font-serif text-[26px] italic text-neutral-700 sm:text-[30px]">
-                  Valor
-                </p>
-                <p className="mt-2 text-[28px] font-medium text-neutral-900 sm:text-[30px] md:text-[42px]">
-                  {planes[currentPlan].precio}
-                </p>
-              </div>
-
-              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:gap-4">
-                <a
-                  href={planes[currentPlan].whatsapp}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex w-full justify-center bg-[#042510] px-8 py-3 text-[10px] uppercase tracking-[0.22em] text-white transition hover:opacity-90 sm:w-auto sm:text-[11px] sm:tracking-[0.24em]"
-                >
-                  Cotizar este plan
-                </a>
-
-                <Link
-                  href="/contacto"
-                  className="inline-flex w-full justify-center border border-neutral-500 px-8 py-3 text-[10px] uppercase tracking-[0.22em] text-neutral-800 transition hover:bg-neutral-900 hover:text-white sm:w-auto sm:text-[11px] sm:tracking-[0.24em]"
-                >
-                  Más información
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link href="/contacto" className="mv-button-light">
+                  Cotizar experiencia
+                </Link>
+                <Link href="/bodas" className="mv-button-outline-light">
+                  Ver portafolio
                 </Link>
               </div>
             </div>
           </div>
 
-          <button
-            onClick={goToPrevPlan}
-            aria-label="Plan anterior"
-            className="absolute left-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-black/25 text-white backdrop-blur-sm transition hover:bg-black/40 sm:left-3 sm:h-10 sm:w-10 md:left-5 md:h-12 md:w-12"
-          >
-            <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
+          {/* HERO ARROWS */}
+          <button onClick={prevHero} className="mv-arrow left-4">
+            <ChevronLeft className="h-5 w-5" />
           </button>
-
-          <button
-            onClick={goToNextPlan}
-            aria-label="Siguiente plan"
-            className="absolute right-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-black/25 text-white backdrop-blur-sm transition hover:bg-black/40 sm:right-3 sm:h-10 sm:w-10 md:right-5 md:h-12 md:w-12"
-          >
-            <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
+          <button onClick={nextHero} className="mv-arrow right-4">
+            <ChevronRight className="h-5 w-5" />
           </button>
+        </section>
 
-          <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 sm:bottom-4 md:bottom-6">
-            {planes.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goToPlan(index)}
-                aria-label={`Ir al plan ${index + 1}`}
-                className={`h-2.5 rounded-full transition-all duration-300 ${
-                  currentPlan === index
-                    ? "w-8 bg-white"
-                    : "w-2.5 bg-white/60 hover:bg-white"
-                }`}
-              />
-            ))}
+        {/* BIENVENIDA */}
+        <section className="mx-auto max-w-[1280px] px-4 py-16 md:px-8 md:py-24">
+          <div className="mx-auto max-w-[920px] text-center">
+            <p className="mv-script text-[46px] leading-none text-[var(--mv-gold)] md:text-[78px]">
+              Bienvenidos
+            </p>
+            <h2 className="mt-2 font-sans text-[30px] font-semibold uppercase tracking-[0.03em] md:text-[54px]">
+              UNA EXPERIENCIA VISUAL QUE SE SIENTE
+            </h2>
+            <p className="mx-auto mt-6 max-w-[760px] font-sans text-[15px] leading-8 text-[var(--mv-ink)]/80 md:text-[18px] md:leading-9">
+              Cada historia merece una estética cuidada, una dirección sensible y
+              una experiencia que conecte desde el primer vistazo hasta la última
+              entrega.
+            </p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* TESTIMONIAL */}
-      <section className="bg-[#042510] py-14 sm:py-16 md:py-20">
-        <div className="mx-auto max-w-[1180px] px-4 sm:px-5 md:px-8">
-          <div className="grid items-center gap-8 md:grid-cols-[340px_1fr] md:gap-10">
-            <div className="h-[320px] overflow-hidden sm:h-[360px] md:h-[430px]">
-              <img
-                src="https://i.pinimg.com/1200x/ae/8c/61/ae8c6124ec8e06911d82c07f143940df.jpg"
-                alt="Pareja testimonial"
-                className="h-full w-full object-cover"
-              />
+        {/* ACERCA DE MI */}
+        <section className="bg-[#789894] py-16 md:py-24">
+          <div className="mx-auto max-w-[1280px] px-4 md:px-8">
+            <div className="grid items-center gap-8 md:grid-cols-[0.85fr_1.15fr] md:gap-14">
+              <div className="relative min-h-[440px]">
+                <div className="absolute left-0 top-0 h-[260px] w-[56%] overflow-hidden rounded-[20px] md:h-[320px]">
+                  <img
+                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80"
+                    alt="Retrato principal"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+
+                <div className="absolute right-0 top-10 h-[300px] w-[68%] overflow-hidden rounded-[20px] md:h-[370px]">
+                  <img
+                    src="https://images.unsplash.com/photo-1493666438817-866a91353ca9?auto=format&fit=crop&w=1000&q=80"
+                    alt="Retrato artístico"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+
+                <div className="absolute bottom-0 left-[12%] h-[140px] w-[34%] overflow-hidden rounded-[18px] md:h-[180px]">
+                  <img
+                    src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
+                    alt="Detalle"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              </div>
+
+              <div className="text-white">
+                <p className="mv-script text-[46px] leading-none text-white md:text-[78px]">
+                  acerca de mí
+                </p>
+                <h2 className="mt-2 font-sans text-[30px] font-semibold uppercase tracking-[0.03em] md:text-[52px]">
+                  HISTORIAS REALES, MIRADA EDITORIAL
+                </h2>
+
+                <p className="mt-6 max-w-[720px] font-sans text-[15px] leading-8 text-white/92 md:text-[18px] md:leading-9">
+                  Soy Miles, fotógrafo y productor audiovisual. Mi trabajo nace
+                  de la sensibilidad, la estética y la intención de transformar
+                  cada momento en una pieza visual con emoción, carácter y
+                  presencia.
+                </p>
+
+                <p className="mt-6 max-w-[720px] font-sans text-[15px] leading-8 text-white/82 md:text-[18px] md:leading-9">
+                  Me interesa crear imágenes que no solo se vean hermosas, sino
+                  que también transmitan verdad, atmósfera y una experiencia
+                  memorable desde el primer contacto.
+                </p>
+
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <Link href="/acercademi" className="mv-button-light">
+                    Conocer más
+                  </Link>
+                  <Link href="/contacto" className="mv-button-outline-light">
+                    Hablemos
+                  </Link>
+                </div>
+              </div>
             </div>
+          </div>
+        </section>
 
-            <div className="text-white">
-              <p className="text-[10px] uppercase tracking-[0.24em] text-white/50 sm:text-[11px] sm:tracking-[0.28em]">
-                Love Stories
+        {/* BODAS */}
+        <section className="mx-auto max-w-[1280px] px-4 py-16 md:px-8 md:py-24">
+          <div className="grid items-center gap-8 md:grid-cols-2 md:gap-14">
+            <FadeCarousel
+              images={bodasImages}
+              currentIndex={bodasIndex}
+              alt="Bodas"
+            />
+
+            <div>
+              <p className="mv-script text-[44px] leading-none text-[var(--mv-gold)] md:text-[72px]">
+                momentos inolvidables
+              </p>
+              <h2 className="mv-section-title mt-1">BODAS</h2>
+              <p className="mv-body mt-6 max-w-[560px]">
+                Coberturas con una mirada elegante, emocional y cinematográfica
+                para contar tu historia con belleza, sensibilidad y verdad.
               </p>
 
-              <blockquote className="mt-5 max-w-[680px] font-serif text-[24px] italic leading-[1.35] sm:text-[28px] md:text-[42px]">
-                “Supimos inmediatamente después de nuestra primera reunión que
-                tenías que ser nuestro fotógrafo de bodas..”
-              </blockquote>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link href="/bodas" className="mv-button-dark">
+                  Ver galería
+                </Link>
+                <a
+                  href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20mi%20boda"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mv-button-outline-dark"
+                >
+                  Cotizar boda
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
 
-              <p className="mt-7 max-w-[700px] text-[13px] leading-8 text-white/70 sm:mt-8 sm:text-sm">
-                Cada imagen refleja calma, elegancia y emoción real. El
-                resultado no solo es hermoso visualmente, también se siente
-                auténtico y profundamente nuestro.
+        {/* PREBODAS */}
+        <section className="mx-auto max-w-[1280px] px-4 py-16 md:px-8 md:py-24">
+          <div className="grid items-center gap-8 md:grid-cols-2 md:gap-14 md:[&>*:first-child]:order-2">
+            <FadeCarousel
+              images={prebodasImages}
+              currentIndex={prebodasIndex}
+              alt="Pre-Bodas"
+            />
+
+            <div>
+              <p className="mv-script text-[44px] leading-none text-[var(--mv-gold)] md:text-[72px]">
+                conexión auténtica
               </p>
+              <h2 className="mv-section-title mt-1">PRE-BODAS</h2>
+              <p className="mv-body mt-6 max-w-[560px]">
+                Sesiones íntimas y editoriales para parejas que quieren imágenes
+                delicadas, naturales y con una narrativa visual especial.
+              </p>
+
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link href="/prebodas" className="mv-button-dark">
+                  Ver galería
+                </Link>
+                <a
+                  href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20mi%20preboda"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mv-button-outline-dark"
+                >
+                  Cotizar preboda
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* CTA */}
-      <section className="mx-auto max-w-[900px] px-4 py-16 text-center sm:px-5 sm:py-20 md:px-8 md:py-24">
-        <p className="font-serif text-[24px] uppercase tracking-[0.05em] text-neutral-900 sm:text-[28px] md:text-[34px]">
-          Tus momentos en imágenes
-        </p>
+        {/* FOTO ESTUDIO */}
+        <section className="mx-auto max-w-[1280px] px-4 py-16 md:px-8 md:py-24">
+          <div className="grid items-center gap-8 md:grid-cols-2 md:gap-14">
+            <FadeCarousel
+              images={estudioImages}
+              currentIndex={estudioIndex}
+              alt="Foto estudio"
+            />
 
-        <p className="mx-auto mt-6 max-w-[620px] text-[13px] leading-8 text-neutral-600 sm:text-sm">
-          Si buscas una estética elegante, natural y atemporal para contar tu
-          historia, estaré encantado de acompañarte y crear imágenes con emoción
-          y belleza real.
-        </p>
+            <div>
+              <p className="mv-script text-[44px] leading-none text-[var(--mv-gold)] md:text-[72px]">
+                luz y esencia
+              </p>
+              <h2 className="mv-section-title mt-1">FOTO ESTUDIO</h2>
+              <p className="mv-body mt-6 max-w-[560px]">
+                Retratos y piezas visuales con una propuesta limpia, refinada y
+                pensada desde la estética, la dirección y el detalle.
+              </p>
 
-        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-          <Link
-            href="/contacto"
-            className="inline-flex w-full justify-center bg-[#042510] px-8 py-3 text-[10px] uppercase tracking-[0.22em] text-white transition hover:opacity-90 sm:w-auto sm:text-[11px] sm:tracking-[0.24em]"
-          >
-            Consultas
-          </Link>
-
-          <a
-            href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20una%20cotizacion"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex w-full justify-center border border-neutral-500 px-8 py-3 text-[10px] uppercase tracking-[0.22em] text-neutral-800 transition hover:bg-neutral-900 hover:text-white sm:w-auto sm:text-[11px] sm:tracking-[0.24em]"
-          >
-            Cotizar ahora
-          </a>
-        </div>
-      </section>
-
-      {/* INSTAGRAM */}
-      <section className="mx-auto max-w-[1180px] px-4 pb-14 sm:px-5 sm:pb-16 md:px-8">
-        <div className="flex flex-col items-center gap-8">
-          <p className="text-[10px] uppercase tracking-[0.24em] text-neutral-500 sm:text-[11px] sm:tracking-[0.28em]">
-            @MILESVISUAL
-          </p>
-
-          <div className="grid w-full max-w-[520px] grid-cols-3 gap-2 sm:gap-3">
-            <div className="aspect-[1/1.15] overflow-hidden">
-              <img
-                src="https://i.pinimg.com/736x/f8/0e/4c/f80e4cab67957b5ebef436c1f0e7b82d.jpg"
-                alt="Instagram 1"
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <div className="aspect-[1/1.15] overflow-hidden">
-              <img
-                src="https://i.pinimg.com/736x/70/eb/f6/70ebf6d0a9aef32ad61104b306b0deb3.jpg"
-                alt="Instagram 2"
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <div className="aspect-[1/1.15] overflow-hidden">
-              <img
-                src="https://i.pinimg.com/736x/85/87/8f/85878f51753ff09ca3f915cced285f8b.jpg"
-                alt="Instagram 3"
-                className="h-full w-full object-cover"
-              />
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link href="/estudio" className="mv-button-dark">
+                  Ver galería
+                </Link>
+                <a
+                  href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20mi%20sesión%20de%20estudio"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mv-button-outline-dark"
+                >
+                  Cotizar estudio
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* FOOTER */}
-      <footer className="bg-[#232120] text-white">
-        <div className="mx-auto flex max-w-[1180px] flex-col gap-6 px-4 py-10 sm:px-5 md:px-8 lg:flex-row lg:items-center lg:justify-between">
-          <nav className="flex flex-wrap justify-center gap-5 text-[11px] uppercase tracking-[0.16em] text-white/70 sm:gap-6 sm:text-[12px] sm:tracking-[0.18em] lg:justify-start">
-            <Link href="/">Inicio</Link>
-            <Link href="/bodas">Bodas</Link>
-            <Link href="/prebodas">Pre-bodas</Link>
-            <Link href="/estudio">Foto estudio</Link>
-            <Link href="/contacto">Contacto</Link>
-          </nav>
+        {/* PLANES */}
+        <section className="mx-auto max-w-[1280px] px-4 py-20 md:px-8 md:py-28">
+          <div className="mb-10 text-center md:mb-14">
+            <p className="mv-script text-[44px] leading-none text-[var(--mv-gold)] md:text-[72px]">
+              experiencias
+            </p>
+            <h2 className="mt-1 font-sans text-[34px] font-semibold uppercase tracking-[0.03em] md:text-[62px]">
+              PLANES DE BODA
+            </h2>
+            <p className="mx-auto mt-5 max-w-[760px] font-sans text-[15px] leading-8 text-[var(--mv-ink)]/75 md:text-[18px] md:leading-9">
+              Diseñados para parejas que quieren una experiencia cuidada, una
+              estética premium y una entrega que se sienta tan especial como su
+              historia.
+            </p>
+          </div>
 
-          <p className="text-center text-xs text-white/45">
-            © 2026 MILES VISUAL
-          </p>
-        </div>
-      </footer>
-    </main>
+          <div className="relative mx-auto max-w-[1160px] overflow-hidden rounded-[28px] bg-[#789894] md:rounded-[34px]">
+            <div className="grid md:grid-cols-[0.95fr_1.05fr]">
+              <div className="relative min-h-[340px] md:min-h-[720px]">
+                <img
+                  src={plans[currentPlan].image}
+                  alt={plans[currentPlan].name}
+                  className="h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/12" />
+              </div>
+
+              <div className="px-7 py-8 text-white md:px-10 md:py-10">
+                <p className="mv-script text-[42px] leading-none text-white md:text-[68px]">
+                  {plans[currentPlan].name}
+                </p>
+
+                <p className="mt-2 font-sans text-[18px] font-light uppercase tracking-[0.08em] text-white/95 md:text-[22px]">
+                  {plans[currentPlan].subtitle}
+                </p>
+
+                <ul className="mt-7 space-y-3">
+                  {plans[currentPlan].items.map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-3">
+                      <span className="mt-[9px] h-[4px] w-[4px] rounded-full bg-white/90" />
+                      <span className="font-sans text-[15px] leading-7 text-white/95 md:text-[18px] md:leading-8">
+                        {item}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-10 flex items-center gap-5">
+                  <span className="h-px flex-1 bg-white/75" />
+                  <p className="font-sans text-[22px] font-light uppercase tracking-[0.08em] text-white md:text-[30px]">
+                    {plans[currentPlan].price}
+                  </p>
+                  <span className="h-px flex-1 bg-white/75" />
+                </div>
+
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <a
+                    href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20este%20plan"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mv-button-light"
+                  >
+                    Cotizar este plan
+                  </a>
+                  <Link href="/contacto" className="mv-button-outline-light">
+                    Más información
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            <button onClick={prevPlan} className="mv-arrow-dark left-4 md:left-6">
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button onClick={nextPlan} className="mv-arrow-dark right-4 md:right-6">
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+        </section>
+
+        {/* CTA FINAL */}
+        <section className="mx-auto max-w-[1280px] px-4 pb-20 md:px-8 md:pb-28">
+          <div className="overflow-hidden rounded-[28px] bg-[#789894] px-7 py-12 text-center text-white md:rounded-[34px] md:px-10 md:py-16">
+            <p className="mv-script text-[44px] leading-none text-white md:text-[72px]">
+              hagamos historia
+            </p>
+            <h2 className="mt-2 font-sans text-[30px] font-semibold uppercase tracking-[0.03em] md:text-[54px]">
+              TU DÍA MERECE UNA MIRADA INOLVIDABLE
+            </h2>
+            <p className="mx-auto mt-6 max-w-[760px] font-sans text-[15px] leading-7 text-white/88 md:text-[18px] md:leading-8">
+              Una propuesta visual elegante, sensible y premium para parejas que
+              quieren imágenes que realmente se sientan.
+            </p>
+
+            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+              <Link href="/contacto" className="mv-button-light">
+                Agendar consulta
+              </Link>
+              <a
+                href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20mi%20cotización"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mv-button-outline-light"
+              >
+                Escribir por WhatsApp
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* FOOTER */}
+        <footer className="border-t border-black/8 bg-white">
+          <div className="mx-auto flex max-w-[1280px] flex-col gap-5 px-4 py-10 md:flex-row md:items-center md:justify-between md:px-8">
+            <nav className="flex flex-wrap gap-5">
+              <Link href="/" className="mv-nav-link">
+                Inicio
+              </Link>
+              <Link href="/bodas" className="mv-nav-link">
+                Bodas
+              </Link>
+              <Link href="/prebodas" className="mv-nav-link">
+                Pre-Bodas
+              </Link>
+              <Link href="/estudio" className="mv-nav-link">
+                Foto Estudio
+              </Link>
+              <Link href="/contacto" className="mv-nav-link">
+                Contacto
+              </Link>
+            </nav>
+
+            <p className="font-sans text-[12px] uppercase tracking-[0.12em] text-black/45">
+              © 2026 Miles Visual
+            </p>
+          </div>
+        </footer>
+      </main>
+    </>
   );
 }
