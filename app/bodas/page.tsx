@@ -1,531 +1,584 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import {
+  Menu,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  MessageCircle,
+} from "lucide-react";
 
-type Slide = {
-  id: number;
-  image: string;
-  alt: string;
-};
+const bodasGallery = [
+   {
+    id: 11,
+    title: "Ceremonia editorial",
+    image:
+      "/Bodas/1.jpeg",
+    description:
+      "Una cobertura pensada para capturar la ceremonia con elegancia, atmósfera y detalle, resaltando la emoción real del momento.",
+  },
+   {
+    id: 12,
+    title: "Ceremonia editorial",
+    image:
+      "/Bodas/2.jpeg",
+    description:
+      "Una cobertura pensada para capturar la ceremonia con elegancia, atmósfera y detalle, resaltando la emoción real del momento.",
+  },
+   {
+    id: 13,
+    title: "Ceremonia editorial",
+    image:
+      "/Bodas/3.jpeg",
+    description:
+      "Una cobertura pensada para capturar la ceremonia con elegancia, atmósfera y detalle, resaltando la emoción real del momento.",
+  },
+ 
+   {
+    id: 15,
+    title: "Ceremonia editorial",
+    image:
+      "/Bodas/4.jpeg",
+    description:
+      "Una cobertura pensada para capturar la ceremonia con elegancia, atmósfera y detalle, resaltando la emoción real del momento.",
+  },
+   {
+    id: 16,
+    title: "Ceremonia editorial",
+    image:
+      "/Bodas/5.jpeg",
+    description:
+      "Una cobertura pensada para capturar la ceremonia con elegancia, atmósfera y detalle, resaltando la emoción real del momento.",
+  },
 
-type GalleryItem = {
-  id: number;
-  image: string;
-  title: string;
-  description: string;
-};
+    {
+    id: 17,
+    title: "Ceremonia editorial",
+    image:
+      "/Bodas/6.jpeg",
+    description:
+      "Una cobertura pensada para capturar la ceremonia con elegancia, atmósfera y detalle, resaltando la emoción real del momento.",
+  },
+   {
+    id: 18,
+    title: "Ceremonia editorial",
+    image:
+      "/Bodas/8.jpeg",
+    description:
+      "Una cobertura pensada para capturar la ceremonia con elegancia, atmósfera y detalle, resaltando la emoción real del momento.",
+  },  {
+    id: 19,
+    title: "Ceremonia editorial",
+    image:
+      "/Bodas/9.jpeg",
+    description:
+      "Una cobertura pensada para capturar la ceremonia con elegancia, atmósfera y detalle, resaltando la emoción real del momento.",
+  },  {
+    id: 20,
+    title: "Ceremonia editorial",
+    image:
+      "/Bodas/982A2258.jpg.jpeg",
+    description:
+      "Una cobertura pensada para capturar la ceremonia con elegancia, atmósfera y detalle, resaltando la emoción real del momento.",
+  },  {
+    id: 21,
+    title: "Ceremonia editorial",
+    image:
+      "/Bodas/982A2623.jpg.jpeg",
+    description:
+      "Una cobertura pensada para capturar la ceremonia con elegancia, atmósfera y detalle, resaltando la emoción real del momento.",
+  },  {
+    id: 22,
+    title: "Ceremonia editorial",
+    image:
+      "/Bodas/982A2679.jpg.jpeg",
+    description:
+      "Una cobertura pensada para capturar la ceremonia con elegancia, atmósfera y detalle, resaltando la emoción real del momento.",
+  },  {
+    id: 23,
+    title: "Ceremonia editorial",
+    image:
+      "/Bodas/982A5011.jpg (1).jpeg",
+    description:
+      "Una cobertura pensada para capturar la ceremonia con elegancia, atmósfera y detalle, resaltando la emoción real del momento.",
+  },  {
+    id: 24,
+    title: "Ceremonia editorial",
+    image:
+      "/Bodas/982A5399.jpg.jpeg",
+    description:
+      "Una cobertura pensada para capturar la ceremonia con elegancia, atmósfera y detalle, resaltando la emoción real del momento.",
+  }, 
+  {
+    id: 25,
+    title: "Ceremonia editorial",
+    image:
+      "/milesvisual/public/Bodas/982A5506.jpg.jpeg",
+    description:
+      "Una cobertura pensada para capturar la ceremonia con elegancia, atmósfera y detalle, resaltando la emoción real del momento.",
+  },  {
+    id: 26,
+    title: "Ceremonia editorial",
+    image:
+      "/Bodas/982A2258.jpg.jpeg",
+    description:
+      "Una cobertura pensada para capturar la ceremonia con elegancia, atmósfera y detalle, resaltando la emoción real del momento.",
+  },  {
+    id: 27,
+    title: "Ceremonia editorial",
+    image:
+      "/Bodas/982A5399.jpg.jpeg",
+    description:
+      "Una cobertura pensada para capturar la ceremonia con elegancia, atmósfera y detalle, resaltando la emoción real del momento.",
+  },  {
+    id: 28,
+    title: "Ceremonia editorial",
+    image:
+      "/Bodas/982A5506.jpg.jpeg",
+    description:
+      "Una cobertura pensada para capturar la ceremonia con elegancia, atmósfera y detalle, resaltando la emoción real del momento.",
+  },  
 
-const heroSlides: Slide[] = [
-  { id: 1, image: "https://i.pinimg.com/control1/1200x/5f/3b/2a/5f3b2a1806de0e599003c14c9310c5dd.jpg", alt: "Novios en ceremonia" },
-  { id: 2, image: "https://i.pinimg.com/control1/1200x/1c/db/72/1cdb72404a639c1f95574ca567692b35.jpg", alt: "Pareja editorial" },
-  { id: 3, image: "https://i.pinimg.com/1200x/54/e1/03/54e103aff53ce485d5a6394ae7f7c6c2.jpg", alt: "Vestido de novia" },
-  { id: 4, image: "https://i.pinimg.com/736x/88/1d/63/881d6395afca545fe10dc60a276ccbef.jpg", alt: "Novios caminando" },
-  { id: 5, image: "https://i.pinimg.com/736x/a8/90/21/a8902169561a41d45682e0ee8e0aa045.jpg", alt: "Momento íntimo" },
 ];
 
-const galleryItems: GalleryItem[] = [
+const plans = [
   {
     id: 1,
-    image: "https://i.pinimg.com/control1/1200x/24/7e/37/247e37db64dcefefcc4f4fe366219f9e.jpg",
-    title: "La espera",
-    description:
-      "Ese instante antes de verlo todo cambiar. La calma, los nervios y la belleza silenciosa del comienzo.",
+    name: "Basic",
+    subtitle: "Fotografía",
+    price: "$1.500.000",
+    image: bodasGallery[0].image,
+    items: [
+      "5 fotos impresas tamaño 15x20 cm",
+      "Cubrimiento del evento en formato digital (aprox. 200 fotos)",
+      "USB con el material del evento",
+      "Protocolo, decoración, recepción, maquillaje y hora loca",
+    ],
   },
   {
     id: 2,
-    image: "https://i.pinimg.com/736x/c7/df/04/c7df04506a4ff18e8484aba22c33e290.jpg",
-    title: "El sí",
-    description:
-      "La ceremonia contada desde la emoción real, sin artificios, con una mirada elegante y atemporal.",
+    name: "Clasic",
+    subtitle: "Fotografía",
+    price: "$1.850.000",
+    image: bodasGallery[1].image,
+    items: [
+      "10 fotos impresas tamaño 15x20 cm",
+      "Photobook 30x30 cm (5 hojas con 30 fotos plasmadas)",
+      "Cubrimiento del evento en formato digital (aprox. 300 fotos)",
+      "USB con el material del evento",
+      "Decoración, recepción, maquillaje y hora loca",
+    ],
   },
   {
     id: 3,
-    image: "https://i.pinimg.com/control1/1200x/3c/2b/f5/3c2bf5836164c5115c4169be1c15e8e5.jpg",
-    title: "Luz de tarde",
-    description:
-      "Retratos suaves y editoriales donde la luz acompaña la narrativa y transforma el momento en memoria.",
+    name: "Premium",
+    subtitle: "Fotografía",
+    price: "$2.400.000",
+    image: bodasGallery[2].image,
+    items: [
+      "15 fotos impresas tamaño 15x20 cm",
+      "Photobook 30x30 cm (10 hojas con 70 fotos plasmadas)",
+      "Cubrimiento del evento en formato digital (aprox. 400 fotos)",
+      "USB con el material del evento",
+      "Decoración, recepción, maquillaje y hora loca",
+    ],
   },
   {
     id: 4,
-    image: "https://i.pinimg.com/control1/1200x/44/0a/be/440abe02ff2cff0f6fce3b0ed3a41e0a.jpg",
-    title: "Detalles que hablan",
-    description:
-      "Texturas, flores, joyas, invitaciones y pequeños objetos que construyen la identidad visual de la boda.",
+    name: "Diamante",
+    subtitle: "Foto + Video",
+    price: "$2.850.000",
+    image: bodasGallery[3].image,
+    items: [
+      "Pre boda",
+      "20 fotos impresas tamaño 15x20 cm",
+      "Photobook 30x30 cm (15 hojas con 90 fotos plasmadas)",
+      "Cubrimiento del evento en formato digital",
+      "USB con todo el material del evento",
+      "Video clip",
+    ],
   },
   {
     id: 5,
-    image: "https://i.pinimg.com/control1/1200x/8e/03/69/8e0369af883df7db465c61edc51d2cb5.jpg",
-    title: "Mirarse",
-    description:
-      "Una conexión íntima capturada con naturalidad, elegancia y sensibilidad.",
-  },
-  {
-    id: 6,
-    image: "https://i.pinimg.com/control1/736x/28/af/d0/28afd095acc5d962d0529e092726fdd3.jpg",
-    title: "La celebración",
-    description:
-      "La energía de los abrazos, las risas y la fiesta convertidas en imágenes vivas y sofisticadas.",
-  },
-  {
-    id: 7,
-    image: "https://i.pinimg.com/1200x/7e/23/2c/7e232cbf4eb38d6a5bfbda44029adba2.jpg",
-    title: "Retrato editorial",
-    description:
-      "Composición, dirección sutil y luz cuidada para crear imágenes que se sientan como una publicación.",
-  },
-  {
-    id: 8,
-    image: "https://i.pinimg.com/736x/91/2f/19/912f19fd6acbba8ee188cec1ca72ce59.jpg",
-    title: "Lo que queda",
-    description:
-      "Momentos que parecían pequeños, pero terminan siendo de los más recordados.",
-  },
-  {
-    id: 9,
-    image: "https://i.pinimg.com/736x/f9/1e/df/f91edfb9b419d326cb7ba5c3efc9dccc.jpg",
-    title: "Final abierto",
-    description:
-      "Porque una boda no termina ese día; continúa en la memoria, en las imágenes y en la forma en que vuelve a sentirse.",
-  },
-];
-
-const editorialSections = [
-  {
-    id: 1,
-    eyebrow: "01",
-    title: "Más que fotos, una atmósfera",
-    text: "La intención no es solo documentar una boda, sino traducirla visualmente: la luz, la elegancia, el silencio antes de entrar, la textura del vestido, el movimiento de las manos, la presencia de quienes aman. Cada imagen busca sentirse refinada, honesta y profundamente viva.",
-    imageLarge: "https://i.pinimg.com/736x/85/53/a1/8553a1eb8dc478e2022f76bb82abf5a6.jpg",
-    imageSmall: "https://i.pinimg.com/control1/736x/d0/de/fb/d0defbbc7f6b72c5f8f8f7620ad5691a.jpg",
-  },
-  {
-    id: 2,
-    eyebrow: "02",
-    title: "Una narrativa con sensibilidad editorial",
-    text: "Cada historia se construye con equilibrio entre espontaneidad y estética. El resultado es una galería que se siente natural, pero también cuidadosamente compuesta: como un recuerdo íntimo con la elegancia visual de una revista.",
-    imageLarge: "https://i.pinimg.com/736x/73/36/6a/73366ac3f08c52a8372affc6858cef54.jpg",
-    imageSmall: "https://i.pinimg.com/control1/736x/e1/47/5d/e1475d1926bd6afa386fbfcb76ab1651.jpg",
-  },
-  {
-    id: 3,
-    eyebrow: "03",
-    title: "Belleza que permanece",
-    text: "Las tendencias pasan; la emoción verdadera permanece. Por eso el enfoque está en crear imágenes sobrias, sofisticadas y atemporales, capaces de conservar no solo cómo se veía el día, sino cómo se sentía.",
-    imageLarge: "https://i.pinimg.com/736x/74/35/ce/7435ce0750ad47144df829731febc38b.jpg",
-    imageSmall: "https://i.pinimg.com/736x/ad/17/5c/ad175c1eaeed667831ddbdb9926b256c.jpg",
-  },
-];
-
-const experienceCards = [
-  {
-    title: "Cobertura editorial",
-    text: "Una narrativa visual pensada para capturar desde lo íntimo hasta lo grandioso, con una estética refinada.",
-  },
-  {
-    title: "Dirección sutil",
-    text: "Acompañamiento delicado para retratos naturales, elegantes y sin rigidez.",
-  },
-  {
-    title: "Detalles con intención",
-    text: "Cada elemento de la boda forma parte de la historia: flores, papel, joyería, arquitectura y luz.",
+    name: "Gold",
+    subtitle: "Experiencia completa",
+    price: "$3.600.000",
+    image: bodasGallery[4].image,
+    items: [
+      "Pre boda",
+      "15 fotos impresas tamaño 15x20 cm",
+      "Photobook 15x20 cm (5 hojas con 30 fotos plasmadas)",
+      "Photobook 30x30 cm (18 hojas con 100 fotos plasmadas)",
+      "USB con todo el material del evento",
+      "Tomas de dron",
+      "Video de tus sueños",
+    ],
   },
 ];
 
 export default function BodasPage() {
-  const [current, setCurrent] = useState(0);
-  const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null);
-  const trackRef = useRef<HTMLDivElement | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState(1);
 
-  const scrollToCard = (index: number) => {
-    const container = trackRef.current;
-    if (!container) return;
+  const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
+  const heroVideoSrc = "/VIDEO 3 .mp4";
 
-    const cards = container.querySelectorAll("[data-slide-card]");
-    const target = cards[index] as HTMLElement | undefined;
-    if (!target) return;
+  const navLeft = [
+    { href: "/bodas", label: "Bodas" },
+    { href: "/prebodas", label: "Pre-Bodas" },
+    { href: "/estudio", label: "Foto Estudios" },
+  ];
 
-    const left =
-      target.offsetLeft - (container.clientWidth - target.clientWidth) / 2;
+  const navRight = [
+    { href: "/contacto", label: "Contacto" },
+    { href: "/#planes", label: "Planes" },
+    { href: "/acercademi", label: "Acerca de mí" },
+  ];
 
-    container.scrollTo({
-      left,
-      behavior: "smooth",
-    });
+  const activePlan = useMemo(
+    () => plans.find((plan) => plan.id === selectedPlan) ?? plans[0],
+    [selectedPlan]
+  );
 
-    setCurrent(index);
+  const activePhoto =
+    selectedPhoto !== null ? bodasGallery[selectedPhoto] : null;
+
+  const prevPhoto = () => {
+    if (selectedPhoto === null) return;
+    setSelectedPhoto(
+      (selectedPhoto - 1 + bodasGallery.length) % bodasGallery.length
+    );
   };
 
-  const nextSlide = () => {
-    const next = (current + 1) % heroSlides.length;
-    scrollToCard(next);
+  const nextPhoto = () => {
+    if (selectedPhoto === null) return;
+    setSelectedPhoto((selectedPhoto + 1) % bodasGallery.length);
   };
-
-  const prevSlide = () => {
-    const prev = (current - 1 + heroSlides.length) % heroSlides.length;
-    scrollToCard(prev);
-  };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const next = (current + 1) % heroSlides.length;
-      scrollToCard(next);
-    }, 4500);
-
-    return () => clearInterval(interval);
-  }, [current]);
-
-  useEffect(() => {
-    const container = trackRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      const cards = Array.from(
-        container.querySelectorAll("[data-slide-card]")
-      ) as HTMLElement[];
-
-      if (!cards.length) return;
-
-      const containerCenter = container.scrollLeft + container.clientWidth / 2;
-
-      let closestIndex = 0;
-      let closestDistance = Infinity;
-
-      cards.forEach((card, index) => {
-        const cardCenter = card.offsetLeft + card.clientWidth / 2;
-        const distance = Math.abs(containerCenter - cardCenter);
-
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closestIndex = index;
-        }
-      });
-
-      setCurrent(closestIndex);
-    };
-
-    container.addEventListener("scroll", handleScroll, { passive: true });
-    return () => container.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (selectedImage && e.key === "Escape") setSelectedImage(null);
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [selectedImage]);
 
   return (
-    <main className="min-h-screen bg-white  text-[#1d1a17]">
+    <main className="bg-[var(--mv-cream)] text-[var(--mv-ink)]">
       {/* HERO */}
-      <section className="bg-[#00291d] text-white">
-        <div className="mx-auto max-w-7xl px-4 py-10 md:px-8 md:py-16">
-          <div className="mb-8 grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
-            <div className="max-w-2xl">
-              <p className="mb-3 text-[11px] uppercase tracking-[0.35em] text-white/55 md:text-xs">
-                Weddings
-              </p>
-              <h1 className="text-3xl font-light uppercase tracking-[0.08em] md:text-5xl lg:text-6xl">
-                Weddings & Real Moments
-              </h1>
-              <p className="mt-4 max-w-xl text-sm leading-7 text-white/75 md:text-base">
-                Una experiencia visual pensada para sentirse como un álbum
-                abierto: elegante, íntima y editorial.
-              </p>
-            </div>
+      <section className="relative min-h-screen overflow-hidden bg-black">
+        <video
+          className="absolute inset-0 h-full w-full object-cover"
+          src={heroVideoSrc}
+          autoPlay
+          muted
+          loop
+          playsInline
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,16,20,0.10)_0%,rgba(7,16,20,0.18)_30%,rgba(7,16,20,0.40)_100%)]" />
 
-            <div className="flex items-center gap-3">
-              <button
-                onClick={prevSlide}
-                aria-label="Anterior"
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/5 transition hover:bg-white/10"
-              >
-                <ChevronLeft size={18} />
-              </button>
-              <button
-                onClick={nextSlide}
-                aria-label="Siguiente"
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/5 transition hover:bg-white/10"
-              >
-                <ChevronRight size={18} />
-              </button>
-            </div>
-          </div>
+        <header className="relative z-30 mx-auto flex w-full max-w-[1400px] items-center justify-between px-4 py-6 md:px-8 md:py-8">
+          <nav className="hidden items-center gap-8 xl:flex">
+            {navLeft.map((item) => (
+              <Link key={item.href} href={item.href} className="mv-nav-link-light">
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <Link href="/" className="absolute left-1/2 top-6 z-30 -translate-x-1/2">
+            <img
+              src={logoSrc}
+              alt="Miles Visual"
+              className="h-[120px] w-auto max-w-[82vw] object-contain sm:h-[150px] md:h-[190px] lg:h-[220px]"
+            />
+          </Link>
+
+          <nav className="hidden items-center gap-8 xl:flex">
+            {navRight.map((item) => (
+              <Link key={item.href} href={item.href} className="mv-nav-link-light">
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <button
+            onClick={() => setMenuOpen(true)}
+            className="ml-auto flex h-10 w-10 items-center justify-center text-white xl:hidden"
+            aria-label="Abrir menú"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
 
           <div
-            ref={trackRef}
-            className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            className={`fixed inset-0 z-50 transition ${
+              menuOpen
+                ? "pointer-events-auto opacity-100"
+                : "pointer-events-none opacity-0"
+            }`}
           >
-            {heroSlides.map((slide, index) => {
-              const isActive = current === index;
-
-              return (
-                <article
-                  key={slide.id}
-                  data-slide-card
-                  className={`
-                    relative shrink-0 snap-center overflow-hidden rounded-[1.6rem] transition-all duration-500
-                    h-[340px] w-[78%]
-                    sm:h-[420px] sm:w-[62%]
-                    md:h-[520px] md:w-[42%]
-                    lg:h-[580px] lg:w-[31%]
-                    ${isActive ? "scale-[1.01] opacity-100" : "opacity-80"}
-                  `}
-                >
-                  <Image
-                    src={slide.image}
-                    alt={slide.alt}
-                    fill
-                    priority={index === 0}
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
-                </article>
-              );
-            })}
-          </div>
-
-          <div className="mt-6 flex justify-center gap-2">
-            {heroSlides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => scrollToCard(index)}
-                aria-label={`Ir al slide ${index + 1}`}
-                className={`h-2 rounded-full transition-all ${
-                  current === index ? "w-8 bg-white" : "w-2 bg-white/35"
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* INTRO */}
-      <section className="mx-auto max-w-6xl px-4 py-16 md:px-8 md:py-24">
-        <div className="grid gap-10 md:grid-cols-[0.9fr_1.1fr]">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.35em] text-[#8c8178] md:text-xs">
-              Bodas
-            </p>
-            <h2 className="mt-3 text-4xl font-light uppercase tracking-[0.12em] md:text-6xl">
-              Una historia
-              <br />
-              contada con belleza
-            </h2>
-          </div>
-
-          <div className="max-w-2xl">
-            <p className="text-base leading-9 text-[#5f5751] md:text-lg">
-              Esta página no está pensada solo para mostrar imágenes, sino para
-              invitar al usuario a sentir una boda desde dentro: la atmósfera,
-              la emoción contenida, la elegancia de los detalles y la presencia
-              de cada instante importante.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* QUOTE / TESTIMONIO */}
-      <section className="mx-auto max-w-5xl px-4 pb-16 md:px-8 md:pb-24">
-        <div className="rounded-[2rem] border border-[#e5dfd8] bg-[#f8f6f3] px-6 py-10 md:px-12 md:py-16">
-          <p className="text-center text-2xl font-light italic leading-relaxed text-[#2c2723] md:text-4xl">
-            “Sentimos que no estábamos viendo solo nuestras fotos, sino la
-            memoria completa de cómo se sintió ese día.”
-          </p>
-          <p className="mt-6 text-center text-xs uppercase tracking-[0.35em] text-[#8a817a]">
-            Comentario de una novia
-          </p>
-        </div>
-      </section>
-
-      {/* SECCIONES EDITORIALES */}
-      <section className="mx-auto max-w-7xl px-4 pb-16 md:px-8 md:pb-24">
-        <div className="space-y-20 md:space-y-28">
-          {editorialSections.map((section, index) => (
             <div
-              key={section.id}
-              className={`grid items-center gap-8 md:gap-12 ${
-                index % 2 === 0
-                  ? "md:grid-cols-[0.75fr_1.25fr]"
-                  : "md:grid-cols-[1.25fr_0.75fr]"
+              className="absolute inset-0 bg-black/50"
+              onClick={() => setMenuOpen(false)}
+            />
+
+            <div
+              className={`absolute right-0 top-0 flex h-full w-[86%] max-w-[360px] flex-col bg-[var(--mv-cream)] p-6 transition-transform duration-300 ${
+                menuOpen ? "translate-x-0" : "translate-x-full"
               }`}
             >
-              <div className={index % 2 === 0 ? "" : "md:order-2"}>
-                <p className="text-[11px] uppercase tracking-[0.35em] text-[#8c8178] md:text-xs">
-                  {section.eyebrow}
-                </p>
-                <h3 className="mt-3 text-3xl font-light uppercase tracking-[0.12em] md:text-5xl">
-                  {section.title}
-                </h3>
-                <p className="mt-6 max-w-xl text-sm leading-8 text-[#5f5751] md:text-base">
-                  {section.text}
-                </p>
+              <div className="flex items-center justify-between">
+                <img
+                  src={logoSrc}
+                  alt="Miles Visual"
+                  className="h-[60px] w-auto object-contain"
+                />
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="flex h-10 w-10 items-center justify-center"
+                  aria-label="Cerrar menú"
+                >
+                  <X className="h-6 w-6" />
+                </button>
               </div>
 
-              <div
-                className={`grid gap-4 sm:grid-cols-2 ${
-                  index % 2 === 0 ? "" : "md:order-1"
-                }`}
-              >
-                <div className="relative h-[380px] overflow-hidden rounded-[1.8rem] sm:h-[480px] md:h-[560px]">
-                  <Image
-                    src={section.imageLarge}
-                    alt={section.title}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="relative h-[240px] overflow-hidden rounded-[1.8rem] sm:mt-16 sm:h-[320px] md:mt-24 md:h-[380px]">
-                  <Image
-                    src={section.imageSmall}
-                    alt={`${section.title} secundaria`}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
+              <nav className="mt-12 flex flex-col gap-5">
+                {[...navLeft, ...navRight].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMenuOpen(false)}
+                    className="border-b border-black/10 pb-4 text-[13px] uppercase tracking-[0.12em] text-[var(--mv-ink)]"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          </div>
+        </header>
+
+        <div className="relative z-20 flex min-h-screen items-end">
+          <div className="mx-auto w-full max-w-[1320px] px-4 pb-14 md:px-8 md:pb-16">
+            <p className="text-[12px] uppercase tracking-[0.16em] text-white/78 md:text-[14px]">
+              Portafolio
+            </p>
+            <h1 className="mt-3 max-w-[760px] text-[36px] font-semibold uppercase leading-[0.94] tracking-[0.03em] text-white md:text-[76px]">
+              BODAS
+            </h1>
+          </div>
+        </div>
+      </section>
+
+      {/* FRASE */}
+      <section className="mx-auto max-w-[1180px] px-4 py-16 text-center md:px-8 md:py-24">
+        <p className="mv-script text-[54px] leading-none text-[var(--mv-gold)] md:text-[92px]">
+          Momentos Inolvidables
+        </p>
+        <h2 className="mt-3 text-[30px] font-semibold uppercase tracking-[0.03em] md:text-[54px]">
+          LA FOTO PERFECTA ES AQUELLA QUE CAPTA LO IRREPETIBLE
+        </h2>
+      </section>
+
+      {/* GRILLA 1 x 6 FULLSCREEN */}
+      <section className="space-y-0">
+        {bodasGallery.map((photo, index) => (
+          <button
+            key={photo.id}
+            onClick={() => setSelectedPhoto(index)}
+            className="group relative block min-h-screen w-full overflow-hidden text-left"
+          >
+            <img
+              src={photo.image}
+              alt={photo.title}
+              className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
+            />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(17,19,20,0.10)_0%,rgba(17,19,20,0.20)_35%,rgba(17,19,20,0.52)_100%)]" />
+
+            <div className="relative z-10 flex min-h-screen items-end">
+              <div className="mx-auto w-full max-w-[1320px] px-4 pb-14 md:px-8 md:pb-16">
+                <p className="mv-script text-[68px] leading-none text-white/18 md:text-[140px]">
+                  bodas
+                </p>
+                <h3 className="mt-2 text-[30px] font-semibold uppercase tracking-[0.03em] text-white md:text-[52px]">
+                  {photo.title}
+                </h3>
+                <p className="mt-4 max-w-[560px] text-[14px] leading-7 text-white/84 md:text-[17px] md:leading-8">
+                  Toca para abrir esta imagen y ver su descripción.
+                </p>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* GALERÍA */}
-      <section className="bg-[#00291d] py-16 text-white md:py-24">
-        <div className="mx-auto max-w-7xl px-4 md:px-8">
-          <div className="mb-10 max-w-2xl">
-            <p className="text-[11px] uppercase tracking-[0.35em] text-white/50 md:text-xs">
-              Galería
-            </p>
-            <h3 className="mt-3 text-3xl font-light uppercase tracking-[0.12em] md:text-5xl">
-              Bodas
-            </h3>
-            <p className="mt-4 text-sm leading-8 text-white/70 md:text-base">
-              Una selección de imágenes que abren la puerta a la atmósfera
-              completa del día.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {galleryItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setSelectedImage(item)}
-                className="group relative h-[340px] overflow-hidden rounded-[1.6rem] text-left sm:h-[380px] lg:h-[420px]"
-              >
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  fill
-                  className="object-cover transition duration-500 group-hover:scale-[1.04]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-                <div className="absolute bottom-0 left-0 p-5">
-                  <h4 className="text-lg font-light uppercase tracking-[0.12em] text-white">
-                    {item.title}
-                  </h4>
-                  <p className="mt-2 text-sm text-white/75">
-                    Ver imagen y descripción
-                  </p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* EXPERIENCIA */}
-      <section className="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
-        <div className="mb-10 max-w-3xl">
-          <p className="text-[11px] uppercase tracking-[0.35em] text-[#8c8178] md:text-xs">
-            La experiencia
-          </p>
-          <h3 className="mt-3 text-3xl font-light uppercase tracking-[0.12em] md:text-5xl">
-            Pensado para quienes aman la estética y la emoción
-          </h3>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          {experienceCards.map((card) => (
-            <article
-              key={card.title}
-              className="rounded-[1.8rem] border border-[#e5dfd8] bg-[#f8f6f3] p-6 md:p-8"
-            >
-              <h4 className="text-xl font-light uppercase tracking-[0.1em] text-[#1f1b18]">
-                {card.title}
-              </h4>
-              <p className="mt-4 text-sm leading-8 text-[#5f5751] md:text-base">
-                {card.text}
-              </p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA FINAL */}
-      <section className="bg-[#f1ede8]">
-        <div className="mx-auto max-w-4xl px-4 py-20 text-center md:px-8 md:py-28">
-          <p className="text-[11px] uppercase tracking-[0.35em] text-[#8c8178] md:text-xs">
-            Último paso
-          </p>
-          <h3 className="mt-4 text-3xl font-light uppercase tracking-[0.12em] md:text-5xl">
-            Para quienes quieren recordar su boda con belleza y verdad
-          </h3>
-          <p className="mx-auto mt-6 max-w-2xl text-sm leading-8 text-[#5f5751] md:text-base">
-            Si imaginan una boda con una narrativa visual elegante, íntima y
-            atemporal, este puede ser el comienzo de algo hermoso.
-          </p>
-
-          <button className="mt-8 rounded-full border border-[#1f1b18] px-8 py-3 text-sm uppercase tracking-[0.22em] text-[#1f1b18] transition hover:bg-[#1f1b18] hover:text-white">
-            Consultar fecha
           </button>
-        </div>
+        ))}
       </section>
 
-      {/* MODAL */}
-      {selectedImage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-          <div className="relative grid max-h-[90vh] w-full max-w-6xl overflow-hidden rounded-[2rem] bg-white lg:grid-cols-[1.2fr_0.8fr]">
+      {/* MODAL FOTO */}
+      {activePhoto && (
+        <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm">
+          <div className="relative flex min-h-screen items-center justify-center px-4 py-10">
             <button
-              onClick={() => setSelectedImage(null)}
-              className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/70 text-white transition hover:bg-black"
+              onClick={() => setSelectedPhoto(null)}
+              className="absolute right-5 top-5 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/30 text-white"
               aria-label="Cerrar"
             >
-              <X size={18} />
+              <X className="h-5 w-5" />
             </button>
 
-            <div className="relative h-[360px] bg-black sm:h-[520px] lg:h-[90vh] lg:max-h-[90vh]">
-              <Image
-                src={selectedImage.image}
-                alt={selectedImage.title}
-                fill
-                className="object-cover"
-              />
-            </div>
+            <button
+              onClick={prevPhoto}
+              className="absolute left-4 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/30 text-white"
+              aria-label="Anterior"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
 
-            <div className="flex flex-col justify-center p-6 md:p-10">
-              <p className="text-[11px] uppercase tracking-[0.35em] text-[#8c8178] md:text-xs">
-                Boda
-              </p>
-              <h4 className="mt-3 text-2xl font-light uppercase tracking-[0.12em] text-[#1f1b18] md:text-3xl">
-                {selectedImage.title}
-              </h4>
-              <p className="mt-6 text-sm leading-8 text-[#5f5751] md:text-base">
-                {selectedImage.description}
-              </p>
+            <button
+              onClick={nextPhoto}
+              className="absolute right-4 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/30 text-white"
+              aria-label="Siguiente"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
 
-              <button
-                onClick={() => setSelectedImage(null)}
-                className="mt-8 w-fit rounded-full border border-[#1f1b18] px-6 py-3 text-sm uppercase tracking-[0.18em] text-[#1f1b18] transition hover:bg-[#1f1b18] hover:text-white"
-              >
-                Cerrar
-              </button>
+            <div className="grid w-full max-w-[1200px] overflow-hidden rounded-[28px] bg-white md:grid-cols-[1fr_0.9fr]">
+              <div className="relative min-h-[360px]">
+                <img
+                  src={activePhoto.image}
+                  alt={activePhoto.title}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+
+              <div className="flex flex-col justify-center px-6 py-8 md:px-10">
+                <p className="mv-script text-[44px] leading-none text-[#789894] md:text-[68px]">
+                  bodas
+                </p>
+                <h3 className="mt-2 text-[28px] font-semibold uppercase tracking-[0.03em] md:text-[42px]">
+                  {activePhoto.title}
+                </h3>
+                <p className="mt-6 text-[15px] leading-8 text-[var(--mv-ink)]/78 md:text-[17px] md:leading-9">
+                  {activePhoto.description}
+                </p>
+              </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* PLANES */}
+      <section className="mx-auto max-w-[1280px] px-4 py-20 md:px-8 md:py-28">
+        <div className="mb-12 text-center">
+          <p className="mv-script text-[44px] leading-none text-[var(--mv-gold)] md:text-[72px]">
+            Planes
+          </p>
+          <h2 className="text-[32px] font-semibold uppercase tracking-[0.03em] md:text-[58px]">
+            EXPERIENCIAS DISPONIBLES
+          </h2>
+        </div>
+
+        <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5">
+          {plans.map((plan) => (
+            <button
+              key={plan.id}
+              onClick={() => setSelectedPlan(plan.id)}
+              className={`rounded-[18px] px-4 py-4 text-center text-[12px] font-medium uppercase tracking-[0.12em] transition ${
+                selectedPlan === plan.id
+                  ? "bg-[#789894] text-white shadow-lg"
+                  : "bg-white text-[var(--mv-ink)] shadow-sm"
+              }`}
+            >
+              {plan.name}
+            </button>
+          ))}
+        </div>
+
+        <div className="overflow-hidden rounded-[30px] bg-white shadow-[0_22px_60px_rgba(0,0,0,0.08)]">
+          <div className="grid md:grid-cols-[0.95fr_1.05fr]">
+            <div className="relative min-h-[360px] md:min-h-[680px]">
+              <img
+                src={activePlan.image}
+                alt={activePlan.name}
+                className="h-full w-full object-cover"
+              />
+            </div>
+
+            <div className="px-6 py-8 md:px-10 md:py-10">
+              <p className="mv-script text-[44px] leading-none text-[#789894] md:text-[68px]">
+                {activePlan.name}
+              </p>
+              <p className="mt-2 text-[13px] uppercase tracking-[0.12em] text-[var(--mv-ink)]/55">
+                {activePlan.subtitle}
+              </p>
+
+              <ul className="mt-7 space-y-3">
+                {activePlan.items.map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <span className="mt-[10px] h-[5px] w-[5px] rounded-full bg-[#789894]" />
+                    <span className="text-[15px] leading-7 text-[var(--mv-ink)]/82 md:text-[17px] md:leading-8">
+                      {item}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-8 flex items-center gap-4">
+                <span className="h-px flex-1 bg-black/10" />
+                <p className="text-[22px] font-medium uppercase tracking-[0.06em] md:text-[28px]">
+                  {activePlan.price}
+                </p>
+                <span className="h-px flex-1 bg-black/10" />
+              </div>
+
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <a
+                  href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20este%20plan"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mv-button-dark"
+                >
+                  Cotizar
+                </a>
+                <Link href="/bodas" className="mv-button-outline-dark">
+                  Ver galería
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="border-t border-black/8 bg-white">
+        <div className="mx-auto flex max-w-[1280px] flex-col gap-6 px-4 py-10 md:flex-row md:items-center md:justify-between md:px-8">
+          <nav className="flex flex-wrap gap-5">
+            <Link href="/" className="mv-nav-link">
+              Inicio
+            </Link>
+            <Link href="/bodas" className="mv-nav-link">
+              Bodas
+            </Link>
+            <Link href="/prebodas" className="mv-nav-link">
+              Pre-Bodas
+            </Link>
+            <Link href="/estudio" className="mv-nav-link">
+              Foto Estudios
+            </Link>
+            <Link href="/contacto" className="mv-nav-link">
+              Contacto
+            </Link>
+          </nav>
+
+          <p className="text-[12px] uppercase tracking-[0.12em] text-black/45">
+            © 2026 Miles Visual
+          </p>
+        </div>
+      </footer>
+
+      {/* WHATSAPP FLOTANTE */}
+      <a
+        href="https://wa.me/573148112717?text=Hola%20Miles%20Visual"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-5 right-5 z-[120] flex h-14 w-14 items-center justify-center rounded-full bg-[#789894] text-white shadow-xl transition hover:scale-105"
+        aria-label="WhatsApp"
+      >
+        <MessageCircle className="h-6 w-6" />
+      </a>
     </main>
   );
 }
