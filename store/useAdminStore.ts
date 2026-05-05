@@ -178,9 +178,12 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
     try {
       const formData = new FormData();
-      // Mapear campos al FormData, excluyendo 'id' para no violar el ValidationPipe
+      // Solo excluimos el id (que va en la URL) y relaciones pesadas. 
+      // El resto lo limpia el backend automáticamente con whitelist:true
+      const excluded = ['id', 'ventasServicios'];
+      
       Object.keys(plan).forEach(key => {
-        if (key !== 'id' && plan[key] !== undefined && plan[key] !== null) {
+        if (!excluded.includes(key) && plan[key] !== undefined && plan[key] !== null) {
           if (plan[key] instanceof File) {
             formData.append(key, plan[key]);
           } else {
