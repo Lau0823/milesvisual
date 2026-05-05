@@ -19,4 +19,5 @@ jobs:
             git pull origin frontend
             npm install
             npm run build
-            pm2 restart miles-front || pm2 start npm --name miles-front -- start
+            # Zero Downtime: reload espera a que la nueva versión esté lista antes de apagar la vieja
+            pm2 reload miles-front --update-env || pm2 start npm --name miles-front -- start
