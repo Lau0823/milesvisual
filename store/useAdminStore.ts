@@ -1,139 +1,230 @@
 import { create } from 'zustand';
-import { db, Reservation, MediaPost, QuoteRequest } from '../lib/db';
-import { liveQuery } from 'dexie';
 
 interface AdminState {
-  // KPIs
+  settings: any[];
+  planes: any[];
+  reservations: any[];
+  quoteRequests: any[];
+  mediaPosts: any[];
   totalActiveReservations: number;
   totalPaidIncome: number;
   totalPendingIncome: number;
   totalPosts: number;
-  totalNewQuotes: number;
+  loading: boolean;
   
-  // Data
-  reservations: Reservation[];
-  mediaPosts: MediaPost[];
-  quoteRequests: QuoteRequest[];
-
-  // Acciones
-  loadLocalData: () => void;
-  addReservation: (res: Omit<Reservation, 'id'>) => Promise<void>;
-  updateReservation: (id: number, res: Partial<Reservation>) => Promise<void>;
-  deleteReservation: (id: number) => Promise<void>;
-  
-  addMediaPost: (post: Omit<MediaPost, 'id'>) => Promise<void>;
-  updateMediaPost: (id: number, post: Partial<MediaPost>) => Promise<void>;
-  deleteMediaPost: (id: number) => Promise<void>;
-
-  addQuoteRequest: (quote: Omit<QuoteRequest, 'id'>) => Promise<void>;
-  updateQuoteRequest: (id: number, quote: Partial<QuoteRequest>) => Promise<void>;
-  deleteQuoteRequest: (id: number) => Promise<void>;
+  // Acciones globales
   syncWithBackend: () => Promise<void>;
+  loadLocalData: () => Promise<void>; // Alias para compatibilidad con layout.tsx
+  
+  // Ajustes
+  fetchSettings: (token: string) => Promise<void>;
+  updateSetting: (token: string, key: string, value: string) => Promise<void>;
+  saveBatchSettings: (token: string, settings: any[]) => Promise<boolean>;
+  
+  // Planes
+  fetchPlanes: (token: string) => Promise<void>;
+  savePlan: (token: string, plan: any) => Promise<void>;
+  deletePlan: (token: string, id: number) => Promise<void>;
+  
+  setLoading: (loading: boolean) => void;
 }
 
 export const useAdminStore = create<AdminState>((set, get) => ({
+  settings: [],
+  planes: [],
+  reservations: [],
+  quoteRequests: [],
+  mediaPosts: [],
   totalActiveReservations: 0,
   totalPaidIncome: 0,
   totalPendingIncome: 0,
   totalPosts: 0,
-  totalNewQuotes: 0,
-  reservations: [],
-  mediaPosts: [],
-  quoteRequests: [],
+  loading: false,
 
-  // Esta función se llamará una vez cuando cargue el Dashboard
-  loadLocalData: () => {
-    // Suscribirse a cambios en la tabla reservations de Dexie
-    liveQuery(() => db.reservations.toArray()).subscribe(reservations => {
-      const totalActive = reservations.filter(r => r.status !== 'cancelled').length;
-      const paidIncome = reservations.filter(r => r.paymentStatus === 'paid').reduce((acc, curr) => acc + Number(curr.value), 0);
-      const pendingIncome = reservations.filter(r => r.paymentStatus === 'pending' && r.status !== 'cancelled').reduce((acc, curr) => acc + Number(curr.value), 0);
-
-      set({
-        reservations,
-        totalActiveReservations: totalActive,
-        totalPaidIncome: paidIncome,
-        totalPendingIncome: pendingIncome,
-      });
-    });
-
-    // Suscribirse a cambios en la tabla mediaPosts de Dexie
-    liveQuery(() => db.mediaPosts.toArray()).subscribe(mediaPosts => {
-      set({
-        mediaPosts,
-        totalPosts: mediaPosts.length,
-      });
-    });
-
-    liveQuery(() => db.quoteRequests.toArray()).subscribe(quoteRequests => {
-      set({
-        quoteRequests,
-        totalNewQuotes: quoteRequests.filter(q => q.status === 'new').length,
-      });
-    });
-  },
-
-  addReservation: async (res) => {
-    await db.reservations.add({ ...res, synced: false });
-  },
-
-  updateReservation: async (id, res) => {
-    await db.reservations.update(id, { ...res, synced: false });
-  },
-
-  deleteReservation: async (id) => {
-    await db.reservations.delete(id);
-  },
-
-  addMediaPost: async (post) => {
-    await db.mediaPosts.add({ ...post, synced: false });
-  },
-
-  updateMediaPost: async (id, post) => {
-    await db.mediaPosts.update(id, { ...post, synced: false });
-  },
-
-  deleteMediaPost: async (id) => {
-    await db.mediaPosts.delete(id);
-  },
-
-  addQuoteRequest: async (quote) => {
-    // Al agregar una nueva cotización desde el frontend publico, guardamos la IP y metadata que tengamos a mano
-    await db.quoteRequests.add({ ...quote, synced: false });
-  },
-
-  updateQuoteRequest: async (id, quote) => {
-    await db.quoteRequests.update(id, { ...quote, synced: false });
-  },
-
-  deleteQuoteRequest: async (id) => {
-    await db.quoteRequests.delete(id);
-  },
+  setLoading: (loading) => set({ loading }),
 
   syncWithBackend: async () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) return;
-
     try {
-      const resReservations = await fetch(`${apiUrl}/reservations`);
-      if (resReservations.ok) {
-        const data = await resReservations.json();
-        await db.reservations.bulkPut(data.map((r: any) => ({ ...r, synced: true })));
-      }
+      const API = process.env.NEXT_PUBLIC_API_URL;
+      
+      const [resRes, quoteRes, settingsRes, planesRes, mediaRes] = await Promise.all([
+        fetch(`${API}/reservations`),
+        fetch(`${API}/quotes`),
+        fetch(`${API}/settings`),
+        fetch(`${API}/servicios?limit=100`),
+        fetch(`${API}/media-posts`)
+      ]);
 
-      const resMedia = await fetch(`${apiUrl}/media-posts`);
-      if (resMedia.ok) {
-        const data = await resMedia.json();
-        await db.mediaPosts.bulkPut(data.map((m: any) => ({ ...m, synced: true })));
-      }
+      const reservations = resRes.ok ? await resRes.json() : [];
+      const quoteRequests = quoteRes.ok ? await quoteRes.json() : [];
+      const settings = settingsRes.ok ? await settingsRes.json() : [];
+      const planesData = planesRes.ok ? await planesRes.json() : { data: [] };
+      const mediaPosts = mediaRes.ok ? await mediaRes.json() : [];
 
-      const resQuotes = await fetch(`${apiUrl}/quotes`);
-      if (resQuotes.ok) {
-        const data = await resQuotes.json();
-        await db.quoteRequests.bulkPut(data.map((q: any) => ({ ...q, synced: true })));
-      }
+      // Calcular ingresos
+      const paid = reservations
+        .filter((r: any) => r.paymentStatus === 'paid')
+        .reduce((sum: number, r: any) => sum + Number(r.value), 0);
+      
+      const pending = reservations
+        .filter((r: any) => r.paymentStatus === 'pending')
+        .reduce((sum: number, r: any) => sum + Number(r.value), 0);
+
+      const activeReservationsCount = reservations.filter((r: any) => r.status !== 'cancelled').length;
+
+      set({ 
+        reservations, 
+        quoteRequests, 
+        settings, 
+        planes: planesData.data || [],
+        mediaPosts,
+        totalPaidIncome: paid,
+        totalPendingIncome: pending,
+        totalActiveReservations: activeReservationsCount,
+        totalPosts: mediaPosts.length
+      });
     } catch (error) {
-      console.error("Error syncing with backend:", error);
+      console.error("Error in syncWithBackend:", error);
     }
   },
+
+  loadLocalData: async () => {
+    await get().syncWithBackend();
+  },
+
+  fetchSettings: async (token) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        set({ settings: data });
+      }
+    } catch (error) {
+      console.error("Error fetching admin settings:", error);
+    }
+  },
+
+  updateSetting: async (token, key, value) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ key, value })
+      });
+      
+      if (res.ok) {
+        const updatedSetting = await res.json();
+        const currentSettings = [...get().settings];
+        const index = currentSettings.findIndex(s => s.key === key);
+        
+        if (index !== -1) {
+          currentSettings[index] = updatedSetting;
+        } else {
+          currentSettings.push(updatedSetting);
+        }
+        
+        set({ settings: currentSettings });
+      }
+    } catch (error) {
+      console.error("Error updating setting:", error);
+    }
+  },
+
+  saveBatchSettings: async (token, settings) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/batch`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ settings })
+      });
+      
+      if (res.ok) {
+        set({ settings });
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error saving batch settings:", error);
+      return false;
+    }
+  },
+
+  fetchPlanes: async (token) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/servicios?limit=100`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        set({ planes: data.data || [] });
+      }
+    } catch (error) {
+      console.error("Error fetching planes:", error);
+    }
+  },
+
+  savePlan: async (token, plan) => {
+    const isEditing = !!plan.id;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/servicios${isEditing ? `/${plan.id}` : ''}`;
+    const method = isEditing ? 'PATCH' : 'POST';
+
+    try {
+      const formData = new FormData();
+      // Mapear campos al FormData, excluyendo 'id' para no violar el ValidationPipe
+      Object.keys(plan).forEach(key => {
+        if (key !== 'id' && plan[key] !== undefined && plan[key] !== null) {
+          if (plan[key] instanceof File) {
+            formData.append(key, plan[key]);
+          } else {
+            formData.append(key, plan[key].toString());
+          }
+        }
+      });
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Error al guardar el plan');
+      }
+      
+      await get().fetchPlanes(token);
+    } catch (error) {
+      console.error("Error saving plan:", error);
+      throw error; // Re-lanzar para que el componente lo maneje
+    }
+  },
+
+  deletePlan: async (token, id) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/servicios/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Error al eliminar el plan');
+      }
+      
+      set({ planes: get().planes.filter(p => p.id !== id) });
+    } catch (error) {
+      console.error("Error deleting plan:", error);
+      throw error;
+    }
+  }
 }));

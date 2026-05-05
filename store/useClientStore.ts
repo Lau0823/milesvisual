@@ -18,12 +18,28 @@ export const useClientStore = create<ClientState>((set, get) => ({
   isLoaded: false,
 
   loadPublicData: async () => {
-    if (get().isLoaded) return; // Si ya está cargado, no volver a hacer fetch
-    
+    // 1. Cargar datos del Cache de Dexie (Instantáneo)
+    try {
+      const cachedSettings = await db.jsonCache.get('settings');
+      const cachedPlans = await db.jsonCache.get('plans');
+      const cachedMedia = await db.jsonCache.get('mediaPosts');
+      
+      if (cachedSettings || cachedPlans || cachedMedia) {
+        set({ 
+          settings: cachedSettings?.data || [], 
+          plans: cachedPlans?.data || [], 
+          mediaPosts: cachedMedia?.data || [],
+          isLoaded: true 
+        });
+      }
+    } catch (e) {
+      console.warn("Dexie cache miss or error:", e);
+    }
+
+    // 2. Fetch en background para actualizar (Revalidate)
     try {
       let API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
       
-      // Auto-corregir a HTTPS si estamos en un entorno seguro para evitar error de Mixed Content
       if (typeof window !== 'undefined' && window.location.protocol === 'https:' && API.startsWith('http://')) {
         API = API.replace('http://', 'https://');
       }
@@ -39,6 +55,14 @@ export const useClientStore = create<ClientState>((set, get) => ({
       const mediaPosts = mediaRes.ok ? await mediaRes.json() : [];
 
       set({ settings, plans, mediaPosts, isLoaded: true });
+
+      // 3. Guardar en Dexie para la próxima vez
+      const now = new Date().toISOString();
+      await Promise.all([
+        db.jsonCache.put({ key: 'settings', data: settings, updatedAt: now }),
+        db.jsonCache.put({ key: 'plans', data: plans, updatedAt: now }),
+        db.jsonCache.put({ key: 'mediaPosts', data: mediaPosts, updatedAt: now })
+      ]);
 
       // Precargar media localmente en background para Dexie
       mediaPosts.forEach((item: any) => {

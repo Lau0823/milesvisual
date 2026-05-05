@@ -318,9 +318,8 @@ function FullscreenVideoSection({
     const displayPlans = useMemo(() => {
       const allPlans = dbPlans.length > 0 ? dbPlans : plans;
       const featured = allPlans.filter((p: any) => p.destacado === true);
-      // Si el usuario marcó planes como destacados, mostramos esos.
-      // Si no marcó ninguno, mostramos los primeros 5 como fallback.
-      return featured.length > 0 ? featured : allPlans.slice(0, 5);
+      // Si hay destacados, mostramos solo esos. Si no hay ninguno, mostramos los 3 primeros como fallback.
+      return featured.length > 0 ? featured : allPlans.slice(0, 3);
     }, [dbPlans]);
 
     const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";

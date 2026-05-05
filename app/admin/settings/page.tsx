@@ -3,36 +3,34 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Settings, Save, Globe, Layout, MessageCircle, Loader2, CheckCircle2, User as UserIcon } from 'lucide-react';
+import { useAdminStore } from '../../../store/useAdminStore';
 
 export default function SettingsPage() {
   const { data: session } = useSession();
+  const { settings, fetchSettings, saveBatchSettings } = useAdminStore();
+  const [localSettings, setLocalSettings] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [success, setSuccess] = useState(false);
-  
-  const [settings, setSettings] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchSettings();
-  }, []);
-
-  const fetchSettings = async () => {
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const res = await fetch(`${apiUrl}/settings`);
-      if (res.ok) {
-        const data = await res.json();
-        setSettings(data);
+    const load = async () => {
+      if (session?.accessToken) {
+        await fetchSettings((session as any).accessToken);
       }
-    } catch (error) {
-      console.error("Error fetching settings:", error);
-    } finally {
       setFetching(false);
+    };
+    load();
+  }, [session, fetchSettings]);
+
+  useEffect(() => {
+    if (settings.length > 0 && localSettings.length === 0) {
+      setLocalSettings(settings);
     }
-  };
+  }, [settings, localSettings.length]);
 
   const handleUpdate = (key: string, value: string) => {
-    setSettings(prev => {
+    setLocalSettings(prev => {
       const exists = prev.find(s => s.key === key);
       if (exists) {
         return prev.map(s => s.key === key ? { ...s, value } : s);
@@ -43,31 +41,19 @@ export default function SettingsPage() {
   };
 
   const saveSettings = async () => {
+    if (!session?.accessToken) return;
     setLoading(true);
     setSuccess(false);
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const res = await fetch(`${apiUrl}/settings/batch`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(session as any)?.accessToken}`
-        },
-        body: JSON.stringify({ settings })
-      });
-
-      if (res.ok) {
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
-      }
-    } catch (error) {
-      console.error("Error saving settings:", error);
-    } finally {
-      setLoading(false);
+    
+    const ok = await saveBatchSettings((session as any).accessToken, localSettings);
+    if (ok) {
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
     }
+    setLoading(false);
   };
 
-  const getSetting = (key: string, defaultValue: string = '') => settings.find(s => s.key === key)?.value || defaultValue;
+  const getSetting = (key: string, defaultValue: string = '') => localSettings.find(s => s.key === key)?.value || defaultValue;
 
   // Layout Ordering Logic
   const layoutOrderString = getSetting('home_layout_order') || 'WELCOME,ABOUT,BODAS,PREBODAS,ESTUDIO,PLANES,CTA';
@@ -228,7 +214,12 @@ export default function SettingsPage() {
                   }} 
                   className="text-[10px]" 
                 />
-                {getSetting('hero_video_url') && <span className="text-[10px] text-green-500 font-bold">Video Cargado ✅</span>}
+                {getSetting('hero_video_url') && (
+                  <div className="flex items-center gap-3">
+                    <video src={getSetting('hero_video_url')} className="w-16 h-16 object-cover rounded border border-black/10" muted loop autoPlay />
+                    <a href={getSetting('hero_video_url')} target="_blank" rel="noreferrer" className="text-[9px] text-blue-500 underline uppercase tracking-widest font-bold">Ver Video</a>
+                  </div>
+                )}
               </div>
             </div>
             <div className="space-y-2">
@@ -255,7 +246,12 @@ export default function SettingsPage() {
                   }} 
                   className="text-[10px]" 
                 />
-                {getSetting('middle_video_url') && <span className="text-[10px] text-green-500 font-bold">Video Cargado ✅</span>}
+                {getSetting('middle_video_url') && (
+                  <div className="flex items-center gap-3">
+                    <video src={getSetting('middle_video_url')} className="w-16 h-16 object-cover rounded border border-black/10" muted loop autoPlay />
+                    <a href={getSetting('middle_video_url')} target="_blank" rel="noreferrer" className="text-[9px] text-blue-500 underline uppercase tracking-widest font-bold">Ver Video</a>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -283,7 +279,12 @@ export default function SettingsPage() {
                   }} 
                   className="text-[10px]" 
                 />
-                {getSetting('bodas_video_url') && <span className="text-[10px] text-green-500 font-bold">Video Cargado ✅</span>}
+                {getSetting('bodas_video_url') && (
+                  <div className="flex items-center gap-3">
+                    <video src={getSetting('bodas_video_url')} className="w-16 h-16 object-cover rounded border border-black/10" muted loop autoPlay />
+                    <a href={getSetting('bodas_video_url')} target="_blank" rel="noreferrer" className="text-[9px] text-blue-500 underline uppercase tracking-widest font-bold">Ver Video</a>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -311,7 +312,12 @@ export default function SettingsPage() {
                   }} 
                   className="text-[10px]" 
                 />
-                {getSetting('prebodas_video_url') && <span className="text-[10px] text-green-500 font-bold">Video Cargado ✅</span>}
+                {getSetting('prebodas_video_url') && (
+                  <div className="flex items-center gap-3">
+                    <video src={getSetting('prebodas_video_url')} className="w-16 h-16 object-cover rounded border border-black/10" muted loop autoPlay />
+                    <a href={getSetting('prebodas_video_url')} target="_blank" rel="noreferrer" className="text-[9px] text-blue-500 underline uppercase tracking-widest font-bold">Ver Video</a>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -339,7 +345,12 @@ export default function SettingsPage() {
                   }} 
                   className="text-[10px]" 
                 />
-                {getSetting('estudio_video_url') && <span className="text-[10px] text-green-500 font-bold">Video Cargado ✅</span>}
+                {getSetting('estudio_video_url') && (
+                  <div className="flex items-center gap-3">
+                    <video src={getSetting('estudio_video_url')} className="w-16 h-16 object-cover rounded border border-black/10" muted loop autoPlay />
+                    <a href={getSetting('estudio_video_url')} target="_blank" rel="noreferrer" className="text-[9px] text-blue-500 underline uppercase tracking-widest font-bold">Ver Video</a>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -365,7 +376,12 @@ export default function SettingsPage() {
                   }} 
                   className="text-[10px]" 
                 />
-                {getSetting('about_video_url') && <span className="text-[10px] text-green-500 font-bold">Video Cargado ✅</span>}
+                {getSetting('about_video_url') && (
+                  <div className="flex items-center gap-3">
+                    <video src={getSetting('about_video_url')} className="w-16 h-16 object-cover rounded border border-black/10" muted loop autoPlay />
+                    <a href={getSetting('about_video_url')} target="_blank" rel="noreferrer" className="text-[9px] text-blue-500 underline uppercase tracking-widest font-bold">Ver Video</a>
+                  </div>
+                )}
               </div>
             </div>
 

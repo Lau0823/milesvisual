@@ -15,10 +15,14 @@ export default function MediaPage() {
   const [success, setSuccess] = useState(false);
 
   const [newPost, setNewPost] = useState({
+    id: undefined as number | undefined,
     title: '',
     category: 'BODAS',
     file: null as File | null
   });
+  
+  const [isNewCategory, setIsNewCategory] = useState(false);
+  const categories = Array.from(new Set(mediaPosts.map(p => p.category).filter(Boolean)));
 
   useEffect(() => {
     syncWithBackend();
@@ -30,43 +34,61 @@ export default function MediaPage() {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPost.file) return;
+    if (!newPost.id && !newPost.file) return; // File is required only for new posts
     setUploading(true);
     const formData = new FormData();
-    formData.append('file', newPost.file);
+    if (newPost.file) formData.append('file', newPost.file);
     formData.append('title', newPost.title);
     formData.append('category', newPost.category);
     formData.append('status', 'published');
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const res = await fetch(`${apiUrl}/media-posts`, {
-        method: 'POST',
+      const isEditing = !!newPost.id;
+      const url = `${apiUrl}/media-posts${isEditing ? `/${newPost.id}` : ''}`;
+      
+      const res = await fetch(url, {
+        method: isEditing ? 'PATCH' : 'POST',
         headers: { 'Authorization': `Bearer ${(session as any)?.accessToken}` },
         body: formData
       });
       if (res.ok) {
         setSuccess(true);
         setShowUploadModal(false);
-        setNewPost({ title: '', category: 'BODAS', file: null });
+        setNewPost({ id: undefined, title: '', category: 'BODAS', file: null });
         await syncWithBackend();
         setTimeout(() => setSuccess(false), 3000);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(`Error: ${err.message || 'No se pudo guardar la publicación'}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      alert(`Error de red: ${error.message}`);
     } finally {
       setUploading(false);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm('¿Eliminar esta publicación?')) {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      await fetch(`${apiUrl}/media-posts/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${(session as any)?.accessToken}` }
-      });
-      await syncWithBackend();
+    if (confirm('¿Eliminar esta publicación de la base de datos?')) {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const res = await fetch(`${apiUrl}/media-posts/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${(session as any)?.accessToken}` }
+        });
+        
+        if (res.ok) {
+          await syncWithBackend();
+        } else {
+          const err = await res.json().catch(() => ({}));
+          alert(`Error al eliminar: ${err.message || 'No se pudo eliminar la publicación'}`);
+        }
+      } catch (error: any) {
+        console.error(error);
+        alert(`Error de red: ${error.message}`);
+      }
     }
   };
 
@@ -86,7 +108,7 @@ export default function MediaPage() {
               <button key={f} onClick={() => setFilter(f)} className={`px-5 py-2 rounded-full text-[9px] uppercase tracking-widest font-bold transition ${filter === f ? 'bg-[var(--mv-sage)] text-white' : 'text-black/30 hover:text-black'}`}>{f}</button>
             ))}
           </div>
-          <button onClick={() => setShowUploadModal(true)} className="bg-[var(--mv-ink)] text-white px-6 py-3 rounded-full text-[11px] uppercase tracking-[0.2em] font-semibold hover:bg-[var(--mv-sage)] transition flex items-center gap-2 shadow-lg"><Plus size={16} /> Nuevo Post</button>
+          <button onClick={() => { setNewPost({ id: undefined, title: '', category: 'BODAS', file: null }); setShowUploadModal(true); }} className="bg-[var(--mv-ink)] text-white px-6 py-3 rounded-full text-[11px] uppercase tracking-[0.2em] font-semibold hover:bg-[var(--mv-sage)] transition flex items-center gap-2 shadow-lg"><Plus size={16} /> Nuevo Post</button>
         </div>
       </div>
 
@@ -122,9 +144,14 @@ export default function MediaPage() {
                 <a href={post.cloudinaryUrl} target="_blank" rel="noopener noreferrer" className="w-full py-2 bg-[var(--mv-cream)] text-[var(--mv-ink)] rounded-xl text-[9px] font-bold uppercase tracking-widest border border-black/5 hover:bg-black/5 transition flex items-center justify-center gap-2">
                   <ExternalLink size={12} /> Ver Archivo
                 </a>
-                <button onClick={() => handleDelete(post.id!)} className="w-full py-2 text-red-400 hover:text-red-600 text-[9px] font-bold uppercase tracking-widest transition flex items-center justify-center gap-2">
-                  <Trash2 size={12} /> Eliminar
-                </button>
+                <div className="flex gap-2">
+                  <button onClick={() => { setNewPost({ id: post.id, title: post.title, category: post.category, file: null }); setShowUploadModal(true); }} className="w-1/2 py-2 bg-black/5 hover:bg-black/10 text-black/60 rounded-xl text-[9px] font-bold uppercase tracking-widest transition flex items-center justify-center gap-2">
+                    <Edit3 size={12} /> Editar
+                  </button>
+                  <button onClick={() => handleDelete(post.id!)} className="w-1/2 py-2 text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 rounded-xl text-[9px] font-bold uppercase tracking-widest transition flex items-center justify-center gap-2">
+                    <Trash2 size={12} /> Eliminar
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -144,32 +171,43 @@ export default function MediaPage() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowUploadModal(false)} />
           <div className="relative bg-white rounded-[40px] w-full max-w-[500px] p-10 shadow-2xl animate-in zoom-in-95 duration-300">
-            <h3 className="text-2xl font-semibold uppercase tracking-tight mb-8">Nueva Publicación</h3>
+            <h3 className="text-2xl font-semibold uppercase tracking-tight mb-8">{newPost.id ? 'Editar Publicación' : 'Nueva Publicación'}</h3>
             <form onSubmit={handleUpload} className="space-y-6">
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-widest font-bold text-black/40 ml-1">Título</label>
                 <input type="text" required value={newPost.title} onChange={(e) => setNewPost({...newPost, title: e.target.value})} className="w-full bg-[var(--mv-cream)] rounded-2xl px-5 py-4 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" placeholder="Título del post..." />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-black/40 ml-1">Categoría</label>
-                <select value={newPost.category} onChange={(e) => setNewPost({...newPost, category: e.target.value})} className="w-full bg-[var(--mv-cream)] rounded-2xl px-5 py-4 text-sm border border-black/5 outline-none">
-                  <option value="BODAS">BODAS</option>
-                  <option value="PREBODAS">PREBODAS</option>
-                  <option value="ESTUDIO">ESTUDIO</option>
-                  <option value="VIDEOS">VIDEOS</option>
-                </select>
+                <div className="flex items-center justify-between ml-1">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-black/40">Categoría</label>
+                  <button type="button" onClick={() => setIsNewCategory(!isNewCategory)} className="text-[9px] font-bold text-[var(--mv-sage)] hover:underline uppercase tracking-wider">
+                    {isNewCategory ? 'Seleccionar existente' : '+ Nueva Categoría'}
+                  </button>
+                </div>
+                {isNewCategory ? (
+                  <input type="text" value={newPost.category} onChange={e => setNewPost({...newPost, category: e.target.value})} className="w-full bg-[var(--mv-cream)] rounded-2xl px-5 py-4 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" placeholder="Escribe nueva categoría..." autoFocus />
+                ) : (
+                  <select value={newPost.category} onChange={e => setNewPost({...newPost, category: e.target.value})} className="w-full bg-[var(--mv-cream)] rounded-2xl px-5 py-4 text-sm border border-black/5 outline-none appearance-none cursor-pointer">
+                    <option value="" disabled>Seleccione una categoría</option>
+                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                    {categories.length === 0 && <option value="BODAS">BODAS</option>}
+                    {categories.length === 0 && <option value="PREBODAS">PREBODAS</option>}
+                    {categories.length === 0 && <option value="ESTUDIO">ESTUDIO</option>}
+                    {categories.length === 0 && <option value="VIDEOS">VIDEOS</option>}
+                  </select>
+                )}
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-widest font-bold text-black/40 ml-1">Archivo (Imagen o Video)</label>
                 <div className="relative group overflow-hidden bg-[var(--mv-cream)] border-2 border-dashed border-black/10 rounded-2xl p-10 text-center hover:border-[var(--mv-sage)] transition">
                   <input type="file" accept="image/*,video/*" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                   <Upload size={24} className="mx-auto text-black/20 mb-2" />
-                  <p className="text-[10px] uppercase tracking-widest font-bold text-black/40">{newPost.file ? newPost.file.name : 'Seleccionar archivo'}</p>
+                  <p className="text-[10px] uppercase tracking-widest font-bold text-black/40">{newPost.file ? newPost.file.name : (newPost.id ? 'Dejar vacío para mantener el archivo actual' : 'Seleccionar archivo')}</p>
                 </div>
               </div>
               <div className="flex gap-4 pt-4">
                 <button type="button" onClick={() => setShowUploadModal(false)} className="flex-1 px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-black/40 hover:text-black">Cancelar</button>
-                <button type="submit" disabled={uploading || !newPost.file} className="flex-1 bg-[var(--mv-ink)] text-white px-8 py-4 rounded-full text-[10px] uppercase tracking-widest font-bold hover:bg-[var(--mv-sage)] transition shadow-lg flex items-center justify-center gap-2">
+                <button type="submit" disabled={uploading || (!newPost.id && !newPost.file)} className="flex-1 bg-[var(--mv-ink)] text-white px-8 py-4 rounded-full text-[10px] uppercase tracking-widest font-bold hover:bg-[var(--mv-sage)] transition shadow-lg flex items-center justify-center gap-2">
                   {uploading ? <Loader2 size={16} className="animate-spin" /> : 'Publicar'}
                 </button>
               </div>
