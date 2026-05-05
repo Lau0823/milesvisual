@@ -277,6 +277,8 @@ function FullscreenVideoSection({
       loadPublicData();
     }, [loadPublicData]);
 
+
+
     const getSetting = (key: string, defaultValue: string) =>
       settings.find(s => s.key === key)?.value || defaultValue;
 
@@ -313,14 +315,27 @@ function FullscreenVideoSection({
     const finalPrebodasImages = prebodasGallery.length > 0 ? prebodasGallery : prebodasImages;
     const finalEstudioImages = estudioGallery.length > 0 ? estudioGallery : estudioImages;
 
+    const displayPlans = useMemo(() => {
+      const allPlans = dbPlans.length > 0 ? dbPlans : plans;
+      const featured = allPlans.filter((p: any) => p.destacado === true);
+      // Si el usuario marcó planes como destacados, mostramos esos.
+      // Si no marcó ninguno, mostramos los primeros 5 como fallback.
+      return featured.length > 0 ? featured : allPlans.slice(0, 5);
+    }, [dbPlans]);
+
     const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
     const heroVideoSrc = getOptimizedUrl(getSetting('hero_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429058/VIDEO_1_1_b0wg0m.mp4"), 'video');
     const middleVideoSrc = getOptimizedUrl(getSetting('middle_video_url', "/VIDEO 2.mp4"), 'video');
 
     const activePlan = useMemo(() => {
-      const allPlans = dbPlans.length > 0 ? dbPlans : plans;
-      return allPlans.find((p) => p.id === selectedPlan) || allPlans[0];
-    }, [selectedPlan, dbPlans]);
+      return displayPlans.find((p) => p.id === selectedPlan) || displayPlans[0];
+    }, [selectedPlan, displayPlans]);
+
+    useEffect(() => {
+      if (isLoaded && displayPlans.length > 0) {
+        setSelectedPlan(displayPlans[0].id);
+      }
+    }, [isLoaded, displayPlans]);
 
     const navLeft = [
       { href: "/bodas", label: "Bodas" },
@@ -532,7 +547,7 @@ function FullscreenVideoSection({
 
           {/* LAS TABS VISIBLES */}
           <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5">
-            {(dbPlans.length > 0 ? dbPlans : plans).map((plan: any) => (
+            {displayPlans.map((plan: any) => (
               <button
                 key={plan.id}
                 onClick={() => setSelectedPlan(plan.id)}
@@ -549,34 +564,28 @@ function FullscreenVideoSection({
           <div className="overflow-hidden rounded-[30px] bg-white shadow-[0_22px_60px_rgba(0,0,0,0.08)]">
             <div className="grid md:grid-cols-[0.95fr_1.05fr]">
               <div className="relative min-h-[360px] md:min-h-[680px]">
-                {(() => {
-                  const active = dbPlans.length > 0 ? dbPlans.find(p => p.id === selectedPlan) || dbPlans[0] : plans.find(p => p.id === selectedPlan) || plans[0];
-                  return (
-                    <img
-                      src={getOptimizedUrl(active.imagen_url || active.image)}
-                      alt={active.nombre || active.name}
-                      loading="lazy"
-                      className="absolute inset-0 h-full w-full object-cover"
-                    />
-                  );
-                })()}
+                <img
+                  src={getOptimizedUrl(activePlan.imagen_url || activePlan.image)}
+                  alt={activePlan.nombre || activePlan.name}
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
               </div>
 
               <div className="px-6 py-8 md:px-10 md:py-10">
                 {(() => {
-                  const active = dbPlans.length > 0 ? dbPlans.find(p => p.id === selectedPlan) || dbPlans[0] : plans.find(p => p.id === selectedPlan) || plans[0];
-                  let itemsList = active.items;
-                  if (!itemsList && active.descripcion) {
-                    try { itemsList = JSON.parse(active.descripcion); } catch (e) { itemsList = [active.descripcion]; }
+                  let itemsList = activePlan.items;
+                  if (!itemsList && activePlan.descripcion) {
+                    try { itemsList = JSON.parse(activePlan.descripcion); } catch (e) { itemsList = [activePlan.descripcion]; }
                   }
 
                   return (
                     <>
                       <p className="mv-script text-[44px] leading-none text-[#789894] md:text-[68px]">
-                        {active.nombre || active.name}
+                        {activePlan.nombre || activePlan.name}
                       </p>
                       <p className="mt-2 text-[13px] uppercase tracking-[0.12em] text-[var(--mv-ink)]/55">
-                        {active.categoria || active.subtitle}
+                        {activePlan.categoria || activePlan.subtitle}
                       </p>
 
                       <ul className="mt-7 space-y-3">
@@ -593,7 +602,7 @@ function FullscreenVideoSection({
                       <div className="mt-8 flex items-center gap-4">
                         <span className="h-px flex-1 bg-black/10" />
                         <p className="text-[22px] font-medium uppercase tracking-[0.06em] md:text-[28px]">
-                          $ {active.precio_base ? Number(active.precio_base).toLocaleString() : active.price}
+                          $ {activePlan.precio_base ? Number(activePlan.precio_base).toLocaleString() : activePlan.price}
                         </p>
                         <span className="h-px flex-1 bg-black/10" />
                       </div>

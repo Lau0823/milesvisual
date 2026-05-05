@@ -12,6 +12,7 @@ interface Servicio {
   descripcion: string;
   categoria: string;
   activo: boolean;
+  destacado: boolean;
 }
 
 export default function PlanesPage() {
@@ -172,9 +173,16 @@ export default function PlanesPage() {
                 <textarea rows={4} value={editingPlan?.descripcion || ''} onChange={e => setEditingPlan({...editingPlan, descripcion: e.target.value})} className="w-full bg-[var(--mv-cream)] rounded-2xl px-5 py-4 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)] resize-none" />
               </div>
 
-              <div className="flex items-center gap-3 pt-2">
-                <input type="checkbox" id="activo" checked={editingPlan?.activo} onChange={e => setEditingPlan({...editingPlan, activo: e.target.checked})} className="w-4 h-4 accent-[var(--mv-sage)]" />
-                <label htmlFor="activo" className="text-[11px] uppercase tracking-widest font-bold text-[var(--mv-ink)]">Plan Activo y Público</label>
+              <div className="flex flex-wrap items-center gap-8 pt-2">
+                <div className="flex items-center gap-3">
+                  <input type="checkbox" id="activo" checked={editingPlan?.activo} onChange={e => setEditingPlan({...editingPlan, activo: e.target.checked})} className="w-4 h-4 accent-[var(--mv-sage)] cursor-pointer" />
+                  <label htmlFor="activo" className="text-[11px] uppercase tracking-widest font-bold text-[var(--mv-ink)] cursor-pointer">Plan Activo y Público</label>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <input type="checkbox" id="destacado" checked={editingPlan?.destacado} onChange={e => setEditingPlan({...editingPlan, destacado: e.target.checked})} className="w-4 h-4 accent-[var(--mv-gold)] cursor-pointer" />
+                  <label htmlFor="destacado" className="text-[11px] uppercase tracking-widest font-bold text-[var(--mv-gold)] cursor-pointer">Destacado en Home ⭐</label>
+                </div>
               </div>
 
               <div className="flex gap-4 pt-6">
