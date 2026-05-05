@@ -172,6 +172,7 @@ function FullscreenSlider({
           key={image}
           src={image}
           alt={`${title} ${index + 1}`}
+          loading="lazy"
           className={`absolute inset-0 h-full w-full object-cover transition-all duration-700 ${current === index ? "opacity-100 scale-100" : "opacity-0 scale-[1.03]"
             }`}
         />
@@ -244,6 +245,7 @@ function FullscreenVideoSection({
         muted
         loop
         playsInline
+        preload="none"
       />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,16,20,0.12)_0%,rgba(7,16,20,0.18)_30%,rgba(7,16,20,0.42)_100%)]" />
 
@@ -296,10 +298,14 @@ export default function HomePage() {
   const getSetting = (key: string, defaultValue: string) => 
     settings.find(s => s.key === key)?.value || defaultValue;
 
-  // Filtrar imágenes por categoría y optimizarlas
+  // Optimización agresiva de Cloudinary
   const getOptimizedUrl = (url: string, type: 'image' | 'video' = 'image') => {
     if (!url || !url.includes('cloudinary.com')) return url;
-    if (type === 'video') return url.replace('/video/upload/', '/video/upload/f_auto,q_auto/');
+    if (type === 'video') {
+      // Vídeos: Formato auto, Calidad buena para streaming, Límite a 1080p
+      return url.replace('/video/upload/', '/video/upload/f_auto,q_auto:good,c_scale,w_1920/');
+    }
+    // Imágenes: Formato auto, Calidad auto
     return url.replace('/upload/', '/upload/f_auto,q_auto/');
   };
 
@@ -352,6 +358,7 @@ export default function HomePage() {
           muted
           loop
           playsInline
+          preload="auto"
         />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,16,20,0.10)_0%,rgba(7,16,20,0.18)_30%,rgba(7,16,20,0.40)_100%)]" />
 
@@ -368,6 +375,7 @@ export default function HomePage() {
             <img
               src={logoSrc}
               alt="Miles Visual"
+              fetchPriority="high"
               className="h-[120px] w-auto max-w-[82vw] object-contain sm:h-[150px] md:h-[190px] lg:h-[220px]"
             />
           </Link>
@@ -435,11 +443,13 @@ export default function HomePage() {
             <img
               src={getOptimizedUrl(getSetting('about_image_1', "Miles/WhatsApp Image 2026-04-13 at 12.24.20 PM (1).jpeg"))}
               alt="Fotógrafo 1"
+              loading="lazy"
               className="absolute left-0 top-0 h-[72%] w-[62%] rounded-[30px] object-cover shadow-[0_22px_60px_rgba(0,0,0,0.10)]"
             />
             <img
               src={getOptimizedUrl(getSetting('about_image_2', "/Miles/WhatsApp Image 2026-04-13 at 12.24.19 PM.jpeg"))}
               alt="Fotógrafo 2"
+              loading="lazy"
               className="absolute bottom-0 right-0 h-[72%] w-[62%] rounded-[30px] object-cover shadow-[0_22px_60px_rgba(0,0,0,0.10)]"
             />
           </div>
