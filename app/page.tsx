@@ -267,6 +267,7 @@ export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [settings, setSettings] = useState<any[]>([]);
   const [mediaPosts, setMediaPosts] = useState<any[]>([]);
+  const [dbPlans, setDbPlans] = useState<any[]>([]);
 
   const [bodasIndex, setBodasIndex] = useState(0);
   const [prebodasIndex, setPrebodasIndex] = useState(0);
@@ -287,6 +288,10 @@ export default function HomePage() {
         // Cargar posts de media
         const mediaRes = await fetch(`${apiUrl}/media-posts`);
         if (mediaRes.ok) setMediaPosts(await mediaRes.json());
+
+        // Cargar planes
+        const planesRes = await fetch(`${apiUrl}/servicios/catalogo`);
+        if (planesRes.ok) setDbPlans(await planesRes.json());
 
       } catch (error) {
         console.error("Error loading data:", error);
@@ -536,9 +541,9 @@ export default function HomePage() {
           </h2>
         </div>
 
-        {/* LAS 5 TABS VISIBLES */}
+        {/* LAS TABS VISIBLES */}
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5">
-          {plans.map((plan) => (
+          {(dbPlans.length > 0 ? dbPlans : plans).map((plan: any) => (
             <button
               key={plan.id}
               onClick={() => setSelectedPlan(plan.id)}
@@ -547,7 +552,7 @@ export default function HomePage() {
                 : "bg-white text-[var(--mv-ink)] shadow-sm"
                 }`}
             >
-              {plan.name}
+              {plan.nombre || plan.name}
             </button>
           ))}
         </div>
@@ -555,35 +560,57 @@ export default function HomePage() {
         <div className="overflow-hidden rounded-[30px] bg-white shadow-[0_22px_60px_rgba(0,0,0,0.08)]">
           <div className="grid md:grid-cols-[0.95fr_1.05fr]">
             <div className="relative min-h-[360px] md:min-h-[680px]">
-
+              {(() => {
+                const active = dbPlans.length > 0 ? dbPlans.find(p => p.id === selectedPlan) || dbPlans[0] : plans.find(p => p.id === selectedPlan) || plans[0];
+                return (
+                  <img
+                    src={getOptimizedUrl(active.imagen_url || active.image)}
+                    alt={active.nombre || active.name}
+                    loading="lazy"
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                );
+              })()}
             </div>
 
             <div className="px-6 py-8 md:px-10 md:py-10">
-              <p className="mv-script text-[44px] leading-none text-[#789894] md:text-[68px]">
-                {activePlan.name}
-              </p>
-              <p className="mt-2 text-[13px] uppercase tracking-[0.12em] text-[var(--mv-ink)]/55">
-                {activePlan.subtitle}
-              </p>
+              {(() => {
+                const active = dbPlans.length > 0 ? dbPlans.find(p => p.id === selectedPlan) || dbPlans[0] : plans.find(p => p.id === selectedPlan) || plans[0];
+                let itemsList = active.items;
+                if (!itemsList && active.descripcion) {
+                  try { itemsList = JSON.parse(active.descripcion); } catch(e) { itemsList = [active.descripcion]; }
+                }
+                
+                return (
+                  <>
+                    <p className="mv-script text-[44px] leading-none text-[#789894] md:text-[68px]">
+                      {active.nombre || active.name}
+                    </p>
+                    <p className="mt-2 text-[13px] uppercase tracking-[0.12em] text-[var(--mv-ink)]/55">
+                      {active.categoria || active.subtitle}
+                    </p>
 
-              <ul className="mt-7 space-y-3">
-                {activePlan.items.map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <span className="mt-[10px] h-[5px] w-[5px] rounded-full bg-[#789894]" />
-                    <span className="text-[15px] leading-7 text-[var(--mv-ink)]/82 md:text-[17px] md:leading-8">
-                      {item}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+                    <ul className="mt-7 space-y-3">
+                      {(itemsList || []).map((item: string, idx: number) => (
+                        <li key={idx} className="flex items-start gap-3">
+                          <span className="mt-[10px] h-[5px] w-[5px] rounded-full bg-[#789894]" />
+                          <span className="text-[15px] leading-7 text-[var(--mv-ink)]/82 md:text-[17px] md:leading-8">
+                            {item}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
 
-              <div className="mt-8 flex items-center gap-4">
-                <span className="h-px flex-1 bg-black/10" />
-                <p className="text-[22px] font-medium uppercase tracking-[0.06em] md:text-[28px]">
-                  {activePlan.price}
-                </p>
-                <span className="h-px flex-1 bg-black/10" />
-              </div>
+                    <div className="mt-8 flex items-center gap-4">
+                      <span className="h-px flex-1 bg-black/10" />
+                      <p className="text-[22px] font-medium uppercase tracking-[0.06em] md:text-[28px]">
+                        $ {active.precio_base ? Number(active.precio_base).toLocaleString() : active.price}
+                      </p>
+                      <span className="h-px flex-1 bg-black/10" />
+                    </div>
+                  </>
+                );
+              })()}
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <a
