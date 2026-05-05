@@ -341,6 +341,32 @@ export default function SettingsPage() {
                 />
                 {getSetting('estudio_video_url') && <span className="text-[10px] text-green-500 font-bold">Video Cargado ✅</span>}
               </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Video Acerca de mí</label>
+                <input 
+                  type="file" 
+                  accept="video/*" 
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const formData = new FormData();
+                      formData.append('file', file);
+                      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/media/upload`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${(session as any)?.accessToken}` },
+                        body: formData
+                      });
+                      if (res.ok) {
+                        const data = await res.json();
+                        handleUpdate('about_video_url', data.value);
+                      }
+                    }
+                  }} 
+                  className="text-[10px]" 
+                />
+                {getSetting('about_video_url') && <span className="text-[10px] text-green-500 font-bold">Video Cargado ✅</span>}
+              </div>
             </div>
 
             <div className="space-y-2">

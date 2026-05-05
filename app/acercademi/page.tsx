@@ -26,7 +26,11 @@ export default function AcercaDeMiPage() {
 
   const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
   const getSetting = (key: string, defaultValue: string) => settings.find(s => s.key === key)?.value || defaultValue;
-  const heroVideoSrc = "/VIDEO 4.mp4";
+  let heroVideoSrc = getSetting('about_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429150/VIDEO_4_1_v0pinj.mp4");
+  
+  if (heroVideoSrc && heroVideoSrc.includes('cloudinary.com')) {
+    heroVideoSrc = heroVideoSrc.replace('/video/upload/', '/video/upload/f_auto,q_auto:good,c_scale,w_1920/');
+  }
 
   const getWhatsappLink = (text: string) => {
     const number = getSetting('whatsapp_number', '573148112717');
