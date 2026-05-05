@@ -23,9 +23,14 @@ export default function PlanesPage() {
 
   const fetchPlanes = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/servicios/catalogo`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/servicios?limit=100`, {
+        headers: {
+          'Authorization': `Bearer ${(session as any)?.accessToken}`
+        }
+      });
       const data = await res.json();
-      setPlanes(data);
+      // El endpoint /servicios devuelve { data: [...], total, page, lastPage }
+      setPlanes(data.data || []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -34,8 +39,10 @@ export default function PlanesPage() {
   };
 
   useEffect(() => {
-    fetchPlanes();
-  }, []);
+    if (session) {
+      fetchPlanes();
+    }
+  }, [session]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
