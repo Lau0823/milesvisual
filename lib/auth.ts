@@ -29,7 +29,7 @@ export const authOptions: NextAuthOptions = {
 
         try {
           // Llamada directa al backend local para evitar el loop de Nginx
-          const backendUrl = process.env.INTERNAL_API_URL || 'http://localhost:3002';
+          const backendUrl = process.env.INTERNAL_API_URL || 'http://127.0.0.1:3002';
           const res = await fetch(`${backendUrl}/auth/login`, {
             method: 'POST',
             body: JSON.stringify({
