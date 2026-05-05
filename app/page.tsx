@@ -332,7 +332,7 @@ export default function HomePage() {
   const finalEstudioImages = estudioGallery.length > 0 ? estudioGallery : estudioImages;
 
   const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
-  const heroVideoSrc = getOptimizedUrl(getSetting('hero_video_url', "/VIDEO 1.mp4"), 'video');
+  const heroVideoSrc = getOptimizedUrl(getSetting('hero_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429058/VIDEO_1_1_b0wg0m.mp4"), 'video');
   const middleVideoSrc = getOptimizedUrl(getSetting('middle_video_url', "/VIDEO 2.mp4"), 'video');
 
   const activePlan = useMemo(
