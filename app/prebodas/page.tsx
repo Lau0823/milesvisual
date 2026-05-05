@@ -25,10 +25,6 @@ export default function PrebodasPage() {
     }
   }, [displayPlans, selectedPlan]);
 
-  if (!isLoaded) {
-    return <div className="min-h-screen bg-black flex items-center justify-center text-white">Cargando experiencia...</div>;
-  }
-
   const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
   const getSetting = (key: string, defaultValue: string) => settings.find(s => s.key === key)?.value || defaultValue;
   
@@ -68,6 +64,10 @@ export default function PrebodasPage() {
     if (selectedPhoto === null) return;
     setSelectedPhoto((selectedPhoto + 1) % prebodasGallery.length);
   };
+
+  if (!isLoaded) {
+    return <div className="min-h-screen bg-black flex items-center justify-center text-white">Cargando experiencia...</div>;
+  }
 
   return (
     <main className="bg-[var(--mv-cream)] text-[var(--mv-ink)]">

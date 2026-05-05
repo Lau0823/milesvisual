@@ -272,10 +272,6 @@ function FullscreenVideoSection({
       loadPublicData();
     }, [loadPublicData]);
 
-    if (!isLoaded) {
-      return <div className="min-h-screen bg-black flex items-center justify-center text-white">Cargando experiencias...</div>;
-    }
-
     const getSetting = (key: string, defaultValue: string) =>
       settings.find(s => s.key === key)?.value || defaultValue;
 
@@ -327,6 +323,10 @@ function FullscreenVideoSection({
       { href: "#planes", label: "Planes" },
       { href: "acercademi", label: "Acerca de mí" },
     ];
+
+    if (!isLoaded) {
+      return <div className="min-h-screen bg-black flex items-center justify-center text-white">Cargando experiencias...</div>;
+    }
 
     return (
       <main className="bg-[var(--mv-cream)] text-[var(--mv-ink)]">
