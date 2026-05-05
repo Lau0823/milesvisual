@@ -82,7 +82,7 @@ export default function MediaPage() {
         
         <div className="flex items-center gap-4">
           <div className="flex bg-white rounded-full p-1 border border-black/5 shadow-sm overflow-hidden">
-            {['TODOS', 'BODAS', 'PREBODAS', 'ESTUDIO'].map((f) => (
+            {['TODOS', 'BODAS', 'PREBODAS', 'ESTUDIO', 'VIDEOS'].map((f) => (
               <button key={f} onClick={() => setFilter(f)} className={`px-5 py-2 rounded-full text-[9px] uppercase tracking-widest font-bold transition ${filter === f ? 'bg-[var(--mv-sage)] text-white' : 'text-black/30 hover:text-black'}`}>{f}</button>
             ))}
           </div>
@@ -93,8 +93,17 @@ export default function MediaPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
         {filteredPosts.map((post) => (
           <div key={post.id} className="bg-white rounded-[32px] p-3 shadow-sm border border-black/5 flex flex-col hover:shadow-xl transition-all duration-500">
-            <div className="aspect-[3/4] rounded-[24px] overflow-hidden relative group">
-              <img src={post.cloudinaryUrl} alt={post.title} className="w-full h-full object-cover transition duration-700 group-hover:scale-110" />
+            <div className="aspect-[3/4] rounded-[24px] overflow-hidden relative group bg-[var(--mv-cream)]">
+              {post.cloudinaryUrl.endsWith('.mp4') || post.cloudinaryUrl.includes('/video/upload/') ? (
+                <div className="w-full h-full flex flex-col items-center justify-center bg-[var(--mv-ink)] text-white/50">
+                  <div className="p-4 rounded-full bg-white/10 mb-2">
+                    <ImageIcon size={32} />
+                  </div>
+                  <span className="text-[8px] uppercase tracking-widest font-bold">Video Content</span>
+                </div>
+              ) : (
+                <img src={post.cloudinaryUrl} alt={post.title} className="w-full h-full object-cover transition duration-700 group-hover:scale-110" />
+              )}
               <div className="absolute top-4 right-4 px-3 py-1 bg-white/90 backdrop-blur-md rounded-full text-[8px] font-bold uppercase tracking-widest shadow-sm">
                 {post.category}
               </div>
@@ -102,15 +111,17 @@ export default function MediaPage() {
             
             <div className="px-3 py-5 flex-1 flex flex-col">
               <h4 className="text-[13px] font-bold uppercase tracking-tight text-[var(--mv-ink)] mb-1 truncate">{post.title}</h4>
-              <p className="text-[9px] uppercase tracking-widest text-black/30 font-bold mb-6">Fotografía Editorial</p>
+              <p className="text-[9px] uppercase tracking-widest text-black/30 font-bold mb-6">
+                {post.cloudinaryUrl.includes('/video/upload/') ? 'Producción Audiovisual' : 'Fotografía Editorial'}
+              </p>
               
               <div className="mt-auto space-y-2">
                 <div className="flex items-center justify-center gap-2 py-2 bg-green-50 text-green-600 rounded-xl text-[9px] font-bold uppercase tracking-widest border border-green-100">
                   <CheckCircle2 size={12} /> Publicado
                 </div>
-                <button className="w-full py-2 bg-[var(--mv-cream)] text-[var(--mv-ink)] rounded-xl text-[9px] font-bold uppercase tracking-widest border border-black/5 hover:bg-black/5 transition">
-                  Editar
-                </button>
+                <a href={post.cloudinaryUrl} target="_blank" rel="noopener noreferrer" className="w-full py-2 bg-[var(--mv-cream)] text-[var(--mv-ink)] rounded-xl text-[9px] font-bold uppercase tracking-widest border border-black/5 hover:bg-black/5 transition flex items-center justify-center gap-2">
+                  <ExternalLink size={12} /> Ver Archivo
+                </a>
                 <button onClick={() => handleDelete(post.id!)} className="w-full py-2 text-red-400 hover:text-red-600 text-[9px] font-bold uppercase tracking-widest transition flex items-center justify-center gap-2">
                   <Trash2 size={12} /> Eliminar
                 </button>
@@ -145,12 +156,13 @@ export default function MediaPage() {
                   <option value="BODAS">BODAS</option>
                   <option value="PREBODAS">PREBODAS</option>
                   <option value="ESTUDIO">ESTUDIO</option>
+                  <option value="VIDEOS">VIDEOS</option>
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-black/40 ml-1">Imagen</label>
+                <label className="text-[10px] uppercase tracking-widest font-bold text-black/40 ml-1">Archivo (Imagen o Video)</label>
                 <div className="relative group overflow-hidden bg-[var(--mv-cream)] border-2 border-dashed border-black/10 rounded-2xl p-10 text-center hover:border-[var(--mv-sage)] transition">
-                  <input type="file" accept="image/*" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                  <input type="file" accept="image/*,video/*" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                   <Upload size={24} className="mx-auto text-black/20 mb-2" />
                   <p className="text-[10px] uppercase tracking-widest font-bold text-black/40">{newPost.file ? newPost.file.name : 'Seleccionar archivo'}</p>
                 </div>

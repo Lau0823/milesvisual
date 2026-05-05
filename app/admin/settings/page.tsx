@@ -178,6 +178,87 @@ export default function SettingsPage() {
           </div>
           <div className="space-y-5">
             <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Imagen de Fondo (Cloudinary)</label>
+              <div className="flex gap-4 items-center">
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={async (e) => {
+                    if (e.target.files?.[0]) {
+                      const formData = new FormData();
+                      formData.append('file', e.target.files[0]);
+                      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                      const res = await fetch(`${apiUrl}/settings/upload-image/hero_image_url`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${(session as any)?.accessToken}` },
+                        body: formData
+                      });
+                      if (res.ok) {
+                        const data = await res.json();
+                        handleUpdate('hero_image_url', data.value);
+                      }
+                    }
+                  }} 
+                  className="text-[10px]" 
+                />
+                {getSetting('hero_image_url') && <img src={getSetting('hero_image_url')} className="w-10 h-10 rounded-lg object-cover shadow-md" />}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Video de Fondo (Hero Video)</label>
+              <div className="flex gap-4 items-center">
+                <input 
+                  type="file" 
+                  accept="video/*" 
+                  onChange={async (e) => {
+                    if (e.target.files?.[0]) {
+                      const formData = new FormData();
+                      formData.append('file', e.target.files[0]);
+                      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                      const res = await fetch(`${apiUrl}/settings/upload-image/hero_video_url`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${(session as any)?.accessToken}` },
+                        body: formData
+                      });
+                      if (res.ok) {
+                        const data = await res.json();
+                        handleUpdate('hero_video_url', data.value);
+                      }
+                    }
+                  }} 
+                  className="text-[10px]" 
+                />
+                {getSetting('hero_video_url') && <span className="text-[10px] text-green-500 font-bold">Video Cargado ✅</span>}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Video Intermedio (Middle Video)</label>
+              <div className="flex gap-4 items-center">
+                <input 
+                  type="file" 
+                  accept="video/*" 
+                  onChange={async (e) => {
+                    if (e.target.files?.[0]) {
+                      const formData = new FormData();
+                      formData.append('file', e.target.files[0]);
+                      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                      const res = await fetch(`${apiUrl}/settings/upload-image/middle_video_url`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${(session as any)?.accessToken}` },
+                        body: formData
+                      });
+                      if (res.ok) {
+                        const data = await res.json();
+                        handleUpdate('middle_video_url', data.value);
+                      }
+                    }
+                  }} 
+                  className="text-[10px]" 
+                />
+                {getSetting('middle_video_url') && <span className="text-[10px] text-green-500 font-bold">Video Cargado ✅</span>}
+              </div>
+            </div>
+            <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Título Principal (Hero Title)</label>
               <input type="text" value={getSetting('hero_title')} onChange={(e) => handleUpdate('hero_title', e.target.value)} className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm border border-black/5 focus:border-[var(--mv-sage)] outline-none transition" />
             </div>
@@ -201,6 +282,33 @@ export default function SettingsPage() {
             <h3 className="text-xl font-semibold uppercase tracking-tight">Acerca de Mí (Biografía)</h3>
           </div>
           <div className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Imagen de Perfil</label>
+              <div className="flex gap-4 items-center">
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={async (e) => {
+                    if (e.target.files?.[0]) {
+                      const formData = new FormData();
+                      formData.append('file', e.target.files[0]);
+                      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                      const res = await fetch(`${apiUrl}/settings/upload-image/about_image_url`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${(session as any)?.accessToken}` },
+                        body: formData
+                      });
+                      if (res.ok) {
+                        const data = await res.json();
+                        handleUpdate('about_image_url', data.value);
+                      }
+                    }
+                  }} 
+                  className="text-[10px]" 
+                />
+                {getSetting('about_image_url') && <img src={getSetting('about_image_url')} className="w-10 h-10 rounded-lg object-cover shadow-md" />}
+              </div>
+            </div>
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Título de Sección</label>
               <input type="text" value={getSetting('about_title')} onChange={(e) => handleUpdate('about_title', e.target.value)} className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm border border-black/5 focus:border-[var(--mv-sage)] outline-none transition" />

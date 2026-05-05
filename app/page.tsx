@@ -263,6 +263,7 @@ function FullscreenVideoSection({
 
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [settings, setSettings] = useState<any[]>([]);
 
   const [bodasIndex, setBodasIndex] = useState(0);
   const [prebodasIndex, setPrebodasIndex] = useState(0);
@@ -271,9 +272,28 @@ export default function HomePage() {
   const [selectedPlan, setSelectedPlan] = useState(1);
   const [testimonialIndex, setTestimonialIndex] = useState(0);
 
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const res = await fetch(`${apiUrl}/settings`);
+        if (res.ok) {
+          const data = await res.json();
+          setSettings(data);
+        }
+      } catch (error) {
+        console.error("Error loading settings:", error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const getSetting = (key: string, defaultValue: string) => 
+    settings.find(s => s.key === key)?.value || defaultValue;
+
   const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
-  const heroVideoSrc = "/VIDEO 1.mp4";
-  const middleVideoSrc = "/VIDEO 2.mp4";
+  const heroVideoSrc = getSetting('hero_video_url', "/VIDEO 1.mp4");
+  const middleVideoSrc = getSetting('middle_video_url', "/VIDEO 2.mp4");
 
   const activePlan = useMemo(
     () => plans.find((plan) => plan.id === selectedPlan) ?? plans[0],
@@ -384,12 +404,12 @@ export default function HomePage() {
         <div className="grid items-center gap-10 md:grid-cols-[0.95fr_1.05fr]">
           <div className="relative h-[470px] md:h-[620px]">
             <img
-              src="Miles/WhatsApp Image 2026-04-13 at 12.24.20 PM (1).jpeg"
+              src={getSetting('about_image_1', "Miles/WhatsApp Image 2026-04-13 at 12.24.20 PM (1).jpeg")}
               alt="Fotógrafo 1"
               className="absolute left-0 top-0 h-[72%] w-[62%] rounded-[30px] object-cover shadow-[0_22px_60px_rgba(0,0,0,0.10)]"
             />
             <img
-              src="/Miles/WhatsApp Image 2026-04-13 at 12.24.19 PM.jpeg"
+              src={getSetting('about_image_2', "/Miles/WhatsApp Image 2026-04-13 at 12.24.19 PM.jpeg")}
               alt="Fotógrafo 2"
               className="absolute bottom-0 right-0 h-[72%] w-[62%] rounded-[30px] object-cover shadow-[0_22px_60px_rgba(0,0,0,0.10)]"
             />
@@ -397,29 +417,19 @@ export default function HomePage() {
 
           <div>
             <p className="text-[34px] font-semibold uppercase leading-none tracking-[0.03em] md:text-[62px]">
-              ¿QUIÉNES
-            </p>
-            <p className="text-[34px] font-light uppercase leading-none tracking-[0.03em] md:text-[62px]">
-
+              {getSetting('about_title_top', '¿QUIÉNES')}
             </p>
             <p className="mv-script -mt-1 text-[56px] leading-none text-[var(--mv-sage)] md:text-[92px]">
-              SOMOS?
+              {getSetting('about_title_bottom', 'SOMOS?')}
             </p>
 
             <p className="mt-8 max-w-[680px] text-[15px] leading-8 text-[var(--mv-ink)]/74 md:text-[17px] md:leading-9">
-              Mi nombre es Miles Esteban Morales Andrade, fotógrafo y productor
-              audiovisual de bodas colombiano, establecido en la ciudad de
-              Villavicencio, amante y apasionado por este arte que es la
-              fotografía.
+              {getSetting('about_text_1', 'Mi nombre es Miles Esteban Morales Andrade, fotógrafo y productor audiovisual de bodas colombiano, establecido en la ciudad de Villavicencio, amante y apasionado por este arte que es la fotografía.')}
             </p>
 
             <p className="mt-5 max-w-[680px] text-[15px] leading-8 text-[var(--mv-ink)]/74 md:text-[17px] md:leading-9">
-              Nos dedicamos a plasmar recuerdos con calidad y creatividad para
-              toda la vida. Somos un equipo capacitado y enfocado en brindar una
-              experiencia única y diferente en cada evento que cubrimos.
+              {getSetting('about_text_2', 'Nos dedicamos a plasmar recuerdos con calidad y creatividad para toda la vida. Somos un equipo capacitado y enfocado en brindar una experiencia única y diferente en cada evento que cubrimos.')}
             </p>
-
-
           </div>
         </div>
       </section>
