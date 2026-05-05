@@ -14,10 +14,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const totalActiveReservations = useAdminStore((state) => state.totalActiveReservations);
   const totalPosts = useAdminStore((state) => state.totalPosts);
 
-  useEffect(() => {
-    loadLocalData();
-  }, [loadLocalData]);
-
+  // Sincronización de datos manejada en cada página individual (page.tsx) con el token de sesión.
   const menuItems = [
     { href: '/admin', label: 'Resumen', icon: <LayoutDashboard size={18} className="h-5 w-5" /> },
     { href: '/admin/reservas', label: 'Reservas', icon: <Calendar size={18} className="h-5 w-5" /> },
