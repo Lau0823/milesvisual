@@ -9,32 +9,19 @@
     "lint": "eslint"
   },
   "dependencies": {
-<<<<<<< HEAD
     "bcryptjs": "^3.0.3",
     "dexie": "^4.4.2",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",
-=======
-    "@prisma/client": "^6.19.2",
-    "bcryptjs": "^3.0.3",
->>>>>>> origin/main
     "lucide-react": "^0.577.0",
     "motion": "^12.37.0",
     "next": "16.1.6",
     "next-auth": "^4.24.13",
-<<<<<<< HEAD
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "recharts": "^3.8.0",
     "zod": "^4.3.6",
     "zustand": "^5.0.12"
-=======
-    "prisma": "^6.19.2",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "recharts": "^3.8.0",
-    "zod": "^4.3.6"
->>>>>>> origin/main
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -46,11 +33,5 @@
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5"
-<<<<<<< HEAD
-=======
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
->>>>>>> origin/main
   }
 }
