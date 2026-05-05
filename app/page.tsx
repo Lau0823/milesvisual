@@ -1,16 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useEffect } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Instagram,
-  Menu,
-  MessageCircle,
-  Star,
-  X,
-} from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Menu, X, ChevronLeft, ChevronRight, MessageCircle, Instagram, Star } from "lucide-react";
+import { useClientStore } from "../store/useClientStore";
 
 const bodasImages = [
   "/Bodas/1.jpeg",
@@ -225,8 +218,6 @@ function FullscreenSlider({
       </button>
     </section>
   );
-}
-
 function FullscreenVideoSection({
   src,
   eyebrow,
@@ -265,9 +256,6 @@ function FullscreenVideoSection({
 
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [settings, setSettings] = useState<any[]>([]);
-  const [mediaPosts, setMediaPosts] = useState<any[]>([]);
-  const [dbPlans, setDbPlans] = useState<any[]>([]);
 
   const [bodasIndex, setBodasIndex] = useState(0);
   const [prebodasIndex, setPrebodasIndex] = useState(0);
@@ -276,29 +264,15 @@ export default function HomePage() {
   const [selectedPlan, setSelectedPlan] = useState(1);
   const [testimonialIndex, setTestimonialIndex] = useState(0);
 
+  const { loadPublicData, settings, plans: dbPlans, mediaPosts, isLoaded } = useClientStore();
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        
-        // Cargar ajustes
-        const settingsRes = await fetch(`${apiUrl}/settings`);
-        if (settingsRes.ok) setSettings(await settingsRes.json());
+    loadPublicData();
+  }, [loadPublicData]);
 
-        // Cargar posts de media
-        const mediaRes = await fetch(`${apiUrl}/media-posts`);
-        if (mediaRes.ok) setMediaPosts(await mediaRes.json());
-
-        // Cargar planes
-        const planesRes = await fetch(`${apiUrl}/servicios/catalogo`);
-        if (planesRes.ok) setDbPlans(await planesRes.json());
-
-      } catch (error) {
-        console.error("Error loading data:", error);
-      }
-    };
-    fetchData();
-  }, []);
+  if (!isLoaded) {
+    return <div className="min-h-screen bg-black flex items-center justify-center text-white">Cargando experiencias...</div>;
+  }
 
   const getSetting = (key: string, defaultValue: string) => 
     settings.find(s => s.key === key)?.value || defaultValue;

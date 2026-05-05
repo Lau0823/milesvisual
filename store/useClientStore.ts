@@ -2,30 +2,62 @@ import { create } from 'zustand';
 import { db } from '../lib/db';
 
 interface ClientState {
+  settings: any[];
+  plans: any[];
+  mediaPosts: any[];
+  isLoaded: boolean;
+  loadPublicData: () => Promise<void>;
   getCachedMediaUrl: (url: string) => Promise<string>;
   clearCache: () => Promise<void>;
 }
 
-export const useClientStore = create<ClientState>((set) => ({
+export const useClientStore = create<ClientState>((set, get) => ({
+  settings: [],
+  plans: [],
+  mediaPosts: [],
+  isLoaded: false,
+
+  loadPublicData: async () => {
+    if (get().isLoaded) return; // Si ya está cargado, no volver a hacer fetch
+    
+    try {
+      const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+      
+      const [settingsRes, plansRes, mediaRes] = await Promise.all([
+        fetch(`${API}/settings`),
+        fetch(`${API}/servicios/catalogo`),
+        fetch(`${API}/media-posts`)
+      ]);
+
+      const settings = settingsRes.ok ? await settingsRes.json() : [];
+      const plans = plansRes.ok ? await plansRes.json() : [];
+      const mediaPosts = mediaRes.ok ? await mediaRes.json() : [];
+
+      set({ settings, plans, mediaPosts, isLoaded: true });
+
+      // Precargar media localmente en background para Dexie
+      mediaPosts.forEach((item: any) => {
+        if (item.cloudinaryUrl) get().getCachedMediaUrl(item.cloudinaryUrl);
+      });
+    } catch (error) {
+      console.error("Error loading public data:", error);
+    }
+  },
+
   getCachedMediaUrl: async (url: string) => {
     if (!url) return '';
     
-    // Si es una URL relativa del proyecto (videos/logos locales), la devolvemos tal cual
     if (!url.startsWith('http') && !url.startsWith('blob:')) {
       return url;
     }
 
     try {
       const cached = await db.mediaCache.get(url);
-      if (cached) {
-        return URL.createObjectURL(cached.blob);
-      }
+      if (cached) return URL.createObjectURL(cached.blob);
 
-      // Si no está cacheado, descargarlo
       const response = await fetch(url);
       const blob = await response.blob();
 
-      // Guardar en cache
       await db.mediaCache.put({
         id: url,
         blob: blob,
@@ -36,7 +68,7 @@ export const useClientStore = create<ClientState>((set) => ({
       return URL.createObjectURL(blob);
     } catch (error) {
       console.error("Error caching media:", error);
-      return url; // Si falla el cacheo, devolvemos la URL original
+      return url;
     }
   },
   

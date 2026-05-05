@@ -2,57 +2,32 @@
 
 import Link from "next/link";
 import { useMemo, useState, useEffect } from "react";
-import {
-  Menu,
-  X,
-  ChevronLeft,
-  ChevronRight,
-  MessageCircle,
-} from "lucide-react";
-
+import { Menu, X, ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
+import { useClientStore } from "../../store/useClientStore";
 
 export default function EstudioPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<number | string>(0);
-  const [displayPlans, setDisplayPlans] = useState<any[]>([]);
-  const [settings, setSettings] = useState<any[]>([]);
-  const [estudioGallery, setEstudioGallery] = useState<any[]>([]);
+  
+  const { loadPublicData, settings, plans: displayPlansFull, mediaPosts: mediaPostsFull, isLoaded } = useClientStore();
 
   useEffect(() => {
-    const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+    loadPublicData();
+  }, [loadPublicData]);
 
-    fetch(`${API}/settings`)
-      .then(res => res.json())
-      .then(data => setSettings(data))
-      .catch(err => console.error(err));
+  const displayPlans = useMemo(() => displayPlansFull.filter((p: any) => p.categoria?.toLowerCase().includes('estudio')), [displayPlansFull]);
+  const estudioGallery = useMemo(() => mediaPostsFull.filter((p: any) => p.category === 'ESTUDIO').map((p: any) => ({ id: p.id, title: p.title, image: p.cloudinaryUrl, description: p.cloudinaryPublicId })), [mediaPostsFull]);
 
-    fetch(`${API}/servicios/catalogo`)
-      .then(res => res.json())
-      .then(data => {
-        const filtered = data.filter((p: any) => p.categoria?.toLowerCase().includes('estudio'));
-        setDisplayPlans(filtered);
-        if (filtered.length > 0) setSelectedPlan(filtered[0].id);
-      })
-      .catch(err => console.error(err));
+  useEffect(() => {
+    if (displayPlans.length > 0 && selectedPlan === 0) {
+      setSelectedPlan(displayPlans[0].id);
+    }
+  }, [displayPlans, selectedPlan]);
 
-    fetch(`${API}/media-posts`)
-      .then(res => res.json())
-      .then(data => {
-        const filtered = data
-          .filter((p: any) => p.category === 'ESTUDIO')
-          .map((p: any) => ({ id: p.id, title: p.title, image: p.cloudinaryUrl, description: p.cloudinaryPublicId }));
-        setEstudioGallery(filtered);
-
-        // Precargar caché local en Dexie
-        import('../../store/useClientStore').then(({ useClientStore }) => {
-          filtered.forEach((item: any) => {
-            if (item.image) useClientStore.getState().getCachedMediaUrl(item.image);
-          });
-        });
-      })
-      .catch(err => console.error(err));
-  }, []);
+  if (!isLoaded) {
+    return <div className="min-h-screen bg-black flex items-center justify-center text-white">Cargando experiencia...</div>;
+  }
 
   const logoSrc = "/milesvisual/public/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
   const getSetting = (key: string, defaultValue: string) => settings.find(s => s.key === key)?.value || defaultValue;
