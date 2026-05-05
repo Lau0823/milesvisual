@@ -355,6 +355,10 @@ export default function SettingsPage() {
               <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Descripción Larga</label>
               <textarea rows={3} value={getSetting('hero_description')} onChange={(e) => handleUpdate('hero_description', e.target.value)} className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm border border-black/5 focus:border-[var(--mv-sage)] outline-none transition resize-none" />
             </div>
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Número de WhatsApp (ej: 573148112717)</label>
+              <input type="text" value={getSetting('whatsapp_number', '573148112717')} onChange={(e) => handleUpdate('whatsapp_number', e.target.value)} className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm border border-black/5 focus:border-[var(--mv-sage)] outline-none transition" />
+            </div>
           </div>
         </section>
 

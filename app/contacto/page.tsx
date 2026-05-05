@@ -1,11 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState, useEffect } from "react";
 import { Menu, MessageCircle, Send, X } from "lucide-react";
+import { useClientStore } from "../../store/useClientStore";
 
 export default function ContactoPage() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { loadPublicData, settings, isLoaded } = useClientStore();
+
+  useEffect(() => {
+    loadPublicData();
+  }, [loadPublicData]);
 
   const [form, setForm] = useState({
     nombre: "",
@@ -17,7 +23,8 @@ export default function ContactoPage() {
   });
 
   const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
-  const heroVideoSrc = "/VIDEO 3 .mp4";
+  const getSetting = (key: string, defaultValue: string) => settings.find(s => s.key === key)?.value || defaultValue;
+  const heroVideoSrc = getSetting('bodas_video_url', "/VIDEO 3 .mp4"); // Fallback a bodas o uno general
 
   const navLeft = [
     { href: "/bodas", label: "Bodas" },
@@ -32,6 +39,7 @@ export default function ContactoPage() {
   ];
 
   const whatsappHref = useMemo(() => {
+    const number = getSetting('whatsapp_number', '573148112717');
     const text = `Hola Miles Visual, quiero más información.
 
 Nombre: ${form.nombre || "-"}
@@ -41,8 +49,12 @@ Tipo de sesión: ${form.tipo || "-"}
 Fecha estimada: ${form.fecha || "-"}
 Mensaje: ${form.mensaje || "-"}`;
 
-    return `https://wa.me/573148112717?text=${encodeURIComponent(text)}`;
-  }, [form]);
+    return `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
+  }, [form, settings]);
+
+  if (!isLoaded) {
+    return <div className="min-h-screen bg-black flex items-center justify-center text-white">Cargando experiencia...</div>;
+  }
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -178,7 +190,7 @@ Mensaje: ${form.mensaje || "-"}`;
                 <p className="text-[12px] uppercase tracking-[0.14em] text-white/70">
                   WhatsApp
                 </p>
-                <p className="mt-2 text-[18px] font-medium">+57 3148112717</p>
+                <p className="mt-2 text-[18px] font-medium">+{getSetting('whatsapp_number', '573148112717')}</p>
               </div>
 
               <div>

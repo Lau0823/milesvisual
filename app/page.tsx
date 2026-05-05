@@ -193,7 +193,7 @@ function FullscreenSlider({
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <a
-                  href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar"
+                  href={getWhatsappLink("Hola Miles Visual, quiero cotizar")}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mv-button-light"
@@ -284,6 +284,11 @@ function FullscreenVideoSection({
       }
       // Imágenes: Formato auto, Calidad auto
       return url.replace('/upload/', '/upload/f_auto,q_auto/');
+    };
+
+    const getWhatsappLink = (text: string) => {
+      const number = getSetting('whatsapp_number', '573148112717');
+      return `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
     };
 
     const bodasGallery = mediaPosts
@@ -590,7 +595,7 @@ function FullscreenVideoSection({
 
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <a
-                    href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20este%20plan"
+                    href={getWhatsappLink(`Hola Miles Visual, quiero cotizar el plan ${activePlan.nombre || activePlan.name}`)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mv-button-dark"
@@ -628,7 +633,7 @@ function FullscreenVideoSection({
               </a>
 
               <a
-                href="https://wa.me/573148112717"
+                href={getWhatsappLink("Hola Miles Visual")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mv-button-outline-light"
@@ -730,7 +735,7 @@ function FullscreenVideoSection({
 
         {/* WHATSAPP FLOTANTE */}
         <a
-          href="https://wa.me/573148112717?text=Hola%20Miles%20Visual"
+          href={getWhatsappLink("Hola Miles Visual")}
           target="_blank"
           rel="noopener noreferrer"
           className="fixed bottom-5 right-5 z-[120] flex h-14 w-14 items-center justify-center rounded-full bg-[#789894] text-white shadow-xl transition hover:scale-105"

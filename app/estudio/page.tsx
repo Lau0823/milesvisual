@@ -33,6 +33,11 @@ export default function EstudioPage() {
     heroVideoSrc = heroVideoSrc.replace('/video/upload/', '/video/upload/f_auto,q_auto:good,c_scale,w_1920/');
   }
 
+  const getWhatsappLink = (text: string) => {
+    const number = getSetting('whatsapp_number', '573148112717');
+    return `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
+  };
+
   const navLeft = [
     { href: "/bodas", label: "Bodas" },
     { href: "/prebodas", label: "Pre-Bodas" },
@@ -329,7 +334,7 @@ export default function EstudioPage() {
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <a
-                  href="https://wa.me/573000000000?text=Hola%20Miles%20Visual,%20quiero%20cotizar%20este%20plan"
+                  href={getWhatsappLink(`Hola Miles Visual, quiero cotizar el plan ${activePlan.nombre || activePlan.name}`)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mv-button-dark"
@@ -373,7 +378,7 @@ export default function EstudioPage() {
       </footer>
 
       <a
-        href="https://wa.me/573148112717?text=Hola%20Miles%20Visual"
+        href={getWhatsappLink("Hola Miles Visual")}
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-5 right-5 z-[120] flex h-14 w-14 items-center justify-center rounded-full bg-[#789894] text-white shadow-xl transition hover:scale-105"

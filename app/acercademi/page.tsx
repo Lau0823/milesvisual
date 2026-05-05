@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, MessageCircle, X } from "lucide-react";
+import { useClientStore } from "../../store/useClientStore";
 
 const heroPhotos = [
   "/Miles/WhatsApp Image 2026-04-13 at 12.24.19 PM.jpeg",
@@ -17,9 +18,20 @@ const articleGridPhotos = [
 
 export default function AcercaDeMiPage() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { loadPublicData, settings, isLoaded } = useClientStore();
+
+  useEffect(() => {
+    loadPublicData();
+  }, [loadPublicData]);
 
   const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
+  const getSetting = (key: string, defaultValue: string) => settings.find(s => s.key === key)?.value || defaultValue;
   const heroVideoSrc = "/VIDEO 4.mp4";
+
+  const getWhatsappLink = (text: string) => {
+    const number = getSetting('whatsapp_number', '573148112717');
+    return `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
+  };
 
   const navLeft = [
     { href: "/bodas", label: "Bodas" },
@@ -32,6 +44,10 @@ export default function AcercaDeMiPage() {
     { href: "/#planes", label: "Planes" },
     { href: "/acercademi", label: "Acerca de mí" },
   ];
+
+  if (!isLoaded) {
+    return <div className="min-h-screen bg-black flex items-center justify-center text-white">Cargando experiencia...</div>;
+  }
 
   return (
     <main className="bg-[var(--mv-cream)] text-[var(--mv-ink)]">
@@ -214,7 +230,7 @@ export default function AcercaDeMiPage() {
                 Agendar consulta
               </Link>
               <a
-                href="https://wa.me/573148112717?text=Hola%20Miles%20Visual"
+                href={getWhatsappLink("Hola Miles Visual")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mv-button-outline-dark"
@@ -253,7 +269,7 @@ export default function AcercaDeMiPage() {
       </section>
 
       <a
-        href="https://wa.me/573148112717text=Hola%20Miles%20Visual"
+        href={getWhatsappLink("Hola Miles Visual")}
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-5 right-5 z-[120] flex h-14 w-14 items-center justify-center rounded-full bg-[#789894] text-white shadow-xl transition hover:scale-105"
