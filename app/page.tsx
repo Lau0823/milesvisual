@@ -157,7 +157,11 @@ function FullscreenSlider({
   onNext: () => void;
   galleryHref: string;
   quote: string;
+  whatsappNumber: string;
 }) {
+  const getWhatsappLink = (text: string) => {
+    return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
+  };
   return (
     <section className="relative min-h-screen overflow-hidden">
       {images.map((image, index) => (
@@ -472,6 +476,7 @@ function FullscreenVideoSection({
           onNext={() => setBodasIndex((prev) => (prev + 1) % finalBodasImages.length)}
           galleryHref="/bodas"
           quote="Coberturas con una mirada elegante, emocional y cinematográfica para contar tu historia con belleza y verdad."
+          whatsappNumber={getSetting('whatsapp_number', '573148112717')}
         />
 
         {/* VIDEO FULLSCREEN EN LA MITAD */}
@@ -494,6 +499,7 @@ function FullscreenVideoSection({
           onNext={() => setPrebodasIndex((prev) => (prev + 1) % finalPrebodasImages.length)}
           galleryHref="/prebodas"
           quote="Sesiones delicadas y editoriales para retratar la complicidad, la atmósfera y la emoción antes del gran día."
+          whatsappNumber={getSetting('whatsapp_number', '573148112717')}
         />
 
         {/* FOTO ESTUDIO */}
@@ -509,6 +515,7 @@ function FullscreenVideoSection({
           onNext={() => setEstudioIndex((prev) => (prev + 1) % finalEstudioImages.length)}
           galleryHref="/estudio"
           quote="Retratos y piezas visuales pensadas desde la dirección, la estética y una presencia visual más editorial."
+          whatsappNumber={getSetting('whatsapp_number', '573148112717')}
         />
 
         {/* PLANES */}
@@ -595,7 +602,7 @@ function FullscreenVideoSection({
 
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <a
-                    href={getWhatsappLink(`Hola Miles Visual, quiero cotizar el plan ${activePlan.nombre || activePlan.name}`)}
+                    href={getWhatsappLink(`Hola Miles Visual, quiero cotizar el plan ${(activePlan as any).nombre || (activePlan as any).name}`)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mv-button-dark"
