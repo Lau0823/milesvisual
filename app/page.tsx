@@ -584,7 +584,7 @@ function FullscreenVideoSection({
                         {activePlan.nombre || activePlan.name}
                       </p>
                       <p className="mt-2 text-[13px] uppercase tracking-[0.12em] text-[var(--mv-ink)]/55">
-                        {activePlan.categoria || activePlan.subtitle}
+                        {activePlan.subtitulo || activePlan.categoria || activePlan.subtitle}
                       </p>
 
                       <ul className="mt-7 space-y-3">
