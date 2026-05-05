@@ -13,8 +13,8 @@ interface AdminState {
   loading: boolean;
   
   // Acciones globales
-  syncWithBackend: () => Promise<void>;
-  loadLocalData: () => Promise<void>; // Alias para compatibilidad con layout.tsx
+  syncWithBackend: (token?: string) => Promise<void>;
+  loadLocalData: (token?: string) => Promise<void>; // Alias para compatibilidad con layout.tsx
   
   // Ajustes
   fetchSettings: (token: string) => Promise<void>;
@@ -43,16 +43,17 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
   setLoading: (loading) => set({ loading }),
 
-  syncWithBackend: async () => {
+  syncWithBackend: async (token?: string) => {
     try {
       const API = process.env.NEXT_PUBLIC_API_URL;
+      const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
       
       const [resRes, quoteRes, settingsRes, planesRes, mediaRes] = await Promise.all([
-        fetch(`${API}/reservations`),
-        fetch(`${API}/quotes`),
-        fetch(`${API}/settings`),
-        fetch(`${API}/servicios?limit=100`),
-        fetch(`${API}/media-posts`)
+        fetch(`${API}/reservations`, { headers }),
+        fetch(`${API}/quotes`, { headers }),
+        fetch(`${API}/settings`, { headers }),
+        fetch(`${API}/servicios?limit=100`, { headers }),
+        fetch(`${API}/media-posts`, { headers })
       ]);
 
       const reservations = resRes.ok ? await resRes.json() : [];
@@ -88,8 +89,8 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     }
   },
 
-  loadLocalData: async () => {
-    await get().syncWithBackend();
+  loadLocalData: async (token?: string) => {
+    await get().syncWithBackend(token);
   },
 
   fetchSettings: async (token) => {

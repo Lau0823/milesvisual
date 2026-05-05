@@ -1,16 +1,20 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { useAdminStore } from '../../../store/useAdminStore';
 import { Users, Mail, Phone, Calendar, ArrowRight, CheckCircle2, MoreHorizontal, Clock, MessageSquare, FileText } from 'lucide-react';
 import { generateQuotePDF } from '../../../utils/pdfGenerator';
 
 export default function CotizacionesPage() {
+  const { data: session } = useSession();
   const { quoteRequests, syncWithBackend } = useAdminStore();
 
   useEffect(() => {
-    syncWithBackend();
-  }, []);
+    if (session?.accessToken) {
+      syncWithBackend(session.accessToken as string);
+    }
+  }, [session]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {

@@ -28,7 +28,9 @@ export default function ReservasPage() {
   });
 
   useEffect(() => {
-    syncWithBackend();
+    if (session?.accessToken) {
+      syncWithBackend(session.accessToken as string);
+    }
   }, []);
 
   const handleAddReservation = async (e: React.FormEvent) => {
@@ -55,7 +57,7 @@ export default function ReservasPage() {
           clientName: '', email: '', phone: '', serviceType: 'Boda',
           eventDate: '', time: '', value: 0, status: 'pending', paymentStatus: 'pending'
         });
-        await syncWithBackend();
+        await syncWithBackend((session as any)?.accessToken);
       }
     } catch (error) {
       console.error("Error adding reservation:", error);

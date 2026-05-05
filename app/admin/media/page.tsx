@@ -29,8 +29,10 @@ export default function MediaPage() {
   const categories = Array.from(new Set(mediaPosts.map(p => p.category).filter(Boolean)));
 
   useEffect(() => {
-    syncWithBackend();
-  }, []);
+    if (session?.accessToken) {
+      syncWithBackend(session.accessToken as string);
+    }
+  }, [session]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) setNewPost({ ...newPost, file: e.target.files[0] });
@@ -60,7 +62,7 @@ export default function MediaPage() {
         setSuccess(true);
         setShowUploadModal(false);
         setNewPost({ id: undefined, title: '', category: 'BODAS', file: null });
-        await syncWithBackend();
+        await syncWithBackend((session as any)?.accessToken);
         setTimeout(() => setSuccess(false), 3000);
       } else {
         const err = await res.json().catch(() => ({}));
@@ -84,7 +86,7 @@ export default function MediaPage() {
         });
         
         if (res.ok) {
-          await syncWithBackend();
+          await syncWithBackend((session as any)?.accessToken);
         } else {
           const err = await res.json().catch(() => ({}));
           alert(`Error al eliminar: ${err.message || 'No se pudo eliminar la publicación'}`);

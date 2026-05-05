@@ -24,8 +24,10 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
-    syncWithBackend();
-  }, []);
+    if (session?.accessToken) {
+      syncWithBackend(session.accessToken as string);
+    }
+  }, [session]);
 
   const getMonthlyIncome = () => {
     const monthly: Record<string, number> = {};
@@ -78,7 +80,7 @@ export default function DashboardPage() {
           paymentStatus: 'pending' 
         })
       });
-      await syncWithBackend();
+      await syncWithBackend((session as any)?.accessToken);
       setNewRes({ clientName: '', email: '', phone: '', serviceType: 'Boda', eventDate: '', time: '', value: '' });
     } catch (e) {
       console.error(e);
