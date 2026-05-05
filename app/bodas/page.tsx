@@ -28,7 +28,7 @@ export default function BodasPage() {
   const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
   const getSetting = (key: string, defaultValue: string) => settings.find(s => s.key === key)?.value || defaultValue;
   
-  let heroVideoSrc = getSetting('bodas_video_url', "/VIDEO 3 .mp4");
+  let heroVideoSrc = getSetting('bodas_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429200/VIDEO_3_1_yuof8i.mp4");
   if (heroVideoSrc && heroVideoSrc.includes('cloudinary.com')) {
     heroVideoSrc = heroVideoSrc.replace('/video/upload/', '/video/upload/f_auto,q_auto:good,c_scale,w_1920/');
   }
