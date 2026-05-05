@@ -21,7 +21,12 @@ export const useClientStore = create<ClientState>((set, get) => ({
     if (get().isLoaded) return; // Si ya está cargado, no volver a hacer fetch
     
     try {
-      const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+      let API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+      
+      // Auto-corregir a HTTPS si estamos en un entorno seguro para evitar error de Mixed Content
+      if (typeof window !== 'undefined' && window.location.protocol === 'https:' && API.startsWith('http://')) {
+        API = API.replace('http://', 'https://');
+      }
       
       const [settingsRes, plansRes, mediaRes] = await Promise.all([
         fetch(`${API}/settings`),
