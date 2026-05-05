@@ -147,6 +147,7 @@ function FullscreenSlider({
   onNext,
   galleryHref,
   quote,
+  whatsappNumber,
 }: {
   title: string;
   script: string;

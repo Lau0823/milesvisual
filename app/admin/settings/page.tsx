@@ -67,7 +67,7 @@ export default function SettingsPage() {
     }
   };
 
-  const getSetting = (key: string) => settings.find(s => s.key === key)?.value || '';
+  const getSetting = (key: string, defaultValue: string = '') => settings.find(s => s.key === key)?.value || defaultValue;
 
   // Layout Ordering Logic
   const layoutOrderString = getSetting('home_layout_order') || 'WELCOME,ABOUT,BODAS,PREBODAS,ESTUDIO,PLANES,CTA';
