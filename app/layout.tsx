@@ -13,15 +13,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-<<<<<<< HEAD
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-=======
-}: {
-  children: React.ReactNode;
-}) {
->>>>>>> origin/main
   return (
     <html lang="es">
       <head>
@@ -36,11 +30,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-<<<<<<< HEAD
       <body>{children}</body>
-=======
-      <body className="min-h-screen antialiased">{children}</body>
->>>>>>> origin/main
     </html>
   );
 }
