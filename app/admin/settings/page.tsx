@@ -1,0 +1,252 @@
+"use client";
+
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { Settings, Save, Globe, Layout, MessageCircle, Loader2, CheckCircle2, User as UserIcon } from 'lucide-react';
+
+export default function SettingsPage() {
+  const { data: session } = useSession();
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [success, setSuccess] = useState(false);
+  
+  const [settings, setSettings] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const res = await fetch(`${apiUrl}/settings`);
+      if (res.ok) {
+        const data = await res.json();
+        setSettings(data);
+      }
+    } catch (error) {
+      console.error("Error fetching settings:", error);
+    } finally {
+      setFetching(false);
+    }
+  };
+
+  const handleUpdate = (key: string, value: string) => {
+    setSettings(prev => {
+      const exists = prev.find(s => s.key === key);
+      if (exists) {
+        return prev.map(s => s.key === key ? { ...s, value } : s);
+      } else {
+        return [...prev, { key, value, description: 'Configuración de Layout' }];
+      }
+    });
+  };
+
+  const saveSettings = async () => {
+    setLoading(true);
+    setSuccess(false);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const res = await fetch(`${apiUrl}/settings/batch`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(session as any)?.accessToken}`
+        },
+        body: JSON.stringify({ settings })
+      });
+
+      if (res.ok) {
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 3000);
+      }
+    } catch (error) {
+      console.error("Error saving settings:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getSetting = (key: string) => settings.find(s => s.key === key)?.value || '';
+
+  // Layout Ordering Logic
+  const layoutOrderString = getSetting('home_layout_order') || 'WELCOME,ABOUT,BODAS,PREBODAS,ESTUDIO,PLANES,CTA';
+  const layoutOrder = layoutOrderString.split(',').filter(Boolean);
+
+  const moveSection = (index: number, direction: number) => {
+    const newOrder = [...layoutOrder];
+    if (direction === -1 && index > 0) {
+      [newOrder[index], newOrder[index - 1]] = [newOrder[index - 1], newOrder[index]];
+    } else if (direction === 1 && index < newOrder.length - 1) {
+      [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+    }
+    handleUpdate('home_layout_order', newOrder.join(','));
+  };
+
+  if (fetching) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <Loader2 className="animate-spin text-[var(--mv-sage)]" size={40} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-[1200px] mx-auto animate-in fade-in duration-700 pb-20">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-black/50 font-semibold mb-1">Configuración del Sitio</p>
+          <h2 className="text-4xl font-semibold tracking-tight uppercase">Ajustes Web</h2>
+        </div>
+        <button 
+          onClick={saveSettings}
+          disabled={loading}
+          className="bg-[var(--mv-ink)] text-white px-8 py-3 rounded-full text-[11px] uppercase tracking-[0.2em] font-semibold hover:bg-[var(--mv-sage)] transition flex items-center gap-3 disabled:opacity-50 shadow-xl"
+        >
+          {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+          Guardar Cambios
+        </button>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-8">
+        
+        {/* Estructura Home (Layout Order) */}
+        <section className="bg-white rounded-[32px] p-8 shadow-sm border border-black/5 md:col-span-2">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-[var(--mv-cream)] rounded-lg">
+              <Layout size={20} className="text-[var(--mv-sage)]" />
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold uppercase tracking-tight">Estructura Dinámica (Home)</h3>
+              <p className="text-xs text-black/40 mt-1">Controla el orden en el que aparecen las secciones en la página principal.</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-3 p-6 bg-[var(--mv-cream)]/30 rounded-3xl border border-black/5">
+            {layoutOrder.map((section: string, index: number) => (
+              <div key={section} className="flex items-center bg-white px-4 py-2.5 rounded-xl border border-black/5 shadow-sm">
+                <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--mv-ink)] mr-4">
+                  {index + 1}. {section}
+                </span>
+                <div className="flex flex-col gap-1">
+                  <button 
+                    onClick={() => moveSection(index, -1)} 
+                    disabled={index === 0}
+                    className="w-5 h-4 flex items-center justify-center bg-black/5 hover:bg-black/10 rounded disabled:opacity-30 transition"
+                  >
+                    ▲
+                  </button>
+                  <button 
+                    onClick={() => moveSection(index, 1)} 
+                    disabled={index === layoutOrder.length - 1}
+                    className="w-5 h-4 flex items-center justify-center bg-black/5 hover:bg-black/10 rounded disabled:opacity-30 transition"
+                  >
+                    ▼
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* SEO & Metadatos */}
+        <section className="bg-white rounded-[32px] p-8 shadow-sm border border-black/5">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-[var(--mv-cream)] rounded-lg">
+              <Globe size={20} className="text-[var(--mv-sage)]" />
+            </div>
+            <h3 className="text-xl font-semibold uppercase tracking-tight">SEO & Visibilidad</h3>
+          </div>
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Título de la Web</label>
+              <input type="text" value={getSetting('seo_title')} onChange={(e) => handleUpdate('seo_title', e.target.value)} className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm border border-black/5 focus:border-[var(--mv-sage)] outline-none transition" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Meta Descripción</label>
+              <textarea rows={3} value={getSetting('seo_description')} onChange={(e) => handleUpdate('seo_description', e.target.value)} className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm border border-black/5 focus:border-[var(--mv-sage)] outline-none transition resize-none" />
+            </div>
+          </div>
+        </section>
+
+        {/* Hero Section */}
+        <section className="bg-white rounded-[32px] p-8 shadow-sm border border-black/5">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-[var(--mv-cream)] rounded-lg">
+              <Layout size={20} className="text-[var(--mv-sage)]" />
+            </div>
+            <h3 className="text-xl font-semibold uppercase tracking-tight">Portada (Hero)</h3>
+          </div>
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Título Principal (Hero Title)</label>
+              <input type="text" value={getSetting('hero_title')} onChange={(e) => handleUpdate('hero_title', e.target.value)} className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm border border-black/5 focus:border-[var(--mv-sage)] outline-none transition" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Subtítulo Corto</label>
+              <input type="text" value={getSetting('hero_subtitle')} onChange={(e) => handleUpdate('hero_subtitle', e.target.value)} className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm border border-black/5 focus:border-[var(--mv-sage)] outline-none transition" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Descripción Larga</label>
+              <textarea rows={3} value={getSetting('hero_description')} onChange={(e) => handleUpdate('hero_description', e.target.value)} className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm border border-black/5 focus:border-[var(--mv-sage)] outline-none transition resize-none" />
+            </div>
+          </div>
+        </section>
+
+        {/* Acerca de mí */}
+        <section className="bg-white rounded-[32px] p-8 shadow-sm border border-black/5">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-[var(--mv-cream)] rounded-lg">
+              <UserIcon size={20} className="text-[var(--mv-sage)]" />
+            </div>
+            <h3 className="text-xl font-semibold uppercase tracking-tight">Acerca de Mí (Biografía)</h3>
+          </div>
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Título de Sección</label>
+              <input type="text" value={getSetting('about_title')} onChange={(e) => handleUpdate('about_title', e.target.value)} className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm border border-black/5 focus:border-[var(--mv-sage)] outline-none transition" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Biografía Párrafo 1</label>
+              <textarea rows={4} value={getSetting('about_text_1')} onChange={(e) => handleUpdate('about_text_1', e.target.value)} className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm border border-black/5 focus:border-[var(--mv-sage)] outline-none transition resize-none" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Biografía Párrafo 2</label>
+              <textarea rows={4} value={getSetting('about_text_2')} onChange={(e) => handleUpdate('about_text_2', e.target.value)} className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm border border-black/5 focus:border-[var(--mv-sage)] outline-none transition resize-none" />
+            </div>
+          </div>
+        </section>
+
+        {/* Contacto & Redes */}
+        <section className="bg-white rounded-[32px] p-8 shadow-sm border border-black/5 md:col-span-2">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-[var(--mv-cream)] rounded-lg">
+              <MessageCircle size={20} className="text-[var(--mv-sage)]" />
+            </div>
+            <h3 className="text-xl font-semibold uppercase tracking-tight">Contacto & Redes</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Email Público</label>
+              <input type="email" value={getSetting('contact_email')} onChange={(e) => handleUpdate('contact_email', e.target.value)} className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm border border-black/5 focus:border-[var(--mv-sage)] outline-none transition" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">WhatsApp / Teléfono</label>
+              <input type="text" value={getSetting('contact_phone')} onChange={(e) => handleUpdate('contact_phone', e.target.value)} className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm border border-black/5 focus:border-[var(--mv-sage)] outline-none transition" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">URL Instagram</label>
+              <input type="text" value={getSetting('instagram_url')} onChange={(e) => handleUpdate('instagram_url', e.target.value)} className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm border border-black/5 focus:border-[var(--mv-sage)] outline-none transition" />
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {success && (
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-[var(--mv-ink)] text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-4">
+          <CheckCircle2 size={20} className="text-[var(--mv-sage)]" />
+          <p className="text-sm font-medium uppercase tracking-widest">Ajustes guardados correctamente</p>
+        </div>
+      )}
+    </div>
+  );
+}
