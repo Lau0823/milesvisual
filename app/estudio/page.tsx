@@ -16,10 +16,16 @@ export default function EstudioPage() {
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<number | string>(0);
   const [displayPlans, setDisplayPlans] = useState<any[]>([]);
+  const [settings, setSettings] = useState<any[]>([]);
   const [estudioGallery, setEstudioGallery] = useState<any[]>([]);
 
   useEffect(() => {
     const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+
+    fetch(`${API}/settings`)
+      .then(res => res.json())
+      .then(data => setSettings(data))
+      .catch(err => console.error(err));
 
     fetch(`${API}/servicios/catalogo`)
       .then(res => res.json())
@@ -49,7 +55,12 @@ export default function EstudioPage() {
   }, []);
 
   const logoSrc = "/milesvisual/public/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
-  const heroVideoSrc = "/VIDEO 5.mp4";
+  const getSetting = (key: string, defaultValue: string) => settings.find(s => s.key === key)?.value || defaultValue;
+  
+  let heroVideoSrc = getSetting('estudio_video_url', "/VIDEO 5.mp4");
+  if (heroVideoSrc && heroVideoSrc.includes('cloudinary.com')) {
+    heroVideoSrc = heroVideoSrc.replace('/video/upload/', '/video/upload/f_auto,q_auto:good,c_scale,w_1920/');
+  }
 
   const navLeft = [
     { href: "/bodas", label: "Bodas" },

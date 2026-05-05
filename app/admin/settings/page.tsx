@@ -258,6 +258,91 @@ export default function SettingsPage() {
                 {getSetting('middle_video_url') && <span className="text-[10px] text-green-500 font-bold">Video Cargado ✅</span>}
               </div>
             </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Video Página Bodas</label>
+              <div className="flex gap-4 items-center">
+                <input 
+                  type="file" 
+                  accept="video/*" 
+                  onChange={async (e) => {
+                    if (e.target.files?.[0]) {
+                      const formData = new FormData();
+                      formData.append('file', e.target.files[0]);
+                      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                      const res = await fetch(`${apiUrl}/settings/upload-image/bodas_video_url`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${(session as any)?.accessToken}` },
+                        body: formData
+                      });
+                      if (res.ok) {
+                        const data = await res.json();
+                        handleUpdate('bodas_video_url', data.value);
+                      }
+                    }
+                  }} 
+                  className="text-[10px]" 
+                />
+                {getSetting('bodas_video_url') && <span className="text-[10px] text-green-500 font-bold">Video Cargado ✅</span>}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Video Página Pre-Bodas</label>
+              <div className="flex gap-4 items-center">
+                <input 
+                  type="file" 
+                  accept="video/*" 
+                  onChange={async (e) => {
+                    if (e.target.files?.[0]) {
+                      const formData = new FormData();
+                      formData.append('file', e.target.files[0]);
+                      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                      const res = await fetch(`${apiUrl}/settings/upload-image/prebodas_video_url`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${(session as any)?.accessToken}` },
+                        body: formData
+                      });
+                      if (res.ok) {
+                        const data = await res.json();
+                        handleUpdate('prebodas_video_url', data.value);
+                      }
+                    }
+                  }} 
+                  className="text-[10px]" 
+                />
+                {getSetting('prebodas_video_url') && <span className="text-[10px] text-green-500 font-bold">Video Cargado ✅</span>}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Video Página Estudio</label>
+              <div className="flex gap-4 items-center">
+                <input 
+                  type="file" 
+                  accept="video/*" 
+                  onChange={async (e) => {
+                    if (e.target.files?.[0]) {
+                      const formData = new FormData();
+                      formData.append('file', e.target.files[0]);
+                      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                      const res = await fetch(`${apiUrl}/settings/upload-image/estudio_video_url`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${(session as any)?.accessToken}` },
+                        body: formData
+                      });
+                      if (res.ok) {
+                        const data = await res.json();
+                        handleUpdate('estudio_video_url', data.value);
+                      }
+                    }
+                  }} 
+                  className="text-[10px]" 
+                />
+                {getSetting('estudio_video_url') && <span className="text-[10px] text-green-500 font-bold">Video Cargado ✅</span>}
+              </div>
+            </div>
+
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Título Principal (Hero Title)</label>
               <input type="text" value={getSetting('hero_title')} onChange={(e) => handleUpdate('hero_title', e.target.value)} className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm border border-black/5 focus:border-[var(--mv-sage)] outline-none transition" />
