@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Plus, Edit3, Trash2, Tag, Loader2, Image as ImageIcon } from 'lucide-react';
 import { useAdminStore } from '../../../store/useAdminStore';
+import toast from 'react-hot-toast';
 
 interface Servicio {
   id: number;
@@ -42,11 +43,13 @@ export default function PlanesPage() {
     e.preventDefault();
     if (!editingPlan || !session?.accessToken) return;
     
+    const loadingToast = toast.loading('Guardando cambios...');
     try {
       await savePlan((session as any).accessToken, editingPlan);
+      toast.success('¡Plan actualizado con éxito!', { id: loadingToast });
       setShowModal(false);
     } catch (error: any) {
-      alert(`Error al guardar: ${error.message}`);
+      toast.error(`Error al guardar: ${error.message}`, { id: loadingToast });
     }
   };
 
@@ -56,9 +59,9 @@ export default function PlanesPage() {
     
     try {
       await deletePlan((session as any).accessToken, id);
-      alert('Plan eliminado exitosamente.');
+      toast.success('Plan eliminado exitosamente.');
     } catch (error: any) {
-      alert(`No se pudo eliminar el plan. Es posible que tenga reservas o facturas asociadas. Error: ${error.message}`);
+      toast.error(`No se pudo eliminar el plan. Error: ${error.message}`);
     }
   };
 

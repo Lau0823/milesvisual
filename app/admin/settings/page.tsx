@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Settings, Save, Globe, Layout, MessageCircle, Loader2, CheckCircle2, User as UserIcon } from 'lucide-react';
 import { useAdminStore } from '../../../store/useAdminStore';
+import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
   const { data: session } = useSession();
@@ -45,10 +46,18 @@ export default function SettingsPage() {
     setLoading(true);
     setSuccess(false);
     
-    const ok = await saveBatchSettings((session as any).accessToken, localSettings);
-    if (ok) {
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+    const loadingToast = toast.loading('Guardando configuración...');
+    try {
+      const ok = await saveBatchSettings((session as any).accessToken, localSettings);
+      if (ok) {
+        setSuccess(true);
+        toast.success('Configuración actualizada con éxito', { id: loadingToast });
+        setTimeout(() => setSuccess(false), 3000);
+      } else {
+        toast.error('No se pudo guardar la configuración', { id: loadingToast });
+      }
+    } catch (error) {
+      toast.error('Error de conexión con el servidor', { id: loadingToast });
     }
     setLoading(false);
   };
