@@ -1,28 +1,33 @@
-"use client";
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useAdminStore } from '../../../store/useAdminStore';
-import { Calendar, Plus, Search, Filter, MoreHorizontal, CheckCircle2, Clock, XCircle, Loader2, Mail, Phone, CalendarDays, FileText } from 'lucide-react';
+import { Calendar, Plus, Search, Filter, MoreHorizontal, CheckCircle2, Clock, XCircle, Loader2, Mail, Phone, CalendarDays, FileText, CreditCard, DollarSign } from 'lucide-react';
 import { generateQuotePDF } from '../../../utils/pdfGenerator';
+import toast from 'react-hot-toast';
 
 export default function ReservasPage() {
   const { data: session } = useSession();
-  const { reservations, syncWithBackend } = useAdminStore();
+  const { reservations, planes, syncWithBackend, fetchPlanes } = useAdminStore();
 
   const [loading, setLoading] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [editingRes, setEditingRes] = useState<any>(null);
   const [filter, setFilter] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const [newRes, setNewRes] = useState({
+  // Estados temporales para los inputs de valor (evitar el problema del cero a la izquierda)
+  const [valInput, setValInput] = useState('');
+  const [antInput, setAntInput] = useState('');
+
+  const [formRes, setFormRes] = useState({
     clientName: '',
     email: '',
     phone: '',
-    serviceType: 'Boda',
+    serviceType: 'Personalizado',
     eventDate: '',
     time: '',
     value: 0,
+    anticipo: 0,
     status: 'pending',
     paymentStatus: 'pending'
   });
@@ -30,50 +35,121 @@ export default function ReservasPage() {
   useEffect(() => {
     if (session?.accessToken) {
       syncWithBackend(session.accessToken as string);
+      fetchPlanes(session.accessToken as string);
     }
-  }, []);
+  }, [session, syncWithBackend, fetchPlanes]);
 
-  const handleAddReservation = async (e: React.FormEvent) => {
+  // Al abrir el modal para editar, sincronizamos los inputs
+  const openModal = (res: any = null) => {
+    if (res) {
+      setEditingRes(res);
+      setFormRes({
+        clientName: res.clientName,
+        email: res.email || '',
+        phone: res.phone || '',
+        serviceType: res.serviceType,
+        eventDate: res.eventDate || '',
+        time: res.time || '',
+        value: Number(res.value),
+        anticipo: Number(res.anticipo || 0),
+        status: res.status,
+        paymentStatus: res.paymentStatus
+      });
+      setValInput(res.value.toString());
+      setAntInput((res.anticipo || 0).toString());
+    } else {
+      setEditingRes(null);
+      setFormRes({
+        clientName: '', email: '', phone: '', serviceType: 'Personalizado',
+        eventDate: '', time: '', value: 0, anticipo: 0, status: 'pending', paymentStatus: 'pending'
+      });
+      setValInput('');
+      setAntInput('');
+    }
+    setShowModal(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const loadingToast = toast.loading(editingRes ? 'Actualizando reserva...' : 'Creando reserva...');
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const res = await fetch(`${apiUrl}/reservations`, {
-        method: 'POST',
+      const method = editingRes ? 'PATCH' : 'POST';
+      const url = editingRes ? `${apiUrl}/reservations/${editingRes.id}` : `${apiUrl}/reservations`;
+
+      // Calcular estado de pago automáticamente si no se ha tocado
+      let pStatus = formRes.paymentStatus;
+      if (formRes.anticipo <= 0) pStatus = 'pending';
+      else if (formRes.anticipo < formRes.value) pStatus = 'partial';
+      else pStatus = 'paid';
+
+      const res = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${(session as any)?.accessToken}`
         },
         body: JSON.stringify({
-          ...newRes,
+          ...formRes,
+          paymentStatus: pStatus,
           date: new Date().toISOString().split('T')[0]
         })
       });
 
       if (res.ok) {
-        setShowAddModal(false);
-        setNewRes({
-          clientName: '', email: '', phone: '', serviceType: 'Boda',
-          eventDate: '', time: '', value: 0, status: 'pending', paymentStatus: 'pending'
-        });
+        toast.success(editingRes ? 'Reserva actualizada' : 'Reserva creada con éxito', { id: loadingToast });
+        setShowModal(false);
         await syncWithBackend((session as any)?.accessToken);
+      } else {
+        throw new Error('Error en el servidor');
       }
     } catch (error) {
-      console.error("Error adding reservation:", error);
+      toast.error('Hubo un error al procesar la reserva', { id: loadingToast });
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'confirmed': return <CheckCircle2 className="text-green-500" size={16} />;
-      case 'pending': return <Clock className="text-amber-500" size={16} />;
-      case 'cancelled': return <XCircle className="text-red-500" size={16} />;
-      default: return null;
+  const handlePlanChange = (planName: string) => {
+    if (planName === 'Personalizado') {
+      setFormRes({ ...formRes, serviceType: 'Personalizado' });
+    } else {
+      const selectedPlan = planes.find(p => p.nombre === planName);
+      if (selectedPlan) {
+        setFormRes({ 
+          ...formRes, 
+          serviceType: selectedPlan.nombre, 
+          value: Number(selectedPlan.precio_base) 
+        });
+        setValInput(selectedPlan.precio_base.toString());
+      }
     }
   };
+
+  const getStatusBadge = (status: string) => {
+    const styles: any = {
+      pending: 'bg-amber-50 text-amber-600 border-amber-200',
+      confirmed: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+      cancelled: 'bg-rose-50 text-rose-600 border-rose-200',
+    };
+    return (
+      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${styles[status] || styles.pending}`}>
+        {status}
+      </span>
+    );
+  };
+
+  const getSetting = (key: string, defaultValue: string = '') => {
+    const settings = (useAdminStore.getState() as any).settings;
+    if (Array.isArray(settings)) {
+      return settings.find((s: any) => s.key === key)?.value || defaultValue;
+    }
+    return defaultValue;
+  };
+  
+  const siteLogo = getSetting('site_logo', 'https://res.cloudinary.com/dgfp5gcjr/image/upload/v1714290580/milesvisual/logo_white.png');
 
   const filteredReservations = reservations
     .filter(r => filter === 'ALL' || r.status === filter)
@@ -100,7 +176,7 @@ export default function ReservasPage() {
           </div>
 
           <button 
-            onClick={() => setShowAddModal(true)}
+            onClick={() => openModal()}
             className="bg-[var(--mv-ink)] text-white px-6 py-3 rounded-full text-[11px] uppercase tracking-[0.2em] font-semibold hover:bg-[var(--mv-sage)] transition flex items-center gap-2 shadow-lg"
           >
             <Plus size={16} /> Nueva Reserva
@@ -108,7 +184,6 @@ export default function ReservasPage() {
         </div>
       </div>
 
-      {/* Tabs de Filtro */}
       <div className="flex gap-8 border-b border-black/5 mb-8">
         {[
           { id: 'ALL', label: 'Todas' },
@@ -127,7 +202,6 @@ export default function ReservasPage() {
         ))}
       </div>
 
-      {/* Tabla de Reservas */}
       <div className="bg-white rounded-[32px] overflow-hidden border border-black/5 shadow-sm">
         <table className="w-full text-left border-collapse">
           <thead>
@@ -135,123 +209,204 @@ export default function ReservasPage() {
               <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40">Cliente</th>
               <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40">Servicio</th>
               <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40">Fecha Evento</th>
-              <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40">Valor</th>
+              <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40">Finanzas</th>
               <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40">Estado</th>
-              <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40">Acciones</th>
+              <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40 text-right">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {filteredReservations.map((res) => (
-              <tr key={res.id} className="border-b border-black/5 hover:bg-black/[0.01] transition-colors group">
-                <td className="px-8 py-6">
-                  <div>
-                    <p className="text-sm font-semibold text-[var(--mv-ink)]">{res.clientName}</p>
-                    <div className="flex items-center gap-3 mt-1 opacity-40">
-                       <span className="flex items-center gap-1 text-[10px]"><Mail size={10} /> {res.email}</span>
-                       <span className="flex items-center gap-1 text-[10px]"><Phone size={10} /> {res.phone}</span>
+            {filteredReservations.map((res) => {
+              const saldo = Number(res.value) - Number(res.anticipo || 0);
+              return (
+                <tr key={res.id} className="border-b border-black/5 hover:bg-black/[0.01] transition-colors group">
+                  <td className="px-8 py-6">
+                    <div>
+                      <p className="text-sm font-semibold text-[var(--mv-ink)]">{res.clientName}</p>
+                      <div className="flex items-center gap-3 mt-1 opacity-40">
+                         <span className="flex items-center gap-1 text-[10px]"><Mail size={10} /> {res.email}</span>
+                         <span className="flex items-center gap-1 text-[10px]"><Phone size={10} /> {res.phone}</span>
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td className="px-8 py-6">
-                  <span className="px-3 py-1 bg-[var(--mv-cream)] text-[var(--mv-sage)] text-[9px] font-bold uppercase tracking-widest rounded-full border border-[var(--mv-sage)]/10">
-                    {res.serviceType}
-                  </span>
-                </td>
-                <td className="px-8 py-6">
-                  <div className="flex items-center gap-2 text-sm text-black/60">
-                    <CalendarDays size={14} />
-                    {new Date(res.eventDate || '').toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
-                    <span className="text-[10px] opacity-50 ml-1">at {res.time}</span>
-                  </div>
-                </td>
-                <td className="px-8 py-6 font-medium text-sm">
-                  ${Number(res.value).toLocaleString()}
-                </td>
-                <td className="px-8 py-6">
-                  <div className="flex items-center gap-2">
-                    {getStatusIcon(res.status)}
-                    <span className="text-[10px] uppercase tracking-widest font-bold opacity-60">{res.status}</span>
-                  </div>
-                </td>
-                <td className="px-8 py-6 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <button 
-                      onClick={() => generateQuotePDF(res as any)}
-                      className="p-2.5 bg-[var(--mv-cream)] text-[var(--mv-gold)] rounded-xl hover:bg-[var(--mv-gold)] hover:text-white transition flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest px-4"
-                    >
-                      <FileText size={14} /> PDF
-                    </button>
-                    <button className="p-2 hover:bg-black/5 rounded-full transition opacity-0 group-hover:opacity-100">
-                      <MoreHorizontal size={18} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="px-8 py-6">
+                    <span className="px-3 py-1 bg-[var(--mv-cream)] text-[var(--mv-sage)] text-[9px] font-bold uppercase tracking-widest rounded-full border border-[var(--mv-sage)]/10">
+                      {res.serviceType}
+                    </span>
+                  </td>
+                  <td className="px-8 py-6">
+                    <div className="flex items-center gap-2 text-sm text-black/60">
+                      <CalendarDays size={14} />
+                      {res.eventDate ? new Date(res.eventDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : '---'}
+                      <span className="text-[10px] opacity-50 ml-1">at {res.time}</span>
+                    </div>
+                  </td>
+                  <td className="px-8 py-6 font-medium text-[11px]">
+                    <div className="space-y-1">
+                      <div className="flex justify-between w-24">
+                        <span className="opacity-40 uppercase">Total:</span>
+                        <span>${Number(res.value).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between w-24 text-[var(--mv-sage)]">
+                        <span className="opacity-40 uppercase">Antic:</span>
+                        <span>${Number(res.anticipo || 0).toLocaleString()}</span>
+                      </div>
+                      <div className={`flex justify-between w-24 font-bold ${saldo > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                        <span className="opacity-40 uppercase">Saldo:</span>
+                        <span>${saldo.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-8 py-6">
+                    <div className="space-y-2">
+                       {getStatusBadge(res.status)}
+                       <div className={`text-[8px] uppercase tracking-tighter font-bold px-2 py-0.5 rounded-md border w-fit ${res.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
+                         PAGO: {res.paymentStatus}
+                       </div>
+                    </div>
+                  </td>
+                  <td className="px-8 py-6 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <button 
+                        onClick={() => generateQuotePDF(res as any, 'quote', siteLogo)}
+                        className="p-2.5 bg-[var(--mv-cream)] text-[var(--mv-gold)] rounded-xl hover:bg-[var(--mv-gold)] hover:text-white transition flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest px-4 shadow-sm"
+                      >
+                        <FileText size={14} /> PDF
+                      </button>
+                      <button 
+                        onClick={() => openModal(res)}
+                        className="p-2.5 bg-black/5 text-black/40 rounded-xl hover:bg-[var(--mv-ink)] hover:text-white transition shadow-sm"
+                      >
+                        <Edit3 size={14} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
-        
-        {filteredReservations.length === 0 && (
-          <div className="py-20 text-center">
-            <p className="text-sm text-black/20 font-medium">No se encontraron reservas</p>
-          </div>
-        )}
       </div>
 
-      {/* Modal Nueva Reserva */}
-      {showAddModal && (
+      {showModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
-          <div className="relative bg-white rounded-[32px] w-full max-w-[600px] p-8 shadow-2xl animate-in zoom-in-95 duration-300 overflow-y-auto max-h-[90vh]">
-            <h3 className="text-2xl font-semibold uppercase tracking-tight mb-6">Crear Nueva Reserva</h3>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+          <div className="relative bg-white rounded-[32px] w-full max-w-[700px] p-8 shadow-2xl animate-in zoom-in-95 duration-300 overflow-y-auto max-h-[95vh]">
+            <div className="flex justify-between items-center mb-8">
+               <h3 className="text-2xl font-semibold uppercase tracking-tight">{editingRes ? 'Editar Reserva' : 'Nueva Reserva'}</h3>
+               <button onClick={() => setShowModal(false)} className="p-2 hover:bg-black/5 rounded-full"><XCircle size={24} className="text-black/20" /></button>
+            </div>
             
-            <form onSubmit={handleAddReservation} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="bg-black/5 p-6 rounded-3xl space-y-4">
+                <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-black/40 mb-2 border-b border-black/5 pb-2">Datos del Cliente</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Nombre Completo</label>
+                    <input type="text" required value={formRes.clientName} onChange={(e) => setFormRes({...formRes, clientName: e.target.value})} className="w-full bg-white rounded-xl px-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Teléfono / WhatsApp</label>
+                    <input type="text" required value={formRes.phone} onChange={(e) => setFormRes({...formRes, phone: e.target.value})} className="w-full bg-white rounded-xl px-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Correo Electrónico</label>
+                  <input type="email" required value={formRes.email} onChange={(e) => setFormRes({...formRes, email: e.target.value})} className="w-full bg-white rounded-xl px-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" />
+                </div>
+              </div>
+
+              <div className="bg-[var(--mv-cream)]/50 p-6 rounded-3xl space-y-4 border border-[var(--mv-sage)]/10">
+                <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--mv-sage)] mb-2 border-b border-[var(--mv-sage)]/10 pb-2">Detalles del Servicio & Finanzas</p>
+                
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Seleccionar Plan</label>
+                    <select 
+                      value={formRes.serviceType} 
+                      onChange={(e) => handlePlanChange(e.target.value)}
+                      className="w-full bg-white rounded-xl px-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]"
+                    >
+                      <option value="Personalizado">--- Personalizado ---</option>
+                      {planes.map(p => (
+                        <option key={p.id} value={p.nombre}>{p.nombre} (${Number(p.precio_base).toLocaleString()})</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Valor Total (COP)</label>
+                    <div className="relative">
+                      <DollarSign size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20" />
+                      <input 
+                        type="text" 
+                        required 
+                        value={valInput} 
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          setValInput(val);
+                          setFormRes({...formRes, value: Number(val)});
+                        }} 
+                        placeholder="0"
+                        className="w-full bg-white rounded-xl pl-10 pr-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)] font-bold text-[var(--mv-ink)]" 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-6">
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase tracking-widest font-bold text-[var(--mv-sage)] ml-1">Anticipo / Abono</label>
+                    <div className="relative">
+                      <CreditCard size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--mv-sage)]/30" />
+                      <input 
+                        type="text" 
+                        value={antInput} 
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          setAntInput(val);
+                          setFormRes({...formRes, anticipo: Number(val)});
+                        }} 
+                        placeholder="0"
+                        className="w-full bg-white rounded-xl pl-10 pr-4 py-3 text-sm border border-[var(--mv-sage)]/20 outline-none focus:border-[var(--mv-sage)] font-bold text-[var(--mv-sage)]" 
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Saldo Pendiente</label>
+                    <div className="w-full bg-black/5 rounded-xl px-4 py-3 text-sm font-bold text-amber-600">
+                      ${(formRes.value - formRes.anticipo).toLocaleString()}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Estado Reserva</label>
+                    <select value={formRes.status} onChange={(e) => setFormRes({...formRes, status: e.target.value})} className="w-full bg-white rounded-xl px-4 py-3 text-[10px] uppercase font-bold border border-black/5 outline-none">
+                      <option value="pending">Pendiente</option>
+                      <option value="confirmed">Confirmada</option>
+                      <option value="cancelled">Cancelada</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-widest font-bold text-black/40">Nombre del Cliente</label>
-                  <input type="text" required value={newRes.clientName} onChange={(e) => setNewRes({...newRes, clientName: e.target.value})} className="w-full bg-[var(--mv-cream)] rounded-xl px-4 py-3 text-sm border border-black/5 outline-none" />
+                  <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Fecha del Evento</label>
+                  <input type="date" required value={formRes.eventDate} onChange={(e) => setFormRes({...formRes, eventDate: e.target.value})} className="w-full bg-black/5 rounded-xl px-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-widest font-bold text-black/40">Teléfono</label>
-                  <input type="text" required value={newRes.phone} onChange={(e) => setNewRes({...newRes, phone: e.target.value})} className="w-full bg-[var(--mv-cream)] rounded-xl px-4 py-3 text-sm border border-black/5 outline-none" />
+                  <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Hora</label>
+                  <input type="time" required value={formRes.time} onChange={(e) => setFormRes({...formRes, time: e.target.value})} className="w-full bg-black/5 rounded-xl px-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" />
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[9px] uppercase tracking-widest font-bold text-black/40">Email</label>
-                <input type="email" required value={newRes.email} onChange={(e) => setNewRes({...newRes, email: e.target.value})} className="w-full bg-[var(--mv-cream)] rounded-xl px-4 py-3 text-sm border border-black/5 outline-none" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-widest font-bold text-black/40">Tipo de Servicio</label>
-                  <select value={newRes.serviceType} onChange={(e) => setNewRes({...newRes, serviceType: e.target.value})} className="w-full bg-[var(--mv-cream)] rounded-xl px-4 py-3 text-sm border border-black/5 outline-none">
-                    <option value="Boda">Boda</option>
-                    <option value="Preboda">Preboda</option>
-                    <option value="Estudio">Estudio</option>
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-widest font-bold text-black/40">Valor (COP)</label>
-                  <input type="number" required value={newRes.value} onChange={(e) => setNewRes({...newRes, value: Number(e.target.value)})} className="w-full bg-[var(--mv-cream)] rounded-xl px-4 py-3 text-sm border border-black/5 outline-none" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-widest font-bold text-black/40">Fecha del Evento</label>
-                  <input type="date" required value={newRes.eventDate} onChange={(e) => setNewRes({...newRes, eventDate: e.target.value})} className="w-full bg-[var(--mv-cream)] rounded-xl px-4 py-3 text-sm border border-black/5 outline-none" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-widest font-bold text-black/40">Hora</label>
-                  <input type="time" required value={newRes.time} onChange={(e) => setNewRes({...newRes, time: e.target.value})} className="w-full bg-[var(--mv-cream)] rounded-xl px-4 py-3 text-sm border border-black/5 outline-none" />
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-6">
-                <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 px-6 py-4 rounded-full text-[10px] uppercase tracking-widest font-bold hover:bg-black/5 transition">Cancelar</button>
-                <button type="submit" disabled={loading} className="flex-1 bg-[var(--mv-ink)] text-white px-6 py-4 rounded-full text-[10px] uppercase tracking-widest font-bold hover:bg-[var(--mv-sage)] transition flex items-center justify-center gap-2 shadow-lg">
-                  {loading ? <Loader2 size={16} className="animate-spin" /> : 'Confirmar Reserva'}
+              <div className="flex gap-4 pt-6">
+                <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-6 py-4 rounded-full text-[10px] uppercase tracking-widest font-bold hover:bg-black/5 transition">Cerrar</button>
+                <button type="submit" disabled={loading} className="flex-1 bg-[var(--mv-ink)] text-white px-8 py-4 rounded-full text-[10px] uppercase tracking-widest font-bold hover:bg-[var(--mv-sage)] transition flex items-center justify-center gap-2 shadow-lg group">
+                  {loading ? <Loader2 size={16} className="animate-spin" /> : (
+                    <>
+                      <DollarSign size={14} className="group-hover:scale-110 transition" />
+                      {editingRes ? 'Guardar Cambios' : 'Crear Reserva & Notificar'}
+                    </>
+                  )}
                 </button>
               </div>
             </form>
@@ -261,3 +416,6 @@ export default function ReservasPage() {
     </div>
   );
 }
+
+// Iconos que faltaban
+import { Edit3 } from 'lucide-react';

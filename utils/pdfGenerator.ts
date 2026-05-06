@@ -7,9 +7,27 @@ interface jsPDFWithAutoTable extends jsPDF {
   autoTable: (options: any) => void;
 }
 
-export const generateQuotePDF = (data: QuoteRequest | Reservation, mode: 'quote' | 'invoice' | 'receipt' = 'quote') => {
+export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: 'quote' | 'invoice' | 'receipt' = 'quote', logoUrl?: string) => {
   const doc = new jsPDF() as jsPDFWithAutoTable;
   const isReservation = 'eventDate' in data;
+
+  // Función para cargar imagen y convertir a Base64
+  const getBase64Image = (url: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.setAttribute('crossOrigin', 'anonymous');
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+  };
 
   // Determinar título
   let docTitle = 'COTIZACIÓN DE SERVICIOS';
@@ -24,24 +42,40 @@ export const generateQuotePDF = (data: QuoteRequest | Reservation, mode: 'quote'
 
   // Header
   doc.setFillColor(inkColor[0], inkColor[1], inkColor[2]);
-  doc.rect(0, 0, 210, 40, 'F');
+  doc.rect(0, 0, 210, 45, 'F');
+
+  if (logoUrl) {
+    try {
+      const base64Logo = await getBase64Image(logoUrl);
+      // Centrar el logo (ajustar dimensiones según necesidad)
+      doc.addImage(base64Logo, 'PNG', 85, 5, 40, 25);
+    } catch (e) {
+      console.warn("No se pudo cargar el logo, usando texto");
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(22);
+      doc.setFont('helvetica', 'bold');
+      doc.text('MILES VISUAL', 105, 20, { align: 'center' });
+    }
+  } else {
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('MILES VISUAL', 105, 20, { align: 'center' });
+  }
 
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(22);
-  doc.setFont('helvetica', 'bold');
-  doc.text('MILES VISUAL', 105, 20, { align: 'center' });
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
-  doc.text('FOTOGRAFÍA EDITORIAL & AUDIOVISUAL', 105, 28, { align: 'center', charSpace: 2 });
+  doc.text('FOTOGRAFÍA EDITORIAL & AUDIOVISUAL', 105, 35, { align: 'center', charSpace: 2 });
 
   // Título del documento
   doc.setTextColor(inkColor[0], inkColor[1], inkColor[2]);
   doc.setFontSize(18);
-  doc.text(docTitle, 20, 55);
+  doc.text(docTitle, 20, 60);
   
   doc.setDrawColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
   doc.setLineWidth(0.5);
-  doc.line(20, 58, 80, 58);
+  doc.line(20, 63, 80, 63);
 
   // Información del Cliente
   doc.setFontSize(10);
@@ -73,19 +107,35 @@ export const generateQuotePDF = (data: QuoteRequest | Reservation, mode: 'quote'
   }
 
   // Detalles del Servicio
-  const serviceName = isReservation ? (data as Reservation).serviceType : (data as QuoteRequest).serviceInterested;
-  const price = isReservation ? (data as Reservation).value : 0;
-  const eventDate = isReservation ? (data as Reservation).eventDate : 'Por definir';
+  const resData = data as any;
+  const serviceName = isReservation ? resData.serviceType : (data as QuoteRequest).serviceInterested;
+  const price = Number(isReservation ? resData.value : 0);
+  const anticipo = Number(isReservation ? (resData.anticipo || 0) : 0);
+  const saldo = price - anticipo;
+  const eventDate = isReservation ? resData.eventDate : 'Por definir';
+
+  // Ajustar título dinámicamente
+  if (isReservation && mode === 'quote') {
+    if (saldo <= 0) docTitle = 'RECIBO DE PAGO TOTAL';
+    else if (anticipo > 0) docTitle = 'RECIBO DE ABONO & RESERVA';
+  }
+
+  const tableBody = [
+    ['TIPO DE SERVICIO', serviceName, ''],
+    ['FECHA DEL EVENTO', eventDate, ''],
+    ['ESTADO', isReservation ? resData.status.toUpperCase() : 'PENDIENTE', ''],
+    ['VALOR TOTAL', '', `$ ${price.toLocaleString()}`]
+  ];
+
+  if (isReservation && anticipo > 0) {
+    tableBody.push(['ANTICIPO / ABONO', '', `$ ${anticipo.toLocaleString()}`]);
+    tableBody.push(['SALDO PENDIENTE', '', `$ ${saldo.toLocaleString()}`]);
+  }
 
   doc.autoTable({
     startY: 105,
     head: [['DESCRIPCIÓN DEL SERVICIO', 'DETALLE', 'VALOR']],
-    body: [
-      ['TIPO DE SERVICIO', serviceName, ''],
-      ['FECHA DEL EVENTO', eventDate, ''],
-      ['ESTADO', isReservation ? (data as Reservation).status.toUpperCase() : 'PENDIENTE', ''],
-      ['VALOR TOTAL', '', `$ ${price.toLocaleString()}`]
-    ],
+    body: tableBody,
     headStyles: { 
       fillColor: primaryColor,
       textColor: [255, 255, 255],
@@ -98,6 +148,11 @@ export const generateQuotePDF = (data: QuoteRequest | Reservation, mode: 'quote'
     },
     columnStyles: {
       2: { halign: 'right', fontStyle: 'bold' }
+    },
+    didParseCell: function(data: any) {
+      if (data.row.index === tableBody.length - 1 && data.column.index === 2) {
+        data.cell.styles.textColor = saldo > 0 ? [186, 161, 118] : [120, 152, 148];
+      }
     }
   });
 

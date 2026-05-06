@@ -10,8 +10,9 @@ export interface Reservation {
   eventDate?: string; // Fecha del evento real
   time: string;
   value: number;
+  anticipo?: number;
   status: 'pending' | 'confirmed' | 'cancelled';
-  paymentStatus: 'pending' | 'paid';
+  paymentStatus: 'pending' | 'partial' | 'paid';
   paymentSchedule?: { date: string; amount: number; isPaid: boolean }[]; // Pagos diferidos
   createdAt?: string;
   updatedAt?: string;
