@@ -6,8 +6,8 @@ import { Menu, MessageCircle, X } from "lucide-react";
 import { useClientStore } from "../../store/useClientStore";
 
 const heroPhotos = [
-  "/Miles/WhatsApp Image 2026-04-13 at 12.24.19 PM.jpeg",
-  "/Miles/WhatsApp Image 2026-04-13 at 12.24.20 PM (1).jpeg",
+  "https://res.cloudinary.com/dgfp5gcjr/image/upload/v1777471868/WhatsApp_Image_2026-04-13_at_12.24.19_PM_qibzhs.jpg",
+  "https://res.cloudinary.com/dgfp5gcjr/image/upload/v1777471870/WhatsApp_Image_2026-04-13_at_12.24.20_PM_1_tooe7y.jpg",
 ];
 
 const articleGridPhotos = [
@@ -27,7 +27,7 @@ export default function AcercaDeMiPage() {
   const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
   const getSetting = (key: string, defaultValue: string) => settings.find(s => s.key === key)?.value || defaultValue;
   let heroVideoSrc = getSetting('about_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429150/VIDEO_4_1_v0pinj.mp4");
-  
+
   if (heroVideoSrc && heroVideoSrc.includes('cloudinary.com')) {
     heroVideoSrc = heroVideoSrc.replace('/video/upload/', '/video/upload/f_auto,q_auto:good,c_scale,w_1920/');
   }
@@ -111,20 +111,18 @@ export default function AcercaDeMiPage() {
           </button>
 
           <div
-            className={`fixed inset-0 z-50 transition ${
-              menuOpen
-                ? "pointer-events-auto opacity-100"
-                : "pointer-events-none opacity-0"
-            }`}
+            className={`fixed inset-0 z-50 transition ${menuOpen
+              ? "pointer-events-auto opacity-100"
+              : "pointer-events-none opacity-0"
+              }`}
           >
             <div
               className="absolute inset-0 bg-black/50"
               onClick={() => setMenuOpen(false)}
             />
             <div
-              className={`absolute right-0 top-0 flex h-full w-[86%] max-w-[360px] flex-col bg-[var(--mv-cream)] p-6 transition-transform duration-300 ${
-                menuOpen ? "translate-x-0" : "translate-x-full"
-              }`}
+              className={`absolute right-0 top-0 flex h-full w-[86%] max-w-[360px] flex-col bg-[var(--mv-cream)] p-6 transition-transform duration-300 ${menuOpen ? "translate-x-0" : "translate-x-full"
+                }`}
             >
               <div className="flex items-center justify-between">
                 <img
@@ -159,7 +157,7 @@ export default function AcercaDeMiPage() {
 
         <div className="relative z-20 flex min-h-[78vh] items-end">
           <div className="mx-auto w-full max-w-[1320px] px-4 pb-14 md:px-8 md:pb-16">
-            
+
             <h1 className="  mt-2 max-w-[860px] text-[34px] font-semibold uppercase leading-[0.94] tracking-[0.03em] text-white md:text-[72px]">
               ACERCA DE MILES VISUAL
             </h1>
@@ -226,7 +224,7 @@ export default function AcercaDeMiPage() {
                 elegancia y profundidad.
               </p>
 
-              
+
             </div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">

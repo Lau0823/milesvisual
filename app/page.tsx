@@ -446,13 +446,13 @@ export default function HomePage() {
         <div className="grid items-center gap-10 md:grid-cols-[0.95fr_1.05fr]">
           <div className="relative h-[470px] md:h-[620px]">
             <img
-              src={getOptimizedUrl(getSetting('about_image_1', "Miles/WhatsApp Image 2026-04-13 at 12.24.20 PM (1).jpeg"))}
+              src={getOptimizedUrl(getSetting('about_image_1', "https://res.cloudinary.com/dgfp5gcjr/image/upload/v1777471870/WhatsApp_Image_2026-04-13_at_12.24.20_PM_1_tooe7y.jpg"))}
               alt="Fotógrafo 1"
               loading="lazy"
               className="absolute left-0 top-0 h-[72%] w-[62%] rounded-[30px] object-cover shadow-[0_22px_60px_rgba(0,0,0,0.10)]"
             />
             <img
-              src={getOptimizedUrl(getSetting('about_image_2', "/Miles/WhatsApp Image 2026-04-13 at 12.24.19 PM.jpeg"))}
+              src={getOptimizedUrl(getSetting('about_image_2', "https://res.cloudinary.com/dgfp5gcjr/image/upload/v1777471868/WhatsApp_Image_2026-04-13_at_12.24.19_PM_qibzhs.jpg"))}
               alt="Fotógrafo 2"
               loading="lazy"
               className="absolute bottom-0 right-0 h-[72%] w-[62%] rounded-[30px] object-cover shadow-[0_22px_60px_rgba(0,0,0,0.10)]"
