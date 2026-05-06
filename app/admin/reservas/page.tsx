@@ -3,19 +3,37 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useAdminStore } from '../../../store/useAdminStore';
-import { Calendar, Plus, Search, Filter, MoreHorizontal, CheckCircle2, Clock, XCircle, Loader2, Mail, Phone, CalendarDays, FileText, CreditCard, DollarSign, Edit3 } from 'lucide-react';
+import { Calendar, Plus, Search, Filter, MoreHorizontal, CheckCircle2, Clock, XCircle, Loader2, Mail, Phone, CalendarDays, FileText, CreditCard, DollarSign, Edit3, Trash2 } from 'lucide-react';
 import { generateQuotePDF } from '../../../utils/pdfGenerator';
 import toast from 'react-hot-toast';
+import { showConfirmToast } from '../../../components/admin/ConfirmToast';
 
 export default function ReservasPage() {
   const { data: session } = useSession();
-  const { reservations, planes, syncWithBackend, fetchPlanes } = useAdminStore();
+  const { reservations, planes, syncWithBackend, fetchPlanes, deleteReservation } = useAdminStore();
 
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingRes, setEditingRes] = useState<any>(null);
   const [filter, setFilter] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
+
+  const handleDelete = async (id: number) => {
+    showConfirmToast({
+      title: '¿Eliminar esta reserva?',
+      message: 'Esta acción es irreversible y afectará tus métricas de finanzas y la agenda.',
+      onConfirm: async () => {
+        const loadingToast = toast.loading('Eliminando reserva...');
+        try {
+          if (!session?.accessToken) return;
+          await deleteReservation((session as any).accessToken, id);
+          toast.success('Reserva eliminada con éxito', { id: loadingToast });
+        } catch (error: any) {
+          toast.error(`Error: ${error.message}`, { id: loadingToast });
+        }
+      }
+    });
+  };
 
   // Estados temporales para los inputs de valor (evitar el problema del cero a la izquierda)
   const [valInput, setValInput] = useState('');
@@ -330,6 +348,12 @@ export default function ReservasPage() {
                         className="p-2.5 bg-black/5 text-black/40 rounded-xl hover:bg-[var(--mv-ink)] hover:text-white transition shadow-sm"
                       >
                         <Edit3 size={14} />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(res.id)}
+                        className="p-2.5 bg-rose-50 text-rose-400 rounded-xl hover:bg-rose-500 hover:text-white transition shadow-sm"
+                      >
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </td>

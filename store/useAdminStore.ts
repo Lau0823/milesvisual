@@ -28,6 +28,7 @@ interface AdminState {
   fetchPlanes: (token: string) => Promise<void>;
   savePlan: (token: string, plan: any) => Promise<void>;
   deletePlan: (token: string, id: number) => Promise<void>;
+  deleteReservation: (token: string, id: number) => Promise<void>;
   
   setLoading: (loading: boolean) => void;
 }
@@ -285,6 +286,31 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       set({ planes: get().planes.filter(p => p.id !== id) });
     } catch (error) {
       console.error("Error deleting plan:", error);
+      throw error;
+    }
+  },
+
+  deleteReservation: async (token, id) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reservations/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || 'No se pudo eliminar la reserva');
+      }
+      
+      const newReservations = get().reservations.filter(r => r.id !== id);
+      set({ reservations: newReservations });
+      
+      // Actualizar caché local
+      const db = (await import('../lib/db')).db;
+      await db.jsonCache.put({ key: 'reservations', data: newReservations, updatedAt: new Date().toISOString() });
+      
+    } catch (error) {
+      console.error("Error deleting reservation:", error);
       throw error;
     }
   }

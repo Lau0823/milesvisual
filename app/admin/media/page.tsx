@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useAdminStore } from '../../../store/useAdminStore';
 import { Image as ImageIcon, Plus, Trash2, Loader2, Upload, CheckCircle2, Edit3, ExternalLink } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { showConfirmToast } from '../../../components/admin/ConfirmToast';
 
 export default function MediaPage() {
   const { data: session } = useSession();
@@ -12,7 +14,6 @@ export default function MediaPage() {
   const [uploading, setUploading] = useState(false);
   const [filter, setFilter] = useState('TODOS');
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState('portfolio'); // 'portfolio' | 'identity'
 
   const { settings, updateSetting } = useAdminStore();
@@ -40,8 +41,11 @@ export default function MediaPage() {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPost.id && !newPost.file) return; // File is required only for new posts
+    if (!newPost.id && !newPost.file) return; 
+    
     setUploading(true);
+    const loadingToast = toast.loading(newPost.id ? 'Actualizando publicación...' : 'Subiendo contenido...');
+    
     const formData = new FormData();
     if (newPost.file) formData.append('file', newPost.file);
     formData.append('title', newPost.title);
@@ -58,44 +62,47 @@ export default function MediaPage() {
         headers: { 'Authorization': `Bearer ${(session as any)?.accessToken}` },
         body: formData
       });
+      
       if (res.ok) {
-        setSuccess(true);
+        toast.success(isEditing ? 'Publicación actualizada' : '¡Contenido subido con éxito!', { id: loadingToast });
         setShowUploadModal(false);
         setNewPost({ id: undefined, title: '', category: 'BODAS', file: null });
         await syncWithBackend((session as any)?.accessToken);
-        setTimeout(() => setSuccess(false), 3000);
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(`Error: ${err.message || 'No se pudo guardar la publicación'}`);
+        toast.error(`Error: ${err.message || 'No se pudo guardar'}`, { id: loadingToast });
       }
     } catch (error: any) {
-      console.error(error);
-      alert(`Error de red: ${error.message}`);
+      toast.error(`Error de red: ${error.message}`, { id: loadingToast });
     } finally {
       setUploading(false);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm('¿Eliminar esta publicación de la base de datos?')) {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const res = await fetch(`${apiUrl}/media-posts/${id}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${(session as any)?.accessToken}` }
-        });
-        
-        if (res.ok) {
-          await syncWithBackend((session as any)?.accessToken);
-        } else {
-          const err = await res.json().catch(() => ({}));
-          alert(`Error al eliminar: ${err.message || 'No se pudo eliminar la publicación'}`);
+    showConfirmToast({
+      title: '¿Eliminar del portafolio?',
+      message: 'Esta imagen o video dejará de ser visible en la web pública de inmediato.',
+      onConfirm: async () => {
+        const loadingToast = toast.loading('Eliminando publicación...');
+        try {
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+          const res = await fetch(`${apiUrl}/media-posts/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${(session as any)?.accessToken}` }
+          });
+          
+          if (res.ok) {
+            toast.success('Publicación eliminada', { id: loadingToast });
+            await syncWithBackend((session as any)?.accessToken);
+          } else {
+            throw new Error('No se pudo eliminar');
+          }
+        } catch (error: any) {
+          toast.error(`Error: ${error.message}`, { id: loadingToast });
         }
-      } catch (error: any) {
-        console.error(error);
-        alert(`Error de red: ${error.message}`);
       }
-    }
+    });
   };
 
   const filteredPosts = filter === 'TODOS' ? mediaPosts : mediaPosts.filter(p => p.category.toUpperCase() === filter);
@@ -205,17 +212,25 @@ export default function MediaPage() {
                   <div className="relative">
                     <input type="file" accept="video/*" onChange={async (e) => {
                       if (e.target.files?.[0] && session?.accessToken) {
-                        const formData = new FormData();
-                        formData.append('file', e.target.files[0]);
-                        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/upload-image/${v.key}`, {
-                          method: 'POST',
-                          headers: { 'Authorization': `Bearer ${(session as any).accessToken}` },
-                          body: formData
-                        });
-                        if (res.ok) {
-                          const data = await res.json();
-                          await updateSetting((session as any).accessToken, v.key, data.value);
-                          await syncWithBackend();
+                        const loadingToast = toast.loading(`Subiendo nuevo video para ${v.label}...`);
+                        try {
+                          const formData = new FormData();
+                          formData.append('file', e.target.files[0]);
+                          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/upload-image/${v.key}`, {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${(session as any).accessToken}` },
+                            body: formData
+                          });
+                          if (res.ok) {
+                            const data = await res.json();
+                            await updateSetting((session as any).accessToken, v.key, data.value);
+                            await syncWithBackend();
+                            toast.success(`${v.label} actualizado con éxito`, { id: loadingToast });
+                          } else {
+                            throw new Error('No se pudo subir el archivo');
+                          }
+                        } catch (err: any) {
+                          toast.error(`Error: ${err.message}`, { id: loadingToast });
                         }
                       }
                     }} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />

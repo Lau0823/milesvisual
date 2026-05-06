@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { Plus, Edit3, Trash2, Tag, Loader2, Image as ImageIcon } from 'lucide-react';
 import { useAdminStore } from '../../../store/useAdminStore';
 import toast from 'react-hot-toast';
+import { showConfirmToast } from '../../../components/admin/ConfirmToast';
 
 interface Servicio {
   id: number;
@@ -54,15 +55,20 @@ export default function PlanesPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('¿Estás SEGURO de eliminar este plan por completo? Esta acción es irreversible y borrará el plan de la base de datos.')) return;
-    if (!session?.accessToken) return;
-    
-    try {
-      await deletePlan((session as any).accessToken, id);
-      toast.success('Plan eliminado exitosamente.');
-    } catch (error: any) {
-      toast.error(`No se pudo eliminar el plan. Error: ${error.message}`);
-    }
+    showConfirmToast({
+      title: '¿Confirmar eliminación?',
+      message: 'Esta acción borrará el plan de forma permanente. No podrás deshacer este cambio.',
+      onConfirm: async () => {
+        const loadingToast = toast.loading('Eliminando plan...');
+        try {
+          if (!session?.accessToken) return;
+          await deletePlan((session as any).accessToken, id);
+          toast.success('Plan eliminado con éxito', { id: loadingToast });
+        } catch (error: any) {
+          toast.error(`Error: ${error.message}`, { id: loadingToast });
+        }
+      }
+    });
   };
 
   if (loading) return <div className="animate-pulse h-full w-full bg-white/50 rounded-[40px] p-10" />;
