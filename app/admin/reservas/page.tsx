@@ -269,7 +269,16 @@ export default function ReservasPage() {
                   <td className="px-8 py-6 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button 
-                        onClick={() => generateQuotePDF(res as any, 'quote', siteLogo)}
+                        onClick={async () => {
+                          const t = toast.loading("Generando documento...");
+                          try {
+                            await generateQuotePDF(res as any, 'quote', siteLogo);
+                            toast.success("PDF generado con éxito", { id: t });
+                          } catch (e) {
+                            toast.error("Error al generar PDF", { id: t });
+                            console.error(e);
+                          }
+                        }}
                         className="p-2.5 bg-[var(--mv-cream)] text-[var(--mv-gold)] rounded-xl hover:bg-[var(--mv-gold)] hover:text-white transition flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest px-4 shadow-sm"
                       >
                         <FileText size={14} /> PDF
