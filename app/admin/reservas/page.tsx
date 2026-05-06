@@ -1,7 +1,9 @@
+"use client";
+
 import { useState, useEffect, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useAdminStore } from '../../../store/useAdminStore';
-import { Calendar, Plus, Search, Filter, MoreHorizontal, CheckCircle2, Clock, XCircle, Loader2, Mail, Phone, CalendarDays, FileText, CreditCard, DollarSign } from 'lucide-react';
+import { Calendar, Plus, Search, Filter, MoreHorizontal, CheckCircle2, Clock, XCircle, Loader2, Mail, Phone, CalendarDays, FileText, CreditCard, DollarSign, Edit3 } from 'lucide-react';
 import { generateQuotePDF } from '../../../utils/pdfGenerator';
 import toast from 'react-hot-toast';
 
@@ -417,5 +419,4 @@ export default function ReservasPage() {
   );
 }
 
-// Iconos que faltaban
-import { Edit3 } from 'lucide-react';
+
