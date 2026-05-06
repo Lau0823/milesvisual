@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { db } from '../lib/db';
 
 interface AdminState {
   settings: any[];
@@ -14,7 +15,7 @@ interface AdminState {
   
   // Acciones globales
   syncWithBackend: (token?: string) => Promise<void>;
-  loadLocalData: (token?: string) => Promise<void>; // Alias para compatibilidad con layout.tsx
+  loadLocalData: (token?: string) => Promise<void>;
   
   // Ajustes
   fetchSettings: (token: string) => Promise<void>;
@@ -44,6 +45,29 @@ export const useAdminStore = create<AdminState>((set, get) => ({
   setLoading: (loading) => set({ loading }),
 
   syncWithBackend: async (token?: string) => {
+    // 1. Carga ultra-rápida desde Dexie (Caché local)
+    try {
+      const cachedData = await db.jsonCache.toArray();
+      const cache: any = {};
+      cachedData.forEach(item => { cache[item.key] = item.data; });
+
+      if (Object.keys(cache).length > 0) {
+        set({
+          reservations: cache.reservations || [],
+          quoteRequests: cache.quoteRequests || [],
+          settings: cache.settings || [],
+          planes: cache.planes || [],
+          mediaPosts: cache.mediaPosts || [],
+          // Recalcular métricas básicas de la caché para que no se vean en cero
+          totalActiveReservations: (cache.reservations || []).filter((r: any) => r.status !== 'cancelled').length,
+          totalPosts: (cache.mediaPosts || []).length
+        });
+      }
+    } catch (e) {
+      console.warn("Error cargando caché:", e);
+    }
+
+    // 2. Sincronización real con el servidor (en segundo plano)
     try {
       const API = process.env.NEXT_PUBLIC_API_URL;
       const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -56,29 +80,42 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         fetch(`${API}/media-posts`, { headers })
       ]);
 
-      const reservations = resRes.ok ? await resRes.json() : [];
-      const quoteRequests = quoteRes.ok ? await quoteRes.json() : [];
-      const settings = settingsRes.ok ? await settingsRes.json() : [];
-      const planesData = planesRes.ok ? await planesRes.json() : { data: [] };
-      const mediaPosts = mediaRes.ok ? await mediaRes.json() : [];
+      const reservations = resRes.ok ? await resRes.json() : get().reservations;
+      const quoteRequests = quoteRes.ok ? await quoteRes.json() : get().quoteRequests;
+      const settings = settingsRes.ok ? await settingsRes.json() : get().settings;
+      const planesData = planesRes.ok ? await planesRes.json() : { data: get().planes };
+      const mediaPosts = mediaRes.ok ? await mediaRes.json() : get().mediaPosts;
+      const planes = planesData.data || [];
 
-      // Calcular ingresos
-      const paid = reservations
-        .filter((r: any) => r.paymentStatus === 'paid')
-        .reduce((sum: number, r: any) => sum + Number(r.value), 0);
-      
-      const pending = reservations
-        .filter((r: any) => r.paymentStatus === 'pending')
-        .reduce((sum: number, r: any) => sum + Number(r.value), 0);
+      // Calcular ingresos reales
+      const paid = reservations.reduce((sum: number, r: any) => {
+        const val = Number(r.value || 0);
+        const ant = Number(r.anticipo || 0);
+        // Lo pagado es el anticipo + el valor total si está marcada como PAID
+        return sum + (r.paymentStatus === 'paid' ? val : ant);
+      }, 0);
+
+      const pending = reservations.reduce((sum: number, r: any) => {
+        const val = Number(r.value || 0);
+        const ant = Number(r.anticipo || 0);
+        // Lo pendiente es el valor total menos el anticipo (si no está totalmente pagada)
+        return sum + (r.paymentStatus !== 'paid' ? (val - ant) : 0);
+      }, 0);
 
       const activeReservationsCount = reservations.filter((r: any) => r.status !== 'cancelled').length;
 
+      // 3. Guardar en Dexie para la próxima vez
+      const now = new Date().toISOString();
+      await Promise.all([
+        db.jsonCache.put({ key: 'reservations', data: reservations, updatedAt: now }),
+        db.jsonCache.put({ key: 'quoteRequests', data: quoteRequests, updatedAt: now }),
+        db.jsonCache.put({ key: 'settings', data: settings, updatedAt: now }),
+        db.jsonCache.put({ key: 'planes', data: planes, updatedAt: now }),
+        db.jsonCache.put({ key: 'mediaPosts', data: mediaPosts, updatedAt: now }),
+      ]);
+
       set({ 
-        reservations, 
-        quoteRequests, 
-        settings, 
-        planes: planesData.data || [],
-        mediaPosts,
+        reservations, quoteRequests, settings, planes, mediaPosts,
         totalPaidIncome: paid,
         totalPendingIncome: pending,
         totalActiveReservations: activeReservationsCount,
