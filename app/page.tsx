@@ -226,539 +226,539 @@ function FullscreenSlider({
 }
 
 function FullscreenVideoSection({
-    src,
-    eyebrow,
-    title,
-  }: {
-    src: string;
-    eyebrow: string;
-    title: string;
-  }) {
-    return (
+  src,
+  eyebrow,
+  title,
+}: {
+  src: string;
+  eyebrow: string;
+  title: string;
+}) {
+  return (
+    <section className="relative min-h-screen overflow-hidden bg-black">
+      <video
+        className="absolute inset-0 h-full w-full object-cover"
+        src={src}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="none"
+      />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,16,20,0.12)_0%,rgba(7,16,20,0.18)_30%,rgba(7,16,20,0.42)_100%)]" />
+
+      <div className="relative z-10 flex min-h-screen items-end">
+        <div className="mx-auto w-full max-w-[1320px] px-4 pb-14 md:px-8 md:pb-16">
+          <p className="text-[12px] uppercase tracking-[0.16em] text-white/78 md:text-[14px]">
+            {eyebrow}
+          </p>
+          <h2 className="mt-3 max-w-[760px] text-[34px] font-semibold uppercase leading-[0.94] tracking-[0.03em] text-white md:text-[72px]">
+            {title}
+          </h2>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function HomePage() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const [bodasIndex, setBodasIndex] = useState(0);
+  const [prebodasIndex, setPrebodasIndex] = useState(0);
+  const [estudioIndex, setEstudioIndex] = useState(0);
+
+  const [selectedPlan, setSelectedPlan] = useState(1);
+  const [testimonialIndex, setTestimonialIndex] = useState(0);
+
+  const { loadPublicData, settings, plans: dbPlans, mediaPosts, isLoaded } = useClientStore();
+
+  useEffect(() => {
+    loadPublicData();
+  }, [loadPublicData]);
+
+
+
+  const getSetting = (key: string, defaultValue: string) =>
+    settings.find(s => s.key === key)?.value || defaultValue;
+
+  // Optimización agresiva de Cloudinary
+  const getOptimizedUrl = (url: string, type: 'image' | 'video' = 'image') => {
+    if (!url || !url.includes('cloudinary.com')) return url;
+    if (type === 'video') {
+      // Vídeos: Formato auto, Calidad buena para streaming, Límite a 1080p
+      return url.replace('/video/upload/', '/video/upload/f_auto,q_auto:good,c_scale,w_1920/');
+    }
+    // Imágenes: Formato auto, Calidad auto
+    return url.replace('/upload/', '/upload/f_auto,q_auto/');
+  };
+
+  const getWhatsappLink = (text: string) => {
+    const number = getSetting('whatsapp_number', '573148112717');
+    return `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
+  };
+
+  const bodasGallery = mediaPosts
+    .filter(p => p.category === 'BODAS')
+    .map(p => getOptimizedUrl(p.cloudinaryUrl));
+
+  const prebodasGallery = mediaPosts
+    .filter(p => p.category === 'PREBODAS')
+    .map(p => getOptimizedUrl(p.cloudinaryUrl));
+
+  const estudioGallery = mediaPosts
+    .filter(p => p.category === 'ESTUDIO')
+    .map(p => getOptimizedUrl(p.cloudinaryUrl));
+
+  // Fallbacks si no hay fotos en la base de datos
+  const finalBodasImages = bodasGallery.length > 0 ? bodasGallery : bodasImages;
+  const finalPrebodasImages = prebodasGallery.length > 0 ? prebodasGallery : prebodasImages;
+  const finalEstudioImages = estudioGallery.length > 0 ? estudioGallery : estudioImages;
+
+  const displayPlans = useMemo(() => {
+    const allPlans = dbPlans.length > 0 ? dbPlans : plans;
+    const featured = allPlans.filter((p: any) => p.destacado === true);
+    // Si hay destacados, mostramos solo esos. Si no hay ninguno, mostramos los 3 primeros como fallback.
+    return featured.length > 0 ? featured : allPlans.slice(0, 3);
+  }, [dbPlans]);
+
+  const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
+  const heroVideoSrc = getOptimizedUrl(getSetting('hero_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429058/VIDEO_1_1_b0wg0m.mp4"), 'video');
+  const middleVideoSrc = getOptimizedUrl(getSetting('middle_video_url', "/VIDEO 2.mp4"), 'video');
+
+  const activePlan = useMemo(() => {
+    return displayPlans.find((p) => p.id === selectedPlan) || displayPlans[0];
+  }, [selectedPlan, displayPlans]);
+
+  useEffect(() => {
+    if (isLoaded && displayPlans.length > 0) {
+      setSelectedPlan(displayPlans[0].id);
+    }
+  }, [isLoaded, displayPlans]);
+
+  const navLeft = [
+    { href: "/bodas", label: "Bodas" },
+    { href: "/prebodas", label: "Pre-Bodas" },
+    { href: "/estudio", label: "Foto Estudios" },
+  ];
+
+  const navRight = [
+    { href: "/contacto", label: "Contacto" },
+    { href: "#planes", label: "Planes" },
+    { href: "acercademi", label: "Acerca de mí" },
+  ];
+
+  if (!isLoaded) {
+    return <div className="min-h-screen bg-black flex items-center justify-center text-white">Cargando experiencias...</div>;
+  }
+
+  return (
+    <main className="bg-[var(--mv-cream)] text-[var(--mv-ink)]">
+      {/* HERO */}
       <section className="relative min-h-screen overflow-hidden bg-black">
         <video
           className="absolute inset-0 h-full w-full object-cover"
-          src={src}
+          src={heroVideoSrc}
           autoPlay
           muted
           loop
           playsInline
-          preload="none"
+          preload="auto"
         />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,16,20,0.12)_0%,rgba(7,16,20,0.18)_30%,rgba(7,16,20,0.42)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,16,20,0.10)_0%,rgba(7,16,20,0.18)_30%,rgba(7,16,20,0.40)_100%)]" />
 
-        <div className="relative z-10 flex min-h-screen items-end">
-          <div className="mx-auto w-full max-w-[1320px] px-4 pb-14 md:px-8 md:pb-16">
-            <p className="text-[12px] uppercase tracking-[0.16em] text-white/78 md:text-[14px]">
-              {eyebrow}
+        <header className="relative z-30 mx-auto flex w-full max-w-[1400px] items-center justify-between px-4 py-6 md:px-8 md:py-8">
+          <nav className="hidden items-center gap-8 xl:flex">
+            {navLeft.map((item) => (
+              <Link key={item.href} href={item.href} className="mv-nav-link-light">
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <Link href="/" className="absolute left-1/2 top-6 z-30 -translate-x-1/2">
+            <img
+              src={logoSrc}
+              alt="Miles Visual"
+              fetchPriority="high"
+              className="h-[120px] w-auto max-w-[82vw] object-contain sm:h-[150px] md:h-[190px] lg:h-[220px]"
+            />
+          </Link>
+
+          <nav className="hidden items-center gap-8 xl:flex">
+            {navRight.map((item) => (
+              <Link key={item.href} href={item.href} className="mv-nav-link-light">
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <button
+            onClick={() => setMenuOpen(true)}
+            className="ml-auto flex h-10 w-10 items-center justify-center text-white xl:hidden"
+            aria-label="Abrir menú"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+
+          <div
+            className={`fixed inset-0 z-50 transition ${menuOpen
+              ? "pointer-events-auto opacity-100"
+              : "pointer-events-none opacity-0"
+              }`}
+          >
+            <div className="absolute inset-0 bg-black/50" onClick={() => setMenuOpen(false)} />
+
+            <div
+              className={`absolute right-0 top-0 flex h-full w-[86%] max-w-[360px] flex-col bg-[var(--mv-cream)] p-6 transition-transform duration-300 ${menuOpen ? "translate-x-0" : "translate-x-full"
+                }`}
+            >
+              <div className="flex items-center justify-between">
+                <img src={logoSrc} alt="Miles Visual" className="h-[60px] w-auto object-contain" />
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="flex h-10 w-10 items-center justify-center"
+                  aria-label="Cerrar menú"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              <nav className="mt-12 flex flex-col gap-5">
+                {[...navLeft, ...navRight].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMenuOpen(false)}
+                    className="border-b border-black/10 pb-4 text-[13px] uppercase tracking-[0.12em] text-[var(--mv-ink)]"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          </div>
+        </header>
+      </section>
+
+      {/* ACERCA */}
+      <section id="acerca" className="mx-auto max-w-[1280px] px-4 py-8 md:px-8 md:py-16">
+        <div className="grid items-center gap-10 md:grid-cols-[0.95fr_1.05fr]">
+          <div className="relative h-[470px] md:h-[620px]">
+            <img
+              src={getOptimizedUrl(getSetting('about_image_1', "Miles/WhatsApp Image 2026-04-13 at 12.24.20 PM (1).jpeg"))}
+              alt="Fotógrafo 1"
+              loading="lazy"
+              className="absolute left-0 top-0 h-[72%] w-[62%] rounded-[30px] object-cover shadow-[0_22px_60px_rgba(0,0,0,0.10)]"
+            />
+            <img
+              src={getOptimizedUrl(getSetting('about_image_2', "/Miles/WhatsApp Image 2026-04-13 at 12.24.19 PM.jpeg"))}
+              alt="Fotógrafo 2"
+              loading="lazy"
+              className="absolute bottom-0 right-0 h-[72%] w-[62%] rounded-[30px] object-cover shadow-[0_22px_60px_rgba(0,0,0,0.10)]"
+            />
+          </div>
+
+          <div>
+            <p className="text-[34px] font-semibold uppercase leading-none tracking-[0.03em] md:text-[62px]">
+              {getSetting('about_title_top', '¿QUIÉNES')}
             </p>
-            <h2 className="mt-3 max-w-[760px] text-[34px] font-semibold uppercase leading-[0.94] tracking-[0.03em] text-white md:text-[72px]">
-              {title}
-            </h2>
+            <p className="mv-script -mt-1 text-[56px] leading-none text-[var(--mv-sage)] md:text-[92px]">
+              {getSetting('about_title_bottom', 'SOMOS?')}
+            </p>
+
+            <p className="mt-8 max-w-[680px] text-[15px] leading-8 text-[var(--mv-ink)]/74 md:text-[17px] md:leading-9">
+              {getSetting('about_text_1', 'Mi nombre es Miles Esteban Morales Andrade, fotógrafo y productor audiovisual de bodas colombiano, establecido en la ciudad de Villavicencio, amante y apasionado por este arte que es la fotografía.')}
+            </p>
+
+            <p className="mt-5 max-w-[680px] text-[15px] leading-8 text-[var(--mv-ink)]/74 md:text-[17px] md:leading-9">
+              {getSetting('about_text_2', 'Nos dedicamos a plasmar recuerdos con calidad y creatividad para toda la vida. Somos un equipo capacitado y enfocado en brindar una experiencia única y diferente en cada evento que cubrimos.')}
+            </p>
           </div>
         </div>
       </section>
-    );
-  }
 
-  export default function HomePage() {
-    const [menuOpen, setMenuOpen] = useState(false);
+      {/* BODAS */}
+      <FullscreenSlider
+        title="BODAS"
+        script="Inolvidables"
+        eyebrow="Momentos inolvidables"
+        images={finalBodasImages}
+        current={bodasIndex}
+        onPrev={() =>
+          setBodasIndex((prev) => (prev - 1 + finalBodasImages.length) % finalBodasImages.length)
+        }
+        onNext={() => setBodasIndex((prev) => (prev + 1) % finalBodasImages.length)}
+        galleryHref="/bodas"
+        quote="Coberturas con una mirada elegante, emocional y cinematográfica para contar tu historia con belleza y verdad."
+        whatsappNumber={getSetting('whatsapp_number', '573148112717')}
+      />
 
-    const [bodasIndex, setBodasIndex] = useState(0);
-    const [prebodasIndex, setPrebodasIndex] = useState(0);
-    const [estudioIndex, setEstudioIndex] = useState(0);
+      {/* VIDEO FULLSCREEN EN LA MITAD */}
+      <FullscreenVideoSection
+        src={middleVideoSrc}
+        eyebrow=""
+        title="Disfruta tu boda. Nosotros nos encargamos de los recuerdos"
+      />
 
-    const [selectedPlan, setSelectedPlan] = useState(1);
-    const [testimonialIndex, setTestimonialIndex] = useState(0);
+      {/* PREBODAS */}
+      <FullscreenSlider
+        title="PRE-BODAS"
+        script="Auténticas"
+        eyebrow="Conexión real"
+        images={finalPrebodasImages}
+        current={prebodasIndex}
+        onPrev={() =>
+          setPrebodasIndex((prev) => (prev - 1 + finalPrebodasImages.length) % finalPrebodasImages.length)
+        }
+        onNext={() => setPrebodasIndex((prev) => (prev + 1) % finalPrebodasImages.length)}
+        galleryHref="/prebodas"
+        quote="Sesiones delicadas y editoriales para retratar la complicidad, la atmósfera y la emoción antes del gran día."
+        whatsappNumber={getSetting('whatsapp_number', '573148112717')}
+      />
 
-    const { loadPublicData, settings, plans: dbPlans, mediaPosts, isLoaded } = useClientStore();
+      {/* FOTO ESTUDIO */}
+      <FullscreenSlider
+        title="FOTO ESTUDIO"
+        script="Esencia"
+        eyebrow="Luz y detalle"
+        images={finalEstudioImages}
+        current={estudioIndex}
+        onPrev={() =>
+          setEstudioIndex((prev) => (prev - 1 + finalEstudioImages.length) % finalEstudioImages.length)
+        }
+        onNext={() => setEstudioIndex((prev) => (prev + 1) % finalEstudioImages.length)}
+        galleryHref="/estudio"
+        quote="Retratos y piezas visuales pensadas desde la dirección, la estética y una presencia visual más editorial."
+        whatsappNumber={getSetting('whatsapp_number', '573148112717')}
+      />
 
-    useEffect(() => {
-      loadPublicData();
-    }, [loadPublicData]);
+      {/* PLANES */}
+      <section id="planes" className="mx-auto max-w-[1280px] px-4 py-20 md:px-8 md:py-28">
+        <div className="mb-12 text-center">
+          <p className="mv-script text-[44px] leading-none text-[var(--mv-gold)] md:text-[72px]">
+            planes
+          </p>
+          <h2 className="text-[32px] font-semibold uppercase tracking-[0.03em] md:text-[58px]">
+            EXPERIENCIAS DISPONIBLES
+          </h2>
+        </div>
 
-
-
-    const getSetting = (key: string, defaultValue: string) =>
-      settings.find(s => s.key === key)?.value || defaultValue;
-
-    // Optimización agresiva de Cloudinary
-    const getOptimizedUrl = (url: string, type: 'image' | 'video' = 'image') => {
-      if (!url || !url.includes('cloudinary.com')) return url;
-      if (type === 'video') {
-        // Vídeos: Formato auto, Calidad buena para streaming, Límite a 1080p
-        return url.replace('/video/upload/', '/video/upload/f_auto,q_auto:good,c_scale,w_1920/');
-      }
-      // Imágenes: Formato auto, Calidad auto
-      return url.replace('/upload/', '/upload/f_auto,q_auto/');
-    };
-
-    const getWhatsappLink = (text: string) => {
-      const number = getSetting('whatsapp_number', '573148112717');
-      return `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
-    };
-
-    const bodasGallery = mediaPosts
-      .filter(p => p.category === 'BODAS')
-      .map(p => getOptimizedUrl(p.cloudinaryUrl));
-
-    const prebodasGallery = mediaPosts
-      .filter(p => p.category === 'PREBODAS')
-      .map(p => getOptimizedUrl(p.cloudinaryUrl));
-
-    const estudioGallery = mediaPosts
-      .filter(p => p.category === 'ESTUDIO')
-      .map(p => getOptimizedUrl(p.cloudinaryUrl));
-
-    // Fallbacks si no hay fotos en la base de datos
-    const finalBodasImages = bodasGallery.length > 0 ? bodasGallery : bodasImages;
-    const finalPrebodasImages = prebodasGallery.length > 0 ? prebodasGallery : prebodasImages;
-    const finalEstudioImages = estudioGallery.length > 0 ? estudioGallery : estudioImages;
-
-    const displayPlans = useMemo(() => {
-      const allPlans = dbPlans.length > 0 ? dbPlans : plans;
-      const featured = allPlans.filter((p: any) => p.destacado === true);
-      // Si hay destacados, mostramos solo esos. Si no hay ninguno, mostramos los 3 primeros como fallback.
-      return featured.length > 0 ? featured : allPlans.slice(0, 3);
-    }, [dbPlans]);
-
-    const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
-    const heroVideoSrc = getOptimizedUrl(getSetting('hero_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429058/VIDEO_1_1_b0wg0m.mp4"), 'video');
-    const middleVideoSrc = getOptimizedUrl(getSetting('middle_video_url', "/VIDEO 2.mp4"), 'video');
-
-    const activePlan = useMemo(() => {
-      return displayPlans.find((p) => p.id === selectedPlan) || displayPlans[0];
-    }, [selectedPlan, displayPlans]);
-
-    useEffect(() => {
-      if (isLoaded && displayPlans.length > 0) {
-        setSelectedPlan(displayPlans[0].id);
-      }
-    }, [isLoaded, displayPlans]);
-
-    const navLeft = [
-      { href: "/bodas", label: "Bodas" },
-      { href: "/prebodas", label: "Pre-Bodas" },
-      { href: "/estudio", label: "Foto Estudios" },
-    ];
-
-    const navRight = [
-      { href: "/contacto", label: "Contacto" },
-      { href: "#planes", label: "Planes" },
-      { href: "acercademi", label: "Acerca de mí" },
-    ];
-
-    if (!isLoaded) {
-      return <div className="min-h-screen bg-black flex items-center justify-center text-white">Cargando experiencias...</div>;
-    }
-
-    return (
-      <main className="bg-[var(--mv-cream)] text-[var(--mv-ink)]">
-        {/* HERO */}
-        <section className="relative min-h-screen overflow-hidden bg-black">
-          <video
-            className="absolute inset-0 h-full w-full object-cover"
-            src={heroVideoSrc}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-          />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,16,20,0.10)_0%,rgba(7,16,20,0.18)_30%,rgba(7,16,20,0.40)_100%)]" />
-
-          <header className="relative z-30 mx-auto flex w-full max-w-[1400px] items-center justify-between px-4 py-6 md:px-8 md:py-8">
-            <nav className="hidden items-center gap-8 xl:flex">
-              {navLeft.map((item) => (
-                <Link key={item.href} href={item.href} className="mv-nav-link-light">
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-
-            <Link href="/" className="absolute left-1/2 top-6 z-30 -translate-x-1/2">
-              <img
-                src={logoSrc}
-                alt="Miles Visual"
-                fetchPriority="high"
-                className="h-[120px] w-auto max-w-[82vw] object-contain sm:h-[150px] md:h-[190px] lg:h-[220px]"
-              />
-            </Link>
-
-            <nav className="hidden items-center gap-8 xl:flex">
-              {navRight.map((item) => (
-                <Link key={item.href} href={item.href} className="mv-nav-link-light">
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-
+        {/* LAS TABS VISIBLES */}
+        <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5">
+          {displayPlans.map((plan: any) => (
             <button
-              onClick={() => setMenuOpen(true)}
-              className="ml-auto flex h-10 w-10 items-center justify-center text-white xl:hidden"
-              aria-label="Abrir menú"
-            >
-              <Menu className="h-6 w-6" />
-            </button>
-
-            <div
-              className={`fixed inset-0 z-50 transition ${menuOpen
-                ? "pointer-events-auto opacity-100"
-                : "pointer-events-none opacity-0"
+              key={plan.id}
+              onClick={() => setSelectedPlan(plan.id)}
+              className={`rounded-[18px] px-4 py-4 text-center text-[12px] font-medium uppercase tracking-[0.12em] transition ${selectedPlan === plan.id
+                ? "bg-[#789894] text-white shadow-lg"
+                : "bg-white text-[var(--mv-ink)] shadow-sm"
                 }`}
             >
-              <div className="absolute inset-0 bg-black/50" onClick={() => setMenuOpen(false)} />
-
-              <div
-                className={`absolute right-0 top-0 flex h-full w-[86%] max-w-[360px] flex-col bg-[var(--mv-cream)] p-6 transition-transform duration-300 ${menuOpen ? "translate-x-0" : "translate-x-full"
-                  }`}
-              >
-                <div className="flex items-center justify-between">
-                  <img src={logoSrc} alt="Miles Visual" className="h-[60px] w-auto object-contain" />
-                  <button
-                    onClick={() => setMenuOpen(false)}
-                    className="flex h-10 w-10 items-center justify-center"
-                    aria-label="Cerrar menú"
-                  >
-                    <X className="h-6 w-6" />
-                  </button>
-                </div>
-
-                <nav className="mt-12 flex flex-col gap-5">
-                  {[...navLeft, ...navRight].map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setMenuOpen(false)}
-                      className="border-b border-black/10 pb-4 text-[13px] uppercase tracking-[0.12em] text-[var(--mv-ink)]"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </nav>
-              </div>
-            </div>
-          </header>
-        </section>
-
-        {/* ACERCA */}
-        <section id="acerca" className="mx-auto max-w-[1280px] px-4 py-8 md:px-8 md:py-16">
-          <div className="grid items-center gap-10 md:grid-cols-[0.95fr_1.05fr]">
-            <div className="relative h-[470px] md:h-[620px]">
-              <img
-                src={getOptimizedUrl(getSetting('about_image_1', "Miles/WhatsApp Image 2026-04-13 at 12.24.20 PM (1).jpeg"))}
-                alt="Fotógrafo 1"
-                loading="lazy"
-                className="absolute left-0 top-0 h-[72%] w-[62%] rounded-[30px] object-cover shadow-[0_22px_60px_rgba(0,0,0,0.10)]"
-              />
-              <img
-                src={getOptimizedUrl(getSetting('about_image_2', "/Miles/WhatsApp Image 2026-04-13 at 12.24.19 PM.jpeg"))}
-                alt="Fotógrafo 2"
-                loading="lazy"
-                className="absolute bottom-0 right-0 h-[72%] w-[62%] rounded-[30px] object-cover shadow-[0_22px_60px_rgba(0,0,0,0.10)]"
-              />
-            </div>
-
-            <div>
-              <p className="text-[34px] font-semibold uppercase leading-none tracking-[0.03em] md:text-[62px]">
-                {getSetting('about_title_top', '¿QUIÉNES')}
-              </p>
-              <p className="mv-script -mt-1 text-[56px] leading-none text-[var(--mv-sage)] md:text-[92px]">
-                {getSetting('about_title_bottom', 'SOMOS?')}
-              </p>
-
-              <p className="mt-8 max-w-[680px] text-[15px] leading-8 text-[var(--mv-ink)]/74 md:text-[17px] md:leading-9">
-                {getSetting('about_text_1', 'Mi nombre es Miles Esteban Morales Andrade, fotógrafo y productor audiovisual de bodas colombiano, establecido en la ciudad de Villavicencio, amante y apasionado por este arte que es la fotografía.')}
-              </p>
-
-              <p className="mt-5 max-w-[680px] text-[15px] leading-8 text-[var(--mv-ink)]/74 md:text-[17px] md:leading-9">
-                {getSetting('about_text_2', 'Nos dedicamos a plasmar recuerdos con calidad y creatividad para toda la vida. Somos un equipo capacitado y enfocado en brindar una experiencia única y diferente en cada evento que cubrimos.')}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* BODAS */}
-        <FullscreenSlider
-          title="BODAS"
-          script="Inolvidables"
-          eyebrow="Momentos inolvidables"
-          images={finalBodasImages}
-          current={bodasIndex}
-          onPrev={() =>
-            setBodasIndex((prev) => (prev - 1 + finalBodasImages.length) % finalBodasImages.length)
-          }
-          onNext={() => setBodasIndex((prev) => (prev + 1) % finalBodasImages.length)}
-          galleryHref="/bodas"
-          quote="Coberturas con una mirada elegante, emocional y cinematográfica para contar tu historia con belleza y verdad."
-          whatsappNumber={getSetting('whatsapp_number', '573148112717')}
-        />
-
-        {/* VIDEO FULLSCREEN EN LA MITAD */}
-        <FullscreenVideoSection
-          src={middleVideoSrc}
-          eyebrow=""
-          title="Disfruta tu boda. Nosotros nos encargamos de los recuerdos"
-        />
-
-        {/* PREBODAS */}
-        <FullscreenSlider
-          title="PRE-BODAS"
-          script="Auténticas"
-          eyebrow="Conexión real"
-          images={finalPrebodasImages}
-          current={prebodasIndex}
-          onPrev={() =>
-            setPrebodasIndex((prev) => (prev - 1 + finalPrebodasImages.length) % finalPrebodasImages.length)
-          }
-          onNext={() => setPrebodasIndex((prev) => (prev + 1) % finalPrebodasImages.length)}
-          galleryHref="/prebodas"
-          quote="Sesiones delicadas y editoriales para retratar la complicidad, la atmósfera y la emoción antes del gran día."
-          whatsappNumber={getSetting('whatsapp_number', '573148112717')}
-        />
-
-        {/* FOTO ESTUDIO */}
-        <FullscreenSlider
-          title="FOTO ESTUDIO"
-          script="Esencia"
-          eyebrow="Luz y detalle"
-          images={finalEstudioImages}
-          current={estudioIndex}
-          onPrev={() =>
-            setEstudioIndex((prev) => (prev - 1 + finalEstudioImages.length) % finalEstudioImages.length)
-          }
-          onNext={() => setEstudioIndex((prev) => (prev + 1) % finalEstudioImages.length)}
-          galleryHref="/estudio"
-          quote="Retratos y piezas visuales pensadas desde la dirección, la estética y una presencia visual más editorial."
-          whatsappNumber={getSetting('whatsapp_number', '573148112717')}
-        />
-
-        {/* PLANES */}
-        <section id="planes" className="mx-auto max-w-[1280px] px-4 py-20 md:px-8 md:py-28">
-          <div className="mb-12 text-center">
-            <p className="mv-script text-[44px] leading-none text-[var(--mv-gold)] md:text-[72px]">
-              planes
-            </p>
-            <h2 className="text-[32px] font-semibold uppercase tracking-[0.03em] md:text-[58px]">
-              EXPERIENCIAS DISPONIBLES
-            </h2>
-          </div>
-
-          {/* LAS TABS VISIBLES */}
-          <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5">
-            {displayPlans.map((plan: any) => (
-              <button
-                key={plan.id}
-                onClick={() => setSelectedPlan(plan.id)}
-                className={`rounded-[18px] px-4 py-4 text-center text-[12px] font-medium uppercase tracking-[0.12em] transition ${selectedPlan === plan.id
-                  ? "bg-[#789894] text-white shadow-lg"
-                  : "bg-white text-[var(--mv-ink)] shadow-sm"
-                  }`}
-              >
-                {plan.nombre || plan.name}
-              </button>
-            ))}
-          </div>
-
-          <div className="overflow-hidden rounded-[30px] bg-white shadow-[0_22px_60px_rgba(0,0,0,0.08)]">
-            <div className="grid md:grid-cols-[0.95fr_1.05fr]">
-              <div className="relative min-h-[360px] md:min-h-[680px]">
-                <img
-                  src={getOptimizedUrl(activePlan.imagen_url || activePlan.image)}
-                  alt={activePlan.nombre || activePlan.name}
-                  loading="lazy"
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-              </div>
-
-              <div className="px-6 py-8 md:px-10 md:py-10">
-                {(() => {
-                  let itemsList = activePlan.items;
-                  if (!itemsList && activePlan.descripcion) {
-                    try { itemsList = JSON.parse(activePlan.descripcion); } catch (e) { itemsList = [activePlan.descripcion]; }
-                  }
-
-                  return (
-                    <>
-                      <p className="mv-script text-[44px] leading-none text-[#789894] md:text-[68px]">
-                        {activePlan.nombre || activePlan.name}
-                      </p>
-                      <p className="mt-2 text-[13px] uppercase tracking-[0.12em] text-[var(--mv-ink)]/55">
-                        {activePlan.subtitulo || activePlan.categoria || activePlan.subtitle}
-                      </p>
-
-                      <ul className="mt-7 space-y-3">
-                        {(itemsList || []).map((item: string, idx: number) => (
-                          <li key={idx} className="flex items-start gap-3">
-                            <span className="mt-[10px] h-[5px] w-[5px] rounded-full bg-[#789894]" />
-                            <span className="text-[15px] leading-7 text-[var(--mv-ink)]/82 md:text-[17px] md:leading-8">
-                              {item}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-
-                      <div className="mt-8 flex items-center gap-4">
-                        <span className="h-px flex-1 bg-black/10" />
-                        <p className="text-[22px] font-medium uppercase tracking-[0.06em] md:text-[28px]">
-                          $ {activePlan.precio_base ? Number(activePlan.precio_base).toLocaleString() : activePlan.price}
-                        </p>
-                        <span className="h-px flex-1 bg-black/10" />
-                      </div>
-                    </>
-                  );
-                })()}
-
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  <a
-                    href={getWhatsappLink(`Hola Miles Visual, quiero cotizar el plan ${(activePlan as any).nombre || (activePlan as any).name}`)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mv-button-dark"
-                  >
-                    Cotizar
-                  </a>
-                  <Link href="/bodas" className="mv-button-outline-dark">
-                    Ver galería
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* REDES */}
-        <section className="mx-auto max-w-[1180px] px-4 py-16 md:px-8 md:py-24">
-          <div className="rounded-[30px] bg-[#789894] px-6 py-12 text-center text-white shadow-[0_22px_60px_rgba(0,0,0,0.08)] md:px-10 md:py-16">
-            <p className="mv-script text-[44px] leading-none text-white md:text-[72px]">
-              Redes
-            </p>
-            <h2 className="mt-2 text-[28px] font-semibold uppercase tracking-[0.03em] md:text-[48px]">
-              CONECTA CON NUESTRO UNIVERSO VISUAL
-            </h2>
-
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <a
-                href="https://www.instagram.com/milesvisual_producciones/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mv-button-light"
-              >
-                <Instagram className="mr-2 h-4 w-4" />
-                Instagram
-              </a>
-
-              <a
-                href={getWhatsappLink("Hola Miles Visual")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mv-button-outline-light"
-              >
-                <MessageCircle className="mr-2 h-4 w-4" />
-                WhatsApp
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* TESTIMONIOS */}
-        <section className="mx-auto max-w-[1180px] px-4 py-20 md:px-8 md:py-28">
-          <div className="mb-12 text-center">
-            <p className="mv-script text-[44px] leading-none text-[var(--mv-gold)] md:text-[72px]">
-              Testimonios
-            </p>
-            <h2 className="text-[32px] font-semibold uppercase tracking-[0.03em] md:text-[54px]">
-              LO QUE DICEN DE LA EXPERIENCIA
-            </h2>
-          </div>
-
-          <div className="relative overflow-hidden rounded-[30px] bg-white px-6 py-10 shadow-[0_22px_60px_rgba(0,0,0,0.06)] md:px-10 md:py-12">
-            <div className="mx-auto max-w-[760px] text-center">
-              <img
-                src={testimonials[testimonialIndex].image}
-                alt={testimonials[testimonialIndex].name}
-                className="mx-auto h-20 w-20 rounded-full object-cover"
-              />
-
-              <div className="mt-5 flex justify-center gap-1 text-[#d4a85d]">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-current" />
-                ))}
-              </div>
-
-              <p className="mt-5 text-[16px] leading-8 text-[var(--mv-ink)]/78 md:text-[18px] md:leading-9">
-                “{testimonials[testimonialIndex].text}”
-              </p>
-
-              <p className="mt-5 text-[16px] font-semibold">
-                {testimonials[testimonialIndex].name}
-              </p>
-              <p className="mt-1 text-[12px] uppercase tracking-[0.12em] text-[var(--mv-ink)]/50">
-                {testimonials[testimonialIndex].role}
-              </p>
-            </div>
-
-            <button
-              onClick={() =>
-                setTestimonialIndex(
-                  (prev) => (prev - 1 + testimonials.length) % testimonials.length
-                )
-              }
-              className="absolute left-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-black/10 bg-white shadow-sm"
-              aria-label="Testimonio anterior"
-            >
-              <ChevronLeft className="h-5 w-5" />
+              {plan.nombre || plan.name}
             </button>
+          ))}
+        </div>
 
-            <button
-              onClick={() =>
-                setTestimonialIndex((prev) => (prev + 1) % testimonials.length)
-              }
-              className="absolute right-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-black/10 bg-white shadow-sm"
-              aria-label="Siguiente testimonio"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
+        <div className="overflow-hidden rounded-[30px] bg-white shadow-[0_22px_60px_rgba(0,0,0,0.08)]">
+          <div className="grid md:grid-cols-[0.95fr_1.05fr]">
+            <div className="relative min-h-[360px] md:min-h-[680px]">
+              <img
+                src={getOptimizedUrl(activePlan.imagen_url || activePlan.image)}
+                alt={activePlan.nombre || activePlan.name}
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            </div>
+
+            <div className="px-6 py-8 md:px-10 md:py-10">
+              {(() => {
+                let itemsList = activePlan.items;
+                if (!itemsList && activePlan.descripcion) {
+                  try { itemsList = JSON.parse(activePlan.descripcion); } catch (e) { itemsList = [activePlan.descripcion]; }
+                }
+
+                return (
+                  <>
+                    <p className="mv-script text-[44px] leading-none text-[#789894] md:text-[68px]">
+                      {activePlan.nombre || activePlan.name}
+                    </p>
+                    <p className="mt-2 text-[13px] uppercase tracking-[0.12em] text-[var(--mv-ink)]/55">
+                      {activePlan.subtitulo || activePlan.categoria || activePlan.subtitle}
+                    </p>
+
+                    <ul className="mt-7 space-y-3">
+                      {(itemsList || []).map((item: string, idx: number) => (
+                        <li key={idx} className="flex items-start gap-3">
+                          <span className="mt-[10px] h-[5px] w-[5px] rounded-full bg-[#789894]" />
+                          <span className="text-[15px] leading-7 text-[var(--mv-ink)]/82 md:text-[17px] md:leading-8">
+                            {item}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="mt-8 flex items-center gap-4">
+                      <span className="h-px flex-1 bg-black/10" />
+                      <p className="text-[22px] font-medium uppercase tracking-[0.06em] md:text-[28px]">
+                        $ {activePlan.precio_base ? Number(activePlan.precio_base).toLocaleString() : activePlan.price}
+                      </p>
+                      <span className="h-px flex-1 bg-black/10" />
+                    </div>
+                  </>
+                );
+              })()}
+
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <a
+                  href={getWhatsappLink(`Hola Miles Visual, quiero cotizar el plan ${(activePlan as any).nombre || (activePlan as any).name}`)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mv-button-dark"
+                >
+                  Cotizar
+                </a>
+                <Link href="/bodas" className="mv-button-outline-dark">
+                  Ver galería
+                </Link>
+              </div>
+            </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* FOOTER */}
-        <footer className="border-t border-black/8 bg-white">
-          <div className="mx-auto flex max-w-[1280px] flex-col gap-6 px-4 py-10 md:flex-row md:items-center md:justify-between md:px-8">
-            <nav className="flex flex-wrap gap-5">
-              <Link href="/" className="mv-nav-link">
-                Inicio
-              </Link>
-              <Link href="/bodas" className="mv-nav-link">
-                Bodas
-              </Link>
-              <Link href="/prebodas" className="mv-nav-link">
-                Pre-Bodas
-              </Link>
-              <Link href="/estudio" className="mv-nav-link">
-                Foto Estudios
-              </Link>
-              <Link href="/contacto" className="mv-nav-link">
-                Contacto
-              </Link>
-            </nav>
+      {/* REDES */}
+      <section className="mx-auto max-w-[1180px] px-4 py-16 md:px-8 md:py-24">
+        <div className="rounded-[30px] bg-[#789894] px-6 py-12 text-center text-white shadow-[0_22px_60px_rgba(0,0,0,0.08)] md:px-10 md:py-16">
+          <p className="mv-script text-[44px] leading-none text-white md:text-[72px]">
+            Redes
+          </p>
+          <h2 className="mt-2 text-[28px] font-semibold uppercase tracking-[0.03em] md:text-[48px]">
+            CONECTA CON NUESTRO UNIVERSO VISUAL
+          </h2>
 
-            <p className="text-[12px] uppercase tracking-[0.12em] text-black/45">
-              © 2026 Miles Visual
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <a
+              href="https://www.instagram.com/milesvisual_producciones/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mv-button-light"
+            >
+              <Instagram className="mr-2 h-4 w-4" />
+              Instagram
+            </a>
+
+            <a
+              href={getWhatsappLink("Hola Miles Visual")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mv-button-outline-light"
+            >
+              <MessageCircle className="mr-2 h-4 w-4" />
+              WhatsApp
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIOS */}
+      <section className="mx-auto max-w-[1180px] px-4 py-20 md:px-8 md:py-28">
+        <div className="mb-12 text-center">
+          <p className="mv-script text-[44px] leading-none text-[var(--mv-gold)] md:text-[72px]">
+            Testimonios
+          </p>
+          <h2 className="text-[32px] font-semibold uppercase tracking-[0.03em] md:text-[54px]">
+            LO QUE DICEN DE LA EXPERIENCIA
+          </h2>
+        </div>
+
+        <div className="relative overflow-hidden rounded-[30px] bg-white px-6 py-10 shadow-[0_22px_60px_rgba(0,0,0,0.06)] md:px-10 md:py-12">
+          <div className="mx-auto max-w-[760px] text-center">
+            <img
+              src={testimonials[testimonialIndex].image}
+              alt={testimonials[testimonialIndex].name}
+              className="mx-auto h-20 w-20 rounded-full object-cover"
+            />
+
+            <div className="mt-5 flex justify-center gap-1 text-[#d4a85d]">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} className="h-4 w-4 fill-current" />
+              ))}
+            </div>
+
+            <p className="mt-5 text-[16px] leading-8 text-[var(--mv-ink)]/78 md:text-[18px] md:leading-9">
+              “{testimonials[testimonialIndex].text}”
+            </p>
+
+            <p className="mt-5 text-[16px] font-semibold">
+              {testimonials[testimonialIndex].name}
+            </p>
+            <p className="mt-1 text-[12px] uppercase tracking-[0.12em] text-[var(--mv-ink)]/50">
+              {testimonials[testimonialIndex].role}
             </p>
           </div>
-        </footer>
 
-        {/* WHATSAPP FLOTANTE */}
-        <a
-          href={getWhatsappLink("Hola Miles Visual")}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="fixed bottom-5 right-5 z-[120] flex h-14 w-14 items-center justify-center rounded-full bg-[#789894] text-white shadow-xl transition hover:scale-105"
-          aria-label="WhatsApp"
-        >
-          <MessageCircle className="h-6 w-6" />
-        </a>
-      </main>
-    );
-  }
+          <button
+            onClick={() =>
+              setTestimonialIndex(
+                (prev) => (prev - 1 + testimonials.length) % testimonials.length
+              )
+            }
+            className="absolute left-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-black/10 bg-white shadow-sm"
+            aria-label="Testimonio anterior"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+
+          <button
+            onClick={() =>
+              setTestimonialIndex((prev) => (prev + 1) % testimonials.length)
+            }
+            className="absolute right-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-black/10 bg-white shadow-sm"
+            aria-label="Siguiente testimonio"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="border-t border-black/8 bg-white">
+        <div className="mx-auto flex max-w-[1280px] flex-col gap-6 px-4 py-10 md:flex-row md:items-center md:justify-between md:px-8">
+          <nav className="flex flex-wrap gap-5">
+            <Link href="/" className="mv-nav-link">
+              Inicio
+            </Link>
+            <Link href="/bodas" className="mv-nav-link">
+              Bodas
+            </Link>
+            <Link href="/prebodas" className="mv-nav-link">
+              Pre-Bodas
+            </Link>
+            <Link href="/estudio" className="mv-nav-link">
+              Foto Estudios
+            </Link>
+            <Link href="/contacto" className="mv-nav-link">
+              Contacto
+            </Link>
+          </nav>
+
+          <p className="text-[12px] uppercase tracking-[0.12em] text-black/45">
+            © 2026 Miles Visual
+          </p>
+        </div>
+      </footer>
+
+      {/* WHATSAPP FLOTANTE */}
+      <a
+        href={getWhatsappLink("Hola Miles Visual")}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-5 right-5 z-[120] flex h-14 w-14 items-center justify-center rounded-full bg-[#789894] text-white shadow-xl transition hover:scale-105"
+        aria-label="WhatsApp"
+      >
+        <MessageCircle className="h-6 w-6" />
+      </a>
+    </main>
+  );
+}
