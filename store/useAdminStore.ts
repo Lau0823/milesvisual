@@ -187,6 +187,9 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         if (!excluded.includes(key) && plan[key] !== undefined && plan[key] !== null) {
           if (plan[key] instanceof File) {
             formData.append(key, plan[key]);
+          } else if (typeof plan[key] === 'boolean') {
+            // Aseguramos que el booleano se envíe como el string 'true' o 'false'
+            formData.append(key, plan[key] ? 'true' : 'false');
           } else {
             formData.append(key, plan[key].toString());
           }
