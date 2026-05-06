@@ -1,15 +1,13 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { Reservation, QuoteRequest } from '../lib/db';
 
-// Extender jsPDF para incluir autoTable (necesario para TypeScript)
-interface jsPDFWithAutoTable extends jsPDF {
-  autoTable: (options: any) => void;
-}
-
 export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: 'quote' | 'invoice' | 'receipt' = 'quote', logoUrl?: string) => {
-  const doc = new jsPDF() as jsPDFWithAutoTable;
+  const doc = new jsPDF();
   const isReservation = 'eventDate' in data;
+
+  const DEFAULT_LOGO = "https://res.cloudinary.com/dgfp5gcjr/image/upload/v1778043651/LOGO_MILES_AMARILLO_Mesa_de_trabajo_1_elqbnp.png";
+  const finalLogoUrl = logoUrl || DEFAULT_LOGO;
 
   // Función para cargar imagen y convertir a Base64
   const getBase64Image = (url: string): Promise<string> => {
@@ -36,17 +34,17 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
   if (mode === 'quote' && isReservation) docTitle = 'RESUMEN DE RESERVA';
 
   // Colores de marca
-  const primaryColor = [120, 152, 148]; // #789894 (Sage)
-  const secondaryColor = [186, 161, 118]; // #BAA176 (Gold)
-  const inkColor = [7, 16, 20]; // #071014 (Ink)
+  const primaryColor: [number, number, number] = [120, 152, 148]; // #789894 (Sage)
+  const secondaryColor: [number, number, number] = [186, 161, 118]; // #BAA176 (Gold)
+  const inkColor: [number, number, number] = [7, 16, 20]; // #071014 (Ink)
 
   // Header
   doc.setFillColor(inkColor[0], inkColor[1], inkColor[2]);
   doc.rect(0, 0, 210, 45, 'F');
 
-  if (logoUrl) {
+  if (finalLogoUrl) {
     try {
-      const base64Logo = await getBase64Image(logoUrl);
+      const base64Logo = await getBase64Image(finalLogoUrl);
       // Centrar el logo (ajustar dimensiones según necesidad)
       doc.addImage(base64Logo, 'PNG', 85, 5, 40, 25);
     } catch (e) {
@@ -103,7 +101,7 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
     doc.setFont('helvetica', 'bold');
     doc.text(mode === 'invoice' ? 'FACTURA NO:' : 'ID RESERVA:', 140, 82);
     doc.setFont('helvetica', 'normal');
-    doc.text(`#MV-${(data as Reservation).id || 'PEND'}`, 165, 82);
+    doc.text(`#MV-${(data as any).id || 'PEND'}`, 165, 82);
   }
 
   // Detalles del Servicio
@@ -132,13 +130,13 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
     tableBody.push(['SALDO PENDIENTE', '', `$ ${saldo.toLocaleString()}`]);
   }
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: 105,
     head: [['DESCRIPCIÓN DEL SERVICIO', 'DETALLE', 'VALOR']],
     body: tableBody,
     headStyles: { 
       fillColor: primaryColor,
-      textColor: [255, 255, 255],
+      textColor: [255, 255, 255] as [number, number, number],
       fontSize: 10,
       fontStyle: 'bold'
     },
@@ -151,7 +149,7 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
     },
     didParseCell: function(data: any) {
       if (data.row.index === tableBody.length - 1 && data.column.index === 2) {
-        data.cell.styles.textColor = saldo > 0 ? [186, 161, 118] : [120, 152, 148];
+        data.cell.styles.textColor = saldo > 0 ? [186, 161, 118] as [number, number, number] : [120, 152, 148] as [number, number, number];
       }
     }
   });
