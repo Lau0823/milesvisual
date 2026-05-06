@@ -73,8 +73,20 @@ export default function CotizacionesPage() {
                 >
                   <FileText size={14} /> PDF
                 </button>
-                <button className="bg-[var(--mv-sage)] text-white px-5 py-2.5 rounded-xl text-[9px] font-bold uppercase tracking-widest hover:bg-[var(--mv-ink)] transition flex items-center gap-2">
-                  <CheckCircle2 size={14} /> Confirmar
+                <button 
+                  onClick={() => {
+                    const params = new URLSearchParams({
+                      name: quote.clientName,
+                      email: quote.email,
+                      phone: quote.phone,
+                      service: quote.serviceInterested,
+                      convert: 'true'
+                    });
+                    window.location.href = `/admin/reservas?${params.toString()}`;
+                  }}
+                  className="bg-[var(--mv-sage)] text-white px-5 py-2.5 rounded-xl text-[9px] font-bold uppercase tracking-widest hover:bg-[var(--mv-ink)] transition flex items-center gap-2 shadow-sm"
+                >
+                  <ArrowRight size={14} /> Convertir a Reserva
                 </button>
                 <button className="bg-white text-[var(--mv-ink)] px-5 py-2.5 rounded-xl text-[9px] font-bold uppercase tracking-widest border border-black/10 hover:bg-black/5 transition flex items-center gap-2">
                   Detalle

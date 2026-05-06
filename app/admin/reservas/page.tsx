@@ -46,6 +46,34 @@ export default function ReservasPage() {
     }
   }, [session, syncWithBackend, fetchPlanes]);
 
+  // Lógica para convertir Cotización -> Reserva
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('convert') === 'true') {
+      const name = params.get('name') || '';
+      const email = params.get('email') || '';
+      const phone = params.get('phone') || '';
+      const service = params.get('service') || 'Personalizado';
+
+      // Buscar si el servicio coincide con un plan para poner el precio
+      const matchedPlan = planes.find(p => p.nombre.toLowerCase() === service.toLowerCase() || p.categoria.toLowerCase() === service.toLowerCase());
+      const price = matchedPlan ? Number(matchedPlan.precio_base) : 0;
+
+      setFormRes(prev => ({
+        ...prev,
+        clientName: name,
+        email: email,
+        phone: phone,
+        serviceType: matchedPlan ? matchedPlan.nombre : 'Personalizado',
+        value: price
+      }));
+      setValInput(price > 0 ? price.toString() : '');
+      setShowModal(true);
+      // Limpiar la URL para que no se abra de nuevo al recargar
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
   // Al abrir el modal para editar, sincronizamos los inputs
   const openModal = (res: any = null) => {
     if (res) {
