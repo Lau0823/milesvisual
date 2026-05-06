@@ -111,10 +111,10 @@ export default function ReservasPage() {
         status: res.status,
         paymentStatus: res.paymentStatus
       });
-      setValInput(res.value.toString());
-      setAntInput((res.anticipo || 0).toString());
-      setDevInput((res.devolucion || 0).toString());
-      setGasInput((res.gastos_operativos || 0).toString());
+      setValInput(res.value > 0 ? res.value.toString() : '');
+      setAntInput(res.anticipo > 0 ? res.anticipo.toString() : '');
+      setDevInput(res.devolucion > 0 ? res.devolucion.toString() : '');
+      setGasInput(res.gastos_operativos > 0 ? res.gastos_operativos.toString() : '');
     } else {
       setEditingRes(null);
       setFormRes({
@@ -185,7 +185,7 @@ export default function ReservasPage() {
           serviceType: selectedPlan.nombre, 
           value: Number(selectedPlan.precio_base) 
         });
-        setValInput(selectedPlan.precio_base.toString());
+        setValInput(selectedPlan.precio_base > 0 ? selectedPlan.precio_base.toString() : '');
       }
     }
   };
@@ -418,7 +418,7 @@ export default function ReservasPage() {
                         required 
                         value={valInput} 
                         onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '');
+                          const val = e.target.value.replace(/\D/g, '').replace(/^0+/, '');
                           setValInput(val);
                           setFormRes({...formRes, value: Number(val)});
                         }} 
@@ -438,7 +438,7 @@ export default function ReservasPage() {
                         type="text" 
                         value={antInput} 
                         onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '');
+                          const val = e.target.value.replace(/\D/g, '').replace(/^0+/, '');
                           setAntInput(val);
                           setFormRes({...formRes, anticipo: Number(val)});
                         }} 
@@ -473,7 +473,7 @@ export default function ReservasPage() {
                         type="text" 
                         value={devInput} 
                         onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '');
+                          const val = e.target.value.replace(/\D/g, '').replace(/^0+/, '');
                           setDevInput(val);
                           setFormRes({...formRes, devolucion: Number(val)});
                         }} 
@@ -490,7 +490,7 @@ export default function ReservasPage() {
                         type="text" 
                         value={gasInput} 
                         onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '');
+                          const val = e.target.value.replace(/\D/g, '').replace(/^0+/, '');
                           setGasInput(val);
                           setFormRes({...formRes, gastos_operativos: Number(val)});
                         }} 

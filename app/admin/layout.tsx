@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Calendar, DollarSign, Image as ImageIcon, Users, User, Settings, LogOut, Tag, FileText, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Calendar, DollarSign, Image as ImageIcon, Users, User, Settings, LogOut, Tag, FileText, Menu, X, MessageCircle } from 'lucide-react';
 import { useAdminStore } from '../../store/useAdminStore';
 import { useEffect, useState } from 'react';
 import { SessionProvider, signOut } from 'next-auth/react';
@@ -22,7 +22,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/media', label: 'Media', icon: <ImageIcon size={18} className="h-5 w-5" /> },
     { href: '/admin/planes', label: 'Planes', icon: <Tag size={18} className="h-5 w-5" /> },
     { href: '/admin/facturas', label: 'Facturas', icon: <FileText size={18} className="h-5 w-5" /> },
-    { href: '/admin/cotizaciones', label: 'Clientes', icon: <Users size={18} className="h-5 w-5" /> },
+    { href: '/admin/clientes', label: 'Clientes', icon: <Users size={18} className="h-5 w-5" /> },
+    { href: '/admin/cotizaciones', label: 'Prospectos', icon: <MessageCircle size={18} className="h-5 w-5" /> },
   ];
 
   return (

@@ -5,7 +5,7 @@ import { useAdminStore } from '../../store/useAdminStore';
 import { 
   Calendar, DollarSign, TrendingUp, Users, ArrowUpRight, 
   Clock, CheckCircle2, Image as ImageIcon, MoreVertical, 
-  Search, Plus, Filter, Mail, Phone, CalendarDays, Upload, Trash2, ChevronLeft, ChevronRight, Activity
+  Search, Plus, Filter, Mail, Phone, CalendarDays, Upload, Trash2, ChevronLeft, ChevronRight, Activity, MessageSquare
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 
@@ -13,7 +13,7 @@ export default function DashboardPage() {
   const { data: session } = useSession();
   const { 
     totalActiveReservations, totalPaidIncome, totalPendingIncome, totalPosts, 
-    reservations, mediaPosts, syncWithBackend 
+    reservations, quoteRequests, mediaPosts, syncWithBackend 
   } = useAdminStore();
 
   const [loading, setLoading] = useState(false);
@@ -42,6 +42,7 @@ export default function DashboardPage() {
   };
 
   const monthlyData = getMonthlyIncome();
+  const uniqueClients = new Set(reservations.map(r => r.email?.toLowerCase().trim()).filter(Boolean)).size;
 
   // --- Dynamic Calendar Logic ---
   const currentMonth = currentDateObj.toLocaleDateString('es-ES', { month: 'long' });
@@ -104,12 +105,13 @@ export default function DashboardPage() {
       </div>
 
       {/* KPI CARDS SUPERIORES */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         {[
-          { label: 'RESERVAS ACTIVAS', value: totalActiveReservations, icon: <Calendar size={16} /> },
-          { label: 'INGRESO PAGADO', value: `$ ${totalPaidIncome.toLocaleString()}`, icon: <CheckCircle2 size={16} /> },
-          { label: 'PENDIENTE', value: `$ ${totalPendingIncome.toLocaleString()}`, icon: <Clock size={16} /> },
-          { label: 'PUBLICACIONES', value: totalPosts, icon: <ImageIcon size={16} /> },
+          { label: 'RESERVAS', value: totalActiveReservations, icon: <Calendar size={16} /> },
+          { label: 'CLIENTES', value: uniqueClients, icon: <Users size={16} /> },
+          { label: 'PROSPECTOS', value: quoteRequests.length, icon: <MessageSquare size={16} /> },
+          { label: 'INGRESOS (LTV)', value: `$ ${totalPaidIncome.toLocaleString()}`, icon: <CheckCircle2 size={16} /> },
+          { label: 'MEDIA', value: totalPosts, icon: <ImageIcon size={16} /> },
         ].map((kpi, i) => (
           <div key={i} className="bg-white rounded-[24px] p-7 shadow-sm border border-black/5 flex justify-between items-start hover:shadow-md transition">
             <div>
