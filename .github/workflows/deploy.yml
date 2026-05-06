@@ -16,7 +16,9 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /var/www/frontend
-            git pull origin frontend
+            # Forzamos la limpieza para evitar bloqueos por archivos locales (como package-lock.json)
+            git fetch --all
+            git reset --hard origin/frontend
             npm install
             npm run build
             # Usamos el archivo central de infraestructura para el despliegue
