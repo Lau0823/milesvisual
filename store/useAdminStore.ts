@@ -183,15 +183,20 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       // El resto lo limpia el backend automáticamente con whitelist:true
       const excluded = ['id', 'ventasServicios'];
       
+      console.log('--- ENVIANDO PLAN AL BACKEND ---', plan);
+      
       Object.keys(plan).forEach(key => {
         if (!excluded.includes(key) && plan[key] !== undefined && plan[key] !== null) {
           if (plan[key] instanceof File) {
             formData.append(key, plan[key]);
+            console.log(`FormData [${key}]: ARCHIVO`);
           } else if (typeof plan[key] === 'boolean') {
-            // Aseguramos que el booleano se envíe como el string 'true' o 'false'
-            formData.append(key, plan[key] ? 'true' : 'false');
+            const boolVal = plan[key] ? 'true' : 'false';
+            formData.append(key, boolVal);
+            console.log(`FormData [${key}]: ${boolVal} (booleano)`);
           } else {
             formData.append(key, plan[key].toString());
+            console.log(`FormData [${key}]: ${plan[key].toString()}`);
           }
         }
       });
