@@ -11,6 +11,9 @@ export interface Reservation {
   time: string;
   value: number;
   anticipo?: number;
+  devolucion?: number;
+  gastos_operativos?: number;
+  notas_admin?: string;
   status: 'pending' | 'confirmed' | 'cancelled';
   paymentStatus: 'pending' | 'partial' | 'paid';
   paymentSchedule?: { date: string; amount: number; isPaid: boolean }[]; // Pagos diferidos

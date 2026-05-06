@@ -11,6 +11,8 @@ interface AdminState {
   totalPaidIncome: number;
   totalPendingIncome: number;
   totalPosts: number;
+  refunds: number;
+  expenses: number;
   loading: boolean;
   
   // Acciones globales
@@ -40,6 +42,8 @@ export const useAdminStore = create<AdminState>((set, get) => ({
   totalPaidIncome: 0,
   totalPendingIncome: 0,
   totalPosts: 0,
+  refunds: 0,
+  expenses: 0,
   loading: false,
 
   setLoading: (loading) => set({ loading }),
@@ -87,20 +91,30 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       const mediaPosts = mediaRes.ok ? await mediaRes.json() : get().mediaPosts;
       const planes = planesData.data || [];
 
-      // Calcular ingresos reales
-      const paid = reservations.reduce((sum: number, r: any) => {
-        const val = Number(r.value || 0);
-        const ant = Number(r.anticipo || 0);
-        // Lo pagado es el anticipo + el valor total si está marcada como PAID
-        return sum + (r.paymentStatus === 'paid' ? val : ant);
-      }, 0);
+      // Calcular ingresos reales y egresos
+      let paid = 0;
+      let pending = 0;
+      let refunds = 0;
+      let expenses = 0;
 
-      const pending = reservations.reduce((sum: number, r: any) => {
+      reservations.forEach((r: any) => {
         const val = Number(r.value || 0);
         const ant = Number(r.anticipo || 0);
-        // Lo pendiente es el valor total menos el anticipo (si no está totalmente pagada)
-        return sum + (r.paymentStatus !== 'paid' ? (val - ant) : 0);
-      }, 0);
+        const dev = Number(r.devolucion || 0);
+        const gas = Number(r.gastos_operativos || 0);
+
+        // Pagado: Si es PAID es el valor total. Si no, solo el anticipo.
+        // Importante: Restamos lo devuelto para saber cuánto dinero TENEMOS realmente.
+        paid += (r.paymentStatus === 'paid' ? val : ant) - dev;
+        
+        // Pendiente: Solo si no está cancelada y no está pagada totalmente
+        if (r.status !== 'cancelled' && r.paymentStatus !== 'paid') {
+          pending += (val - ant);
+        }
+
+        refunds += dev;
+        expenses += gas;
+      });
 
       const activeReservationsCount = reservations.filter((r: any) => r.status !== 'cancelled').length;
 
@@ -119,7 +133,10 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         totalPaidIncome: paid,
         totalPendingIncome: pending,
         totalActiveReservations: activeReservationsCount,
-        totalPosts: mediaPosts.length
+        totalPosts: mediaPosts.length,
+        // Añadimos estas métricas al estado (puedes expandir el AdminState si quieres verlas en el dashboard)
+        refunds,
+        expenses
       });
     } catch (error) {
       console.error("Error in syncWithBackend:", error);

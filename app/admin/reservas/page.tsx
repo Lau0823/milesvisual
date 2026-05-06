@@ -20,6 +20,8 @@ export default function ReservasPage() {
   // Estados temporales para los inputs de valor (evitar el problema del cero a la izquierda)
   const [valInput, setValInput] = useState('');
   const [antInput, setAntInput] = useState('');
+  const [devInput, setDevInput] = useState('');
+  const [gasInput, setGasInput] = useState('');
 
   const [formRes, setFormRes] = useState({
     clientName: '',
@@ -30,6 +32,9 @@ export default function ReservasPage() {
     time: '',
     value: 0,
     anticipo: 0,
+    devolucion: 0,
+    gastos_operativos: 0,
+    notas_admin: '',
     status: 'pending',
     paymentStatus: 'pending'
   });
@@ -54,19 +59,28 @@ export default function ReservasPage() {
         time: res.time || '',
         value: Number(res.value),
         anticipo: Number(res.anticipo || 0),
+        devolucion: Number(res.devolucion || 0),
+        gastos_operativos: Number(res.gastos_operativos || 0),
+        notas_admin: res.notas_admin || '',
         status: res.status,
         paymentStatus: res.paymentStatus
       });
       setValInput(res.value.toString());
       setAntInput((res.anticipo || 0).toString());
+      setDevInput((res.devolucion || 0).toString());
+      setGasInput((res.gastos_operativos || 0).toString());
     } else {
       setEditingRes(null);
       setFormRes({
         clientName: '', email: '', phone: '', serviceType: 'Personalizado',
-        eventDate: '', time: '', value: 0, anticipo: 0, status: 'pending', paymentStatus: 'pending'
+        eventDate: '', time: '', value: 0, anticipo: 0, 
+        devolucion: 0, gastos_operativos: 0, notas_admin: '',
+        status: 'pending', paymentStatus: 'pending'
       });
       setValInput('');
       setAntInput('');
+      setDevInput('');
+      setGasInput('');
     }
     setShowModal(true);
   };
@@ -395,6 +409,54 @@ export default function ReservasPage() {
                       <option value="cancelled">Cancelada</option>
                     </select>
                   </div>
+                </div>
+
+                {/* NUEVOS CAMPOS: Devoluciones y Gastos */}
+                <div className="grid grid-cols-2 gap-6 pt-4 border-t border-black/5">
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase tracking-widest font-bold text-rose-500/60 ml-1">Devolución (Refund)</label>
+                    <div className="relative">
+                      <DollarSign size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-300" />
+                      <input 
+                        type="text" 
+                        value={devInput} 
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          setDevInput(val);
+                          setFormRes({...formRes, devolucion: Number(val)});
+                        }} 
+                        placeholder="0"
+                        className="w-full bg-rose-50/30 rounded-xl pl-10 pr-4 py-3 text-sm border border-rose-100 outline-none focus:border-rose-300 text-rose-600 font-medium" 
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Gastos Operativos</label>
+                    <div className="relative">
+                      <DollarSign size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20" />
+                      <input 
+                        type="text" 
+                        value={gasInput} 
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          setGasInput(val);
+                          setFormRes({...formRes, gastos_operativos: Number(val)});
+                        }} 
+                        placeholder="0"
+                        className="w-full bg-white rounded-xl pl-10 pr-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)] font-medium" 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Notas Internas / Motivo Cancelación</label>
+                  <textarea 
+                    value={formRes.notas_admin} 
+                    onChange={(e) => setFormRes({...formRes, notas_admin: e.target.value})}
+                    placeholder="Escribe aquí detalles sobre devoluciones, gastos o por qué se canceló la sesión..."
+                    className="w-full bg-white rounded-xl px-4 py-3 text-xs border border-black/5 outline-none focus:border-[var(--mv-sage)] min-h-[80px] resize-none"
+                  />
                 </div>
               </div>
 
