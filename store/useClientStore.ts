@@ -65,6 +65,24 @@ export const useClientStore = create<ClientState>((set, get) => ({
         db.jsonCache.put({ key: 'plans', data: plans, updatedAt: now }),
         db.jsonCache.put({ key: 'mediaPosts', data: mediaPosts, updatedAt: now })
       ]);
+
+      // 4. PREFETCH SILENCIOSO: Descargar todo lo demás en background
+      // Esperamos 2 segundos para no molestar la carga inicial del Hero
+      setTimeout(() => {
+        // Lista de videos clave de otras páginas
+        const importantVideos = [
+          "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429200/VIDEO_3_1_yuof8i.mp4", // Bodas
+          "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429204/VIDEO_5_1_r3j5j1.mp4", // Prebodas
+        ];
+
+        [...importantVideos, ...mediaPosts].forEach((item: any) => {
+          const url = typeof item === 'string' ? item : item.cloudinaryUrl;
+          if (url) {
+            fetch(url, { mode: 'no-cors', priority: 'low' }).catch(() => {});
+          }
+        });
+      }, 2000);
+
     } catch (error) {
       console.error("Error loading public data:", error);
       // Si falló el fetch pero no teníamos cache, igual mostramos la web con los fallbacks
