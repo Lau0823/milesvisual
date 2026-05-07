@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useMemo, useState, useEffect } from "react";
 import { Menu, X, ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
 import { useClientStore } from "../../store/useClientStore";
@@ -27,11 +28,20 @@ export default function PrebodasPage() {
 
   const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
   const getSetting = (key: string, defaultValue: string) => settings.find(s => s.key === key)?.value || defaultValue;
+
+  const getOptimizedUrl = (url: string, type: 'image' | 'video' = 'image') => {
+    if (!url || !url.includes('cloudinary.com')) return url;
+    if (type === 'video') return url.replace('/video/upload/', '/video/upload/f_auto,q_auto,c_scale,w_1280/');
+    return url.replace('/upload/', '/upload/f_auto,q_auto/');
+  };
+
+  const getPosterUrl = (url: string) => {
+    if (!url || !url.includes('cloudinary.com')) return undefined;
+    return url.replace('/video/upload/', '/video/upload/f_auto,q_auto,so_0/').replace('.mp4', '.jpg');
+  };
   
   let heroVideoSrc = getSetting('prebodas_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429204/VIDEO_5_1_r3j5j1.mp4");
-  if (heroVideoSrc && heroVideoSrc.includes('cloudinary.com')) {
-    heroVideoSrc = heroVideoSrc.replace('/video/upload/', '/video/upload/f_auto,q_auto:good,c_scale,w_1920/');
-  }
+  heroVideoSrc = getOptimizedUrl(heroVideoSrc, 'video');
 
   const getWhatsappLink = (text: string) => {
     const number = getSetting('whatsapp_number', '573148112717');
@@ -81,6 +91,7 @@ export default function PrebodasPage() {
         <video
           className="absolute inset-0 h-full w-full object-cover"
           src={heroVideoSrc}
+          poster={getPosterUrl(heroVideoSrc)}
           autoPlay
           muted
           loop
@@ -98,9 +109,12 @@ export default function PrebodasPage() {
           </nav>
 
           <Link href="/" className="absolute left-1/2 top-6 z-30 -translate-x-1/2">
-            <img
+            <Image
               src={logoSrc}
               alt="Miles Visual"
+              width={220}
+              height={190}
+              priority
               className="h-[120px] w-auto max-w-[82vw] object-contain sm:h-[150px] md:h-[190px] lg:h-[220px]"
             />
           </Link>
@@ -135,7 +149,7 @@ export default function PrebodasPage() {
               }`}
             >
               <div className="flex items-center justify-between">
-                <img src={logoSrc} alt="Miles Visual" className="h-[60px] w-auto object-contain" />
+                <Image src={logoSrc} alt="Miles Visual" width={100} height={60} className="h-[60px] w-auto object-contain" />
                 <button
                   onClick={() => setMenuOpen(false)}
                   className="flex h-10 w-10 items-center justify-center"
@@ -191,10 +205,12 @@ export default function PrebodasPage() {
             onClick={() => setSelectedPhoto(index)}
             className="group relative block min-h-screen w-full overflow-hidden text-left"
           >
-            <img
-              src={photo.image}
+            <Image
+              src={getOptimizedUrl(photo.image)}
               alt={photo.title}
-              className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
+              fill
+              sizes="100vw"
+              className="absolute inset-0 object-cover transition duration-700 group-hover:scale-[1.03]"
             />
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(17,19,20,0.10)_0%,rgba(17,19,20,0.20)_35%,rgba(17,19,20,0.52)_100%)]" />
 
@@ -245,10 +261,11 @@ export default function PrebodasPage() {
 
             <div className="grid w-full max-w-[1200px] overflow-hidden rounded-[28px] bg-white md:grid-cols-[1fr_0.9fr]">
               <div className="relative min-h-[360px]">
-                <img
-                  src={activePhoto.image}
+                <Image
+                  src={getOptimizedUrl(activePhoto.image)}
                   alt={activePhoto.title}
-                  className="h-full w-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               </div>
 
@@ -298,10 +315,11 @@ export default function PrebodasPage() {
         {activePlan && <div className="overflow-hidden rounded-[30px] bg-white shadow-[0_22px_60px_rgba(0,0,0,0.08)]">
           <div className="grid md:grid-cols-[0.95fr_1.05fr]">
             <div className="relative min-h-[360px] md:min-h-[680px]">
-              <img
-                src={(activePlan.imagen_url || activePlan.image)}
+              <Image
+                src={getOptimizedUrl(activePlan.imagen_url || activePlan.image)}
                 alt={activePlan.nombre || activePlan.name}
-                className="h-full w-full object-cover"
+                fill
+                className="object-cover"
               />
             </div>
 

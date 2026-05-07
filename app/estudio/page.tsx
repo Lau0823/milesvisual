@@ -29,10 +29,19 @@ export default function EstudioPage() {
   const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
   const getSetting = (key: string, defaultValue: string) => settings.find(s => s.key === key)?.value || defaultValue;
   
-  let heroVideoSrc = getSetting('estudio_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429204/VIDEO_5_1_r3j5j1.mp4"); // Fallback al mismo de prebodas o similar
-  if (heroVideoSrc && heroVideoSrc.includes('cloudinary.com')) {
-    heroVideoSrc = heroVideoSrc.replace('/video/upload/', '/video/upload/f_auto,q_auto:good,c_scale,w_1920/');
-  }
+  const getOptimizedUrl = (url: string, type: 'image' | 'video' = 'image') => {
+    if (!url || !url.includes('cloudinary.com')) return url;
+    if (type === 'video') return url.replace('/video/upload/', '/video/upload/f_auto,q_auto,c_scale,w_1280/');
+    return url.replace('/upload/', '/upload/f_auto,q_auto/');
+  };
+
+  const getPosterUrl = (url: string) => {
+    if (!url || !url.includes('cloudinary.com')) return undefined;
+    return url.replace('/video/upload/', '/video/upload/f_auto,q_auto,so_0/').replace('.mp4', '.jpg');
+  };
+  
+  let heroVideoSrc = getSetting('estudio_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429204/VIDEO_5_1_r3j5j1.mp4");
+  heroVideoSrc = getOptimizedUrl(heroVideoSrc, 'video');
 
   const getWhatsappLink = (text: string) => {
     const number = getSetting('whatsapp_number', '573148112717');
@@ -82,6 +91,7 @@ export default function EstudioPage() {
         <video
           className="absolute inset-0 h-full w-full object-cover"
           src={heroVideoSrc}
+          poster={getPosterUrl(heroVideoSrc)}
           autoPlay
           muted
           loop

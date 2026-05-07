@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { FormEvent, useMemo, useState, useEffect } from "react";
 import { Menu, MessageCircle, Send, X } from "lucide-react";
 import { useClientStore } from "../../store/useClientStore";
@@ -24,7 +25,20 @@ export default function ContactoPage() {
 
   const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
   const getSetting = (key: string, defaultValue: string) => settings.find(s => s.key === key)?.value || defaultValue;
-  const heroVideoSrc = getSetting('bodas_video_url', "/VIDEO 3 .mp4"); // Fallback a bodas o uno general
+
+  const getOptimizedUrl = (url: string, type: 'image' | 'video' = 'image') => {
+    if (!url || !url.includes('cloudinary.com')) return url;
+    if (type === 'video') return url.replace('/video/upload/', '/video/upload/f_auto,q_auto,c_scale,w_1280/');
+    return url.replace('/upload/', '/upload/f_auto,q_auto/');
+  };
+
+  const getPosterUrl = (url: string) => {
+    if (!url || !url.includes('cloudinary.com')) return undefined;
+    return url.replace('/video/upload/', '/video/upload/f_auto,q_auto,so_0/').replace('.mp4', '.jpg');
+  };
+
+  let heroVideoSrc = getSetting('bodas_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429200/VIDEO_3_1_yuof8i.mp4");
+  heroVideoSrc = getOptimizedUrl(heroVideoSrc, 'video');
 
   const navLeft = [
     { href: "/bodas", label: "Bodas" },
@@ -68,6 +82,7 @@ Mensaje: ${form.mensaje || "-"}`;
         <video
           className="absolute inset-0 h-full w-full object-cover"
           src={heroVideoSrc}
+          poster={getPosterUrl(heroVideoSrc)}
           autoPlay
           muted
           loop
@@ -85,9 +100,12 @@ Mensaje: ${form.mensaje || "-"}`;
           </nav>
 
           <Link href="/" className="absolute left-1/2 top-6 z-30 -translate-x-1/2">
-            <img
+            <Image
               src={logoSrc}
               alt="Miles Visual"
+              width={220}
+              height={190}
+              priority
               className="h-[120px] w-auto max-w-[82vw] object-contain sm:h-[150px] md:h-[190px] lg:h-[220px]"
             />
           </Link>
@@ -122,7 +140,7 @@ Mensaje: ${form.mensaje || "-"}`;
               }`}
             >
               <div className="flex items-center justify-between">
-                <img src={logoSrc} alt="Miles Visual" className="h-[60px] w-auto object-contain" />
+                <Image src={logoSrc} alt="Miles Visual" width={100} height={60} className="h-[60px] w-auto object-contain" />
                 <button
                   onClick={() => setMenuOpen(false)}
                   className="flex h-10 w-10 items-center justify-center"
