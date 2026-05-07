@@ -264,8 +264,9 @@ export default function ReservasPage() {
         ))}
       </div>
 
-      <div className="bg-white rounded-[32px] overflow-hidden border border-black/5 shadow-sm">
-        <table className="w-full text-left border-collapse">
+      <div className="bg-white rounded-[32px] border border-black/5 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[1100px]">
           <thead>
             <tr className="bg-black/[0.02] border-b border-black/5">
               <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40">Cliente</th>
@@ -361,7 +362,8 @@ export default function ReservasPage() {
               );
             })}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
 
       {showModal && (
