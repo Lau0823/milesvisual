@@ -17,7 +17,13 @@ export default function BodasPage() {
     loadPublicData();
   }, [loadPublicData]);
 
-  const displayPlans = useMemo(() => displayPlansFull.filter((p: any) => p.categoria?.toLowerCase().includes('boda')), [displayPlansFull]);
+  const displayPlans = useMemo(() => {
+    return displayPlansFull.filter((p: any) => {
+      const cat = p.categoria?.toLowerCase() || '';
+      // Debe contener 'boda' pero NO 'pre-boda' para no mezclarse
+      return cat.includes('boda') && !cat.includes('pre-boda') && !cat.includes('preboda');
+    });
+  }, [displayPlansFull]);
   const bodasGallery = useMemo(() => mediaPostsFull.filter((p: any) => p.category === 'BODAS').map((p: any) => ({ id: p.id, title: p.title, image: p.cloudinaryUrl, description: p.cloudinaryPublicId })), [mediaPostsFull]);
 
   useEffect(() => {

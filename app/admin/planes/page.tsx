@@ -163,14 +163,25 @@ export default function PlanesPage() {
                     </button>
                   </div>
                   {isNewCategory ? (
-                    <input type="text" value={editingPlan?.categoria || ''} onChange={e => setEditingPlan({...editingPlan, categoria: e.target.value})} className="w-full bg-[var(--mv-cream)] rounded-2xl px-5 py-4 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" placeholder="Escribe nueva categoría..." autoFocus />
+                    <div className="space-y-1">
+                      <input type="text" value={editingPlan?.categoria || ''} onChange={e => setEditingPlan({...editingPlan, categoria: e.target.value})} className="w-full bg-[var(--mv-cream)] rounded-2xl px-5 py-4 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" placeholder="Escribe nueva categoría..." autoFocus />
+                      <p className="text-[9px] text-black/30 px-1 italic">Ej: Bodas, Prebodas, Foto Estudio, Editorial...</p>
+                    </div>
                   ) : (
                     <select value={editingPlan?.categoria || ''} onChange={e => setEditingPlan({...editingPlan, categoria: e.target.value})} className="w-full bg-[var(--mv-cream)] rounded-2xl px-5 py-4 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)] appearance-none cursor-pointer">
                       <option value="" disabled>Seleccione una categoría</option>
-                      {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                      {categories.length === 0 && <option value="Boda">Boda</option>}
-                      {categories.length === 0 && <option value="Preboda">Preboda</option>}
-                      {categories.length === 0 && <option value="Estudio">Estudio</option>}
+                      <optgroup label="Sugeridas">
+                        <option value="Bodas">Bodas</option>
+                        <option value="Prebodas">Prebodas</option>
+                        <option value="Estudio">Estudio / Editorial</option>
+                      </optgroup>
+                      {categories.length > 0 && (
+                        <optgroup label="Existentes">
+                          {categories.filter(c => !['Bodas', 'Prebodas', 'Estudio'].includes(c)).map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                        </optgroup>
+                      )}
                     </select>
                   )}
                 </div>

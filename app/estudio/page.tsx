@@ -17,7 +17,12 @@ export default function EstudioPage() {
     loadPublicData();
   }, [loadPublicData]);
 
-  const displayPlans = useMemo(() => displayPlansFull.filter((p: any) => p.categoria?.toLowerCase().includes('estudio')), [displayPlansFull]);
+  const displayPlans = useMemo(() => {
+    return displayPlansFull.filter((p: any) => {
+      const cat = p.categoria?.toLowerCase() || '';
+      return cat.includes('estudio') || cat.includes('editorial') || cat.includes('branding');
+    });
+  }, [displayPlansFull]);
   const estudioGallery = useMemo(() => mediaPostsFull.filter((p: any) => p.category === 'ESTUDIO').map((p: any) => ({ id: p.id, title: p.title, image: p.cloudinaryUrl, description: p.cloudinaryPublicId })), [mediaPostsFull]);
 
   useEffect(() => {

@@ -17,7 +17,12 @@ export default function PrebodasPage() {
     loadPublicData();
   }, [loadPublicData]);
 
-  const displayPlans = useMemo(() => displayPlansFull.filter((p: any) => p.categoria?.toLowerCase().includes('pre-boda')), [displayPlansFull]);
+  const displayPlans = useMemo(() => {
+    return displayPlansFull.filter((p: any) => {
+      const cat = p.categoria?.toLowerCase() || '';
+      return cat.includes('pre-boda') || cat.includes('preboda');
+    });
+  }, [displayPlansFull]);
   const prebodasGallery = useMemo(() => mediaPostsFull.filter((p: any) => p.category === 'PREBODAS').map((p: any) => ({ id: p.id, title: p.title, image: p.cloudinaryUrl, description: p.cloudinaryPublicId })), [mediaPostsFull]);
 
   useEffect(() => {
