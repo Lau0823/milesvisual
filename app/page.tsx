@@ -349,10 +349,7 @@ export default function HomePage() {
     { href: "acercademi", label: "Acerca de mí" },
   ];
 
-  if (!isLoaded) {
-    return <div className="min-h-screen bg-black flex items-center justify-center text-white">Cargando experiencias...</div>;
-  }
-
+  // El contenido se muestra de inmediato usando datos cacheados o fallbacks
   return (
     <main className="bg-[var(--mv-cream)] text-[var(--mv-ink)]">
       {/* HERO */}

@@ -73,10 +73,6 @@ export default function PrebodasPage() {
     setSelectedPhoto((selectedPhoto + 1) % prebodasGallery.length);
   };
 
-  if (!isLoaded) {
-    return <div className="min-h-screen bg-black flex items-center justify-center text-white">Cargando experiencia...</div>;
-  }
-
   return (
     <main className="bg-[var(--mv-cream)] text-[var(--mv-ink)]">
       {/* HERO */}

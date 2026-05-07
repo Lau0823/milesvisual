@@ -19,6 +19,7 @@ export const useClientStore = create<ClientState>((set, get) => ({
 
   loadPublicData: async () => {
     // 1. Cargar datos del Cache de Dexie (Instantáneo)
+    let hasCache = false;
     try {
       const cachedSettings = await db.jsonCache.get('settings');
       const cachedPlans = await db.jsonCache.get('plans');
@@ -29,8 +30,9 @@ export const useClientStore = create<ClientState>((set, get) => ({
           settings: cachedSettings?.data || [], 
           plans: cachedPlans?.data || [], 
           mediaPosts: cachedMedia?.data || [],
-          isLoaded: true 
+          isLoaded: true // Marcamos como cargado YA con lo que hay en cache
         });
+        hasCache = true;
       }
     } catch (e) {
       console.warn("Dexie cache miss or error:", e);
@@ -39,7 +41,6 @@ export const useClientStore = create<ClientState>((set, get) => ({
     // 2. Fetch en background para actualizar (Revalidate)
     try {
       let API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
-      
       if (typeof window !== 'undefined' && window.location.protocol === 'https:' && API.startsWith('http://')) {
         API = API.replace('http://', 'https://');
       }
@@ -54,6 +55,7 @@ export const useClientStore = create<ClientState>((set, get) => ({
       const plans = plansRes.ok ? await plansRes.json() : [];
       const mediaPosts = mediaRes.ok ? await mediaRes.json() : [];
 
+      // Actualizamos el estado con la info fresca del servidor
       set({ settings, plans, mediaPosts, isLoaded: true });
 
       // 3. Guardar en Dexie para la próxima vez
@@ -63,13 +65,10 @@ export const useClientStore = create<ClientState>((set, get) => ({
         db.jsonCache.put({ key: 'plans', data: plans, updatedAt: now }),
         db.jsonCache.put({ key: 'mediaPosts', data: mediaPosts, updatedAt: now })
       ]);
-
-      // Precargar media localmente en background para Dexie
-      mediaPosts.forEach((item: any) => {
-        if (item.cloudinaryUrl) get().getCachedMediaUrl(item.cloudinaryUrl);
-      });
     } catch (error) {
       console.error("Error loading public data:", error);
+      // Si falló el fetch pero no teníamos cache, igual mostramos la web con los fallbacks
+      if (!hasCache) set({ isLoaded: true });
     }
   },
 
