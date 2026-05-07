@@ -178,7 +178,8 @@ function FullscreenSlider({
           src={getOptimizedUrl(image)}
           alt={`${title} ${index + 1}`}
           fill
-          priority={current === index}
+          priority={false}
+          loading="lazy"
           sizes="100vw"
           className={`absolute inset-0 object-cover transition-all duration-700 ${current === index ? "opacity-100 scale-100" : "opacity-0 scale-[1.03]"
             }`}
@@ -252,7 +253,7 @@ function FullscreenVideoSection({
         muted
         loop
         playsInline
-        preload="auto"
+        preload="none"
       />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,16,20,0.12)_0%,rgba(7,16,20,0.18)_30%,rgba(7,16,20,0.42)_100%)]" />
 
