@@ -10,10 +10,17 @@ import { useClientStore } from "../store/useClientStore";
 const getOptimizedUrl = (url: string, type: 'image' | 'video' = 'image') => {
   if (!url || !url.includes('cloudinary.com')) return url;
   if (type === 'video') {
-    // Calidad eco y bitrate optimizado para fondos web
-    return url.replace('/video/upload/', '/video/upload/f_auto,q_auto:eco,vc_vp9,br_2m,c_scale,w_1280/');
+    // Quitamos br_2m y vc_vp9 para que el inicio sea más fluido (nativo)
+    return url.replace('/video/upload/', '/video/upload/f_auto,q_auto,c_scale,w_1280/');
   }
   return url.replace('/upload/', '/upload/f_auto,q_auto/');
+};
+
+// Nueva función para generar la imagen de portada del video automáticamente
+const getPosterUrl = (url: string) => {
+  if (!url || !url.includes('cloudinary.com')) return undefined;
+  // Cambiamos /video/upload/ por /video/upload/so_0/ (start offset 0) y la extensión a .jpg
+  return url.replace('/video/upload/', '/video/upload/f_auto,q_auto,so_0/').replace('.mp4', '.jpg');
 };
 
 const bodasImages = [
@@ -252,6 +259,7 @@ function FullscreenVideoSection({
       <video
         className="absolute inset-0 h-full w-full object-cover"
         src={src}
+        poster={getPosterUrl(src)}
         autoPlay
         muted
         loop
@@ -363,6 +371,7 @@ export default function HomePage() {
         <video
           className="absolute inset-0 h-full w-full object-cover"
           src={heroVideoSrc}
+          poster={getPosterUrl(heroVideoSrc)}
           autoPlay
           muted
           loop
