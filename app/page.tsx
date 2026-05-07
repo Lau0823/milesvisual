@@ -1,17 +1,27 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect, useMemo } from "react";
 import { Menu, X, ChevronLeft, ChevronRight, MessageCircle, Instagram, Star } from "lucide-react";
 import { useClientStore } from "../store/useClientStore";
 
+// Función de optimización de Cloudinary movida fuera para ser accesible por todos los componentes
+const getOptimizedUrl = (url: string, type: 'image' | 'video' = 'image') => {
+  if (!url || !url.includes('cloudinary.com')) return url;
+  if (type === 'video') {
+    return url.replace('/video/upload/', '/video/upload/f_auto,q_auto:good,c_scale,w_1920/');
+  }
+  return url.replace('/upload/', '/upload/f_auto,q_auto/');
+};
+
 const bodasImages = [
-  "/Bodas/1.jpeg",
-  "/Bodas/2.jpeg",
-  "/Bodas/3.jpeg",
-  "/Bodas/4.jpeg",
-  "/Bodas/5.jpeg",
-  "/Bodas/6.jpeg",
+  "https://res.cloudinary.com/dgfp5gcjr/image/upload/v1778118632/1_icimdx.jpg",
+  "https://res.cloudinary.com/dgfp5gcjr/image/upload/v1778118811/2_b0wn6p.jpg",
+  "https://res.cloudinary.com/dgfp5gcjr/image/upload/v1778120052/6_cvfner.jpg",
+  "https://res.cloudinary.com/dgfp5gcjr/image/upload/v1778120052/4_nfyvww.jpg",
+  "https://res.cloudinary.com/dgfp5gcjr/image/upload/v1778120052/8_iashwf.jpg",
+  "https://res.cloudinary.com/dgfp5gcjr/image/upload/v1778120052/3_uaqeks.jpg",
 ];
 
 const prebodasImages = [
@@ -21,7 +31,7 @@ const prebodasImages = [
 ];
 
 const estudioImages = [
-  "/estudio/DSC09548.jpg (1).jpeg",
+  "https://res.cloudinary.com/dgfp5gcjr/image/upload/v1777916404/DSC09548.jpg-squished_n5huzj.jpg",
   "/estudio/WhatsApp Image 2026-04-13 at 12.24.20 PM (2).jpeg",
   "/estudio/WhatsApp Image 2026-04-13 at 12.24.24 PM.jpeg",
 ];
@@ -33,7 +43,7 @@ const plans = [
     subtitle: "Fotografía",
     price: "$1.500.000",
     image:
-      "/Bodas/8.jpeg",
+      "https://res.cloudinary.com/dgfp5gcjr/image/upload/v1778120054/5_d4xktj.jpg",
     items: [
       "5 fotos impresas tamaño 15x20 cm",
       "Cubrimiento del evento en formato digital (aprox. 200 fotos)",
@@ -166,12 +176,13 @@ function FullscreenSlider({
   return (
     <section className="relative min-h-screen overflow-hidden">
       {images.map((image, index) => (
-        <img
+        <Image
           key={image}
-          src={image}
+          src={getOptimizedUrl(image)}
           alt={`${title} ${index + 1}`}
-          loading="lazy"
-          className={`absolute inset-0 h-full w-full object-cover transition-all duration-700 ${current === index ? "opacity-100 scale-100" : "opacity-0 scale-[1.03]"
+          fill
+          priority={current === index}
+          className={`absolute inset-0 object-cover transition-all duration-700 ${current === index ? "opacity-100 scale-100" : "opacity-0 scale-[1.03]"
             }`}
         />
       ))}
@@ -282,16 +293,7 @@ export default function HomePage() {
   const getSetting = (key: string, defaultValue: string) =>
     settings.find(s => s.key === key)?.value || defaultValue;
 
-  // Optimización agresiva de Cloudinary
-  const getOptimizedUrl = (url: string, type: 'image' | 'video' = 'image') => {
-    if (!url || !url.includes('cloudinary.com')) return url;
-    if (type === 'video') {
-      // Vídeos: Formato auto, Calidad buena para streaming, Límite a 1080p
-      return url.replace('/video/upload/', '/video/upload/f_auto,q_auto:good,c_scale,w_1920/');
-    }
-    // Imágenes: Formato auto, Calidad auto
-    return url.replace('/upload/', '/upload/f_auto,q_auto/');
-  };
+
 
   const getWhatsappLink = (text: string) => {
     const number = getSetting('whatsapp_number', '573148112717');
@@ -377,10 +379,12 @@ export default function HomePage() {
           </nav>
 
           <Link href="/" className="absolute left-1/2 top-6 z-30 -translate-x-1/2">
-            <img
+            <Image
               src={logoSrc}
               alt="Miles Visual"
-              fetchPriority="high"
+              width={220}
+              height={190}
+              priority
               className="h-[120px] w-auto max-w-[82vw] object-contain sm:h-[150px] md:h-[190px] lg:h-[220px]"
             />
           </Link>
@@ -445,16 +449,18 @@ export default function HomePage() {
       <section id="acerca" className="mx-auto max-w-[1280px] px-4 py-8 md:px-8 md:py-16">
         <div className="grid items-center gap-10 md:grid-cols-[0.95fr_1.05fr]">
           <div className="relative h-[470px] md:h-[620px]">
-            <img
+            <Image
               src={getOptimizedUrl(getSetting('about_image_1', "https://res.cloudinary.com/dgfp5gcjr/image/upload/v1777471870/WhatsApp_Image_2026-04-13_at_12.24.20_PM_1_tooe7y.jpg"))}
               alt="Fotógrafo 1"
-              loading="lazy"
+              width={400}
+              height={500}
               className="absolute left-0 top-0 h-[72%] w-[62%] rounded-[30px] object-cover shadow-[0_22px_60px_rgba(0,0,0,0.10)]"
             />
-            <img
+            <Image
               src={getOptimizedUrl(getSetting('about_image_2', "https://res.cloudinary.com/dgfp5gcjr/image/upload/v1777471868/WhatsApp_Image_2026-04-13_at_12.24.19_PM_qibzhs.jpg"))}
               alt="Fotógrafo 2"
-              loading="lazy"
+              width={400}
+              height={500}
               className="absolute bottom-0 right-0 h-[72%] w-[62%] rounded-[30px] object-cover shadow-[0_22px_60px_rgba(0,0,0,0.10)]"
             />
           </div>
@@ -563,11 +569,11 @@ export default function HomePage() {
         <div className="overflow-hidden rounded-[30px] bg-white shadow-[0_22px_60px_rgba(0,0,0,0.08)]">
           <div className="grid md:grid-cols-[0.95fr_1.05fr]">
             <div className="relative min-h-[360px] md:min-h-[680px]">
-              <img
+              <Image
                 src={getOptimizedUrl(activePlan.imagen_url || activePlan.image)}
                 alt={activePlan.nombre || activePlan.name}
-                loading="lazy"
-                className="absolute inset-0 h-full w-full object-cover"
+                fill
+                className="absolute inset-0 object-cover"
               />
             </div>
 
@@ -674,10 +680,12 @@ export default function HomePage() {
 
         <div className="relative overflow-hidden rounded-[30px] bg-white px-6 py-10 shadow-[0_22px_60px_rgba(0,0,0,0.06)] md:px-10 md:py-12">
           <div className="mx-auto max-w-[760px] text-center">
-            <img
+            <Image
               src={testimonials[testimonialIndex].image}
               alt={testimonials[testimonialIndex].name}
-              className="mx-auto h-20 w-20 rounded-full object-cover"
+              width={80}
+              height={80}
+              className="mx-auto rounded-full object-cover"
             />
 
             <div className="mt-5 flex justify-center gap-1 text-[#d4a85d]">

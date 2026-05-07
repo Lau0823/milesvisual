@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useMemo, useState, useEffect } from "react";
 import { Menu, X, ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
 import { useClientStore } from "../../store/useClientStore";
@@ -98,9 +99,12 @@ export default function BodasPage() {
           </nav>
 
           <Link href="/" className="absolute left-1/2 top-6 z-30 -translate-x-1/2">
-            <img
+            <Image
               src={logoSrc}
               alt="Miles Visual"
+              width={220}
+              height={190}
+              priority
               className="h-[120px] w-auto max-w-[82vw] object-contain sm:h-[150px] md:h-[190px] lg:h-[220px]"
             />
           </Link>
@@ -137,9 +141,11 @@ export default function BodasPage() {
                 }`}
             >
               <div className="flex items-center justify-between">
-                <img
+                <Image
                   src={logoSrc}
                   alt="Miles Visual"
+                  width={120}
+                  height={60}
                   className="h-[60px] w-auto object-contain"
                 />
                 <button
@@ -197,10 +203,11 @@ export default function BodasPage() {
             onClick={() => setSelectedPhoto(index)}
             className="group relative block min-h-screen w-full overflow-hidden text-left"
           >
-            <img
+            <Image
               src={photo.image}
               alt={photo.title}
-              className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
+              fill
+              className="absolute inset-0 object-cover transition duration-700 group-hover:scale-[1.03]"
             />
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(17,19,20,0.10)_0%,rgba(17,19,20,0.20)_35%,rgba(17,19,20,0.52)_100%)]" />
 
@@ -251,10 +258,11 @@ export default function BodasPage() {
 
             <div className="grid w-full max-w-[1200px] overflow-hidden rounded-[28px] bg-white md:grid-cols-[1fr_0.9fr]">
               <div className="relative min-h-[360px]">
-                <img
+                <Image
                   src={activePhoto.image}
                   alt={activePhoto.title}
-                  className="h-full w-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               </div>
 
@@ -303,10 +311,11 @@ export default function BodasPage() {
         {activePlan && <div className="overflow-hidden rounded-[30px] bg-white shadow-[0_22px_60px_rgba(0,0,0,0.08)]">
           <div className="grid md:grid-cols-[0.95fr_1.05fr]">
             <div className="relative min-h-[360px] md:min-h-[680px]">
-              <img
+              <Image
                 src={(activePlan.imagen_url || activePlan.image)}
                 alt={activePlan.nombre || activePlan.name}
-                className="h-full w-full object-cover"
+                fill
+                className="object-cover"
               />
             </div>
 
