@@ -7,20 +7,9 @@ import { Menu, X, ChevronLeft, ChevronRight, MessageCircle, Instagram, Star } fr
 import { useClientStore } from "../store/useClientStore";
 
 // Función de optimización de Cloudinary movida fuera para ser accesible por todos los componentes
-const getOptimizedUrl = (url: string, type: 'image' | 'video' = 'image') => {
+const getOptimizedUrl = (url: string) => {
   if (!url || !url.includes('cloudinary.com')) return url;
-  if (type === 'video') {
-    // Quitamos br_2m y vc_vp9 para que el inicio sea más fluido (nativo)
-    return url.replace('/video/upload/', '/video/upload/f_auto,q_auto,c_scale,w_1280/');
-  }
   return url.replace('/upload/', '/upload/f_auto,q_auto/');
-};
-
-// Nueva función para generar la imagen de portada del video automáticamente
-const getPosterUrl = (url: string) => {
-  if (!url || !url.includes('cloudinary.com')) return undefined;
-  // Cambiamos /video/upload/ por /video/upload/so_0/ (start offset 0) y la extensión a .jpg
-  return url.replace('/video/upload/', '/video/upload/f_auto,q_auto,so_0/').replace('.mp4', '.jpg');
 };
 
 const bodasImages = [
@@ -259,12 +248,11 @@ function FullscreenVideoSection({
       <video
         className="absolute inset-0 h-full w-full object-cover"
         src={src}
-        poster={getPosterUrl(src)}
         autoPlay
         muted
         loop
         playsInline
-        preload="none"
+        preload="auto"
       />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,16,20,0.12)_0%,rgba(7,16,20,0.18)_30%,rgba(7,16,20,0.42)_100%)]" />
 
@@ -335,8 +323,8 @@ export default function HomePage() {
   }, [dbPlans]);
 
   const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
-  const heroVideoSrc = getOptimizedUrl(getSetting('hero_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429058/VIDEO_1_1_b0wg0m.mp4"), 'video');
-  const middleVideoSrc = getOptimizedUrl(getSetting('middle_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1778000231/VIDEO_2_1_ggrrzq.mp4"), 'video');
+  const heroVideoSrc = getSetting('hero_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429058/VIDEO_1_1_b0wg0m.mp4");
+  const middleVideoSrc = getSetting('middle_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1778000231/VIDEO_2_1_ggrrzq.mp4");
 
   const activePlan = useMemo(() => {
     return displayPlans.find((p) => p.id === selectedPlan) || displayPlans[0];
@@ -371,7 +359,6 @@ export default function HomePage() {
         <video
           className="absolute inset-0 h-full w-full object-cover"
           src={heroVideoSrc}
-          poster={getPosterUrl(heroVideoSrc)}
           autoPlay
           muted
           loop
