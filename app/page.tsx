@@ -10,7 +10,8 @@ import { useClientStore } from "../store/useClientStore";
 const getOptimizedUrl = (url: string, type: 'image' | 'video' = 'image') => {
   if (!url || !url.includes('cloudinary.com')) return url;
   if (type === 'video') {
-    return url.replace('/video/upload/', '/video/upload/f_auto,q_auto:good,c_scale,w_1920/');
+    // Calidad eco y bitrate optimizado para fondos web
+    return url.replace('/video/upload/', '/video/upload/f_auto,q_auto:eco,vc_vp9,br_2m,c_scale,w_1280/');
   }
   return url.replace('/upload/', '/upload/f_auto,q_auto/');
 };
@@ -182,6 +183,7 @@ function FullscreenSlider({
           alt={`${title} ${index + 1}`}
           fill
           priority={current === index}
+          sizes="100vw"
           className={`absolute inset-0 object-cover transition-all duration-700 ${current === index ? "opacity-100 scale-100" : "opacity-0 scale-[1.03]"
             }`}
         />
@@ -326,7 +328,7 @@ export default function HomePage() {
 
   const logoSrc = "/LOGO MILES AMARILLO_Mesa de trabajo 1.png";
   const heroVideoSrc = getOptimizedUrl(getSetting('hero_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429058/VIDEO_1_1_b0wg0m.mp4"), 'video');
-  const middleVideoSrc = getOptimizedUrl(getSetting('middle_video_url', "/VIDEO 2.mp4"), 'video');
+  const middleVideoSrc = getOptimizedUrl(getSetting('middle_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1778000231/VIDEO_2_1_ggrrzq.mp4"), 'video');
 
   const activePlan = useMemo(() => {
     return displayPlans.find((p) => p.id === selectedPlan) || displayPlans[0];
@@ -418,7 +420,7 @@ export default function HomePage() {
                 }`}
             >
               <div className="flex items-center justify-between">
-                <img src={logoSrc} alt="Miles Visual" className="h-[60px] w-auto object-contain" />
+                <Image src={logoSrc} alt="Miles Visual" width={100} height={60} className="h-[60px] w-auto object-contain" />
                 <button
                   onClick={() => setMenuOpen(false)}
                   className="flex h-10 w-10 items-center justify-center"
@@ -573,6 +575,7 @@ export default function HomePage() {
                 src={getOptimizedUrl(activePlan.imagen_url || activePlan.image)}
                 alt={activePlan.nombre || activePlan.name}
                 fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 className="absolute inset-0 object-cover"
               />
             </div>
