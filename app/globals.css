@@ -15,7 +15,7 @@ html {
 body {
   background: var(--mv-cream);
   color: var(--mv-ink);
-  font-family: "Montserrat", sans-serif;
+  font-family: var(--font-montserrat), sans-serif;
 }
 
 @keyframes introReveal {
@@ -42,7 +42,7 @@ body {
 
 @layer components {
   .mv-script {
-    font-family: "Allura", cursive;
+    font-family: var(--font-allura), cursive;
     font-weight: 400;
     letter-spacing: 0;
   }
