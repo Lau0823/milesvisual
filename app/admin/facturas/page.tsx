@@ -1,17 +1,21 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { useAdminStore } from '../../../store/useAdminStore';
 import { DollarSign, FileText, Download, Search, Filter, Mail, Phone, Calendar } from 'lucide-react';
 import { generateQuotePDF } from '../../../utils/pdfGenerator';
 
 export default function FacturasPage() {
+  const { data: session } = useSession();
   const { reservations, syncWithBackend } = useAdminStore();
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    syncWithBackend();
-  }, []);
+    if (session?.accessToken) {
+      syncWithBackend((session as any).accessToken);
+    }
+  }, [session, syncWithBackend]);
 
   const confirmedReservations = reservations
     .filter(r => r.status === 'confirmed')

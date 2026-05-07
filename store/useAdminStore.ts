@@ -33,6 +33,14 @@ interface AdminState {
   setLoading: (loading: boolean) => void;
 }
 
+const getApiUrl = () => {
+  let API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+  if (typeof window !== 'undefined' && window.location.protocol === 'https:' && API.startsWith('http://')) {
+    return API.replace('http://', 'https://');
+  }
+  return API;
+};
+
 export const useAdminStore = create<AdminState>((set, get) => ({
   settings: [],
   planes: [],
@@ -72,9 +80,8 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       console.warn("Error cargando caché:", e);
     }
 
-    // 2. Sincronización real con el servidor (en segundo plano)
     try {
-      const API = process.env.NEXT_PUBLIC_API_URL;
+      const API = getApiUrl();
       const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
       
       const [resRes, quoteRes, settingsRes, planesRes, mediaRes] = await Promise.all([
@@ -150,7 +157,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
   fetchSettings: async (token) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, {
+      const res = await fetch(`${getApiUrl()}/settings`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -164,7 +171,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
   updateSetting: async (token, key, value) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, {
+      const res = await fetch(`${getApiUrl()}/settings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -193,7 +200,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
   saveBatchSettings: async (token, settings) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/batch`, {
+      const res = await fetch(`${getApiUrl()}/settings/batch`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -215,7 +222,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
   fetchPlanes: async (token) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/servicios?limit=100`, {
+      const res = await fetch(`${getApiUrl()}/servicios?limit=100`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -229,14 +236,13 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
   savePlan: async (token, plan) => {
     const isEditing = !!plan.id;
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/servicios${isEditing ? `/${plan.id}` : ''}`;
+    const url = `${getApiUrl()}/servicios${isEditing ? `/${plan.id}` : ''}`;
     const method = isEditing ? 'PATCH' : 'POST';
 
     try {
       const formData = new FormData();
-      // Solo excluimos el id (que va en la URL) y relaciones pesadas. 
-      // El resto lo limpia el backend automáticamente con whitelist:true
-      const excluded = ['id', 'ventasServicios'];
+      // Solo excluimos el id (que va en la URL) y campos automáticos/relaciones.
+      const excluded = ['id', 'ventasServicios', 'created_at', 'updated_at', 'slug'];
       
       Object.keys(plan).forEach(key => {
         if (!excluded.includes(key) && plan[key] !== undefined && plan[key] !== null) {
@@ -273,7 +279,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
   deletePlan: async (token, id) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/servicios/${id}`, {
+      const res = await fetch(`${getApiUrl()}/servicios/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -292,7 +298,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
   deleteReservation: async (token, id) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reservations/${id}`, {
+      const res = await fetch(`${getApiUrl()}/reservations/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

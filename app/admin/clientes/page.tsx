@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
+import { useSession } from 'next-auth/react';
 import { useAdminStore } from '../../../store/useAdminStore';
 import { Users, Search, Mail, Phone, Calendar, ArrowRight, ExternalLink, History, DollarSign, Tag } from 'lucide-react';
 import Link from 'next/link';
@@ -16,12 +17,15 @@ interface ClientEntry {
 }
 
 export default function ClientesPage() {
+  const { data: session } = useSession();
   const { reservations, syncWithBackend } = useAdminStore();
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    syncWithBackend();
-  }, []);
+    if (session?.accessToken) {
+      syncWithBackend((session as any).accessToken);
+    }
+  }, [session, syncWithBackend]);
 
   // Agrupar reservas por cliente (Email como ID único)
   const clientsData = useMemo(() => {
