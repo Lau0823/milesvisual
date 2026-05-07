@@ -285,7 +285,7 @@ export default function ReservasPage() {
                   <td className="px-8 py-6">
                     <div>
                       <p className="text-sm font-semibold text-[var(--mv-ink)]">{res.clientName}</p>
-                      <div className="flex items-center gap-3 mt-1 opacity-40">
+                      <div className="flex flex-col gap-1 mt-1 opacity-40">
                          <span className="flex items-center gap-1 text-[10px]"><Mail size={10} /> {res.email}</span>
                          <span className="flex items-center gap-1 text-[10px]"><Phone size={10} /> {res.phone}</span>
                       </div>
