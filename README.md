@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Miles Visual - Frontend 📸
 
-## Getting Started
+Este es el frontend de la plataforma **Miles Visual**, una solución integral para la gestión de servicios de fotografía, portafolio multimedia y administración de clientes (CRM).
 
-First, run the development server:
+## 🚀 Tecnologías Principales
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Framework**: [Next.js 15+](https://nextjs.org/) (App Router)
+- **Estado Global**: [Zustand](https://github.com/pmndrs/zustand)
+- **Caché Local**: [Dexie.js](https://dexie.org/) (IndexedDB para persistencia ultra-rápida)
+- **Estilos**: Tailwind CSS con una estética premium y minimalista.
+- **Iconografía**: Lucide React.
+- **Autenticación**: NextAuth.js.
+
+## ✨ Características Clave
+
+- **Dashboard Administrativo**: Gestión completa de planes, portafolio, reservas y solicitudes de presupuesto.
+- **Sincronización Atómica**: Sistema robusto de sincronización con el backend que utiliza cache-busting e invalidación inteligente.
+- **Portafolio Multimedia**: Galería dinámica con soporte para imágenes y videos optimizados.
+- **Experiencia de Usuario Premium**: Diseño responsivo con micro-animaciones, modo oscuro/claro coherente y estados de carga optimizados.
+
+## 🛠️ Configuración del Proyecto
+
+### Variables de Entorno
+
+Crea un archivo `.env.local` en la raíz con las siguientes variables:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3002
+NEXTAUTH_SECRET=tu_secreto_aqui
+NEXTAUTH_URL=http://localhost:3000
+
+# Opcional: Integraciones de Terceros
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Instalación y Ejecución
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Instala las dependencias:
+   ```bash
+   npm install
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. Inicia el servidor de desarrollo:
+   ```bash
+   npm run dev
+   ```
 
-## Learn More
+3. Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 
-To learn more about Next.js, take a look at the following resources:
+## 📦 Estructura de Carpetas
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `/app`: Rutas de la aplicación (Admin y Públicas).
+- `/components`: Componentes reutilizables de UI.
+- `/store`: Lógica de Zustand para la gestión de estado y sincronización.
+- `/lib`: Configuraciones de base de datos local (Dexie) y utilidades.
+- `/public`: Assets estáticos.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📄 Licencia
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Este proyecto es privado y propiedad de Miles Visual.
