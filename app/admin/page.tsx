@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAdminStore } from '../../store/useAdminStore';
 import { 
   Calendar, DollarSign, TrendingUp, Users, ArrowUpRight, 
@@ -29,7 +29,7 @@ export default function DashboardPage() {
     }
   }, [session]);
 
-  const getMonthlyIncome = () => {
+  const monthlyData = useMemo(() => {
     const monthly: Record<string, number> = {};
     reservations.forEach(res => {
       if (res.paymentStatus === 'paid') {
@@ -39,25 +39,34 @@ export default function DashboardPage() {
       }
     });
     return Object.entries(monthly).map(([month, total]) => ({ month, total }));
-  };
+  }, [reservations]);
 
-  const monthlyData = getMonthlyIncome();
-  const uniqueClients = new Set(reservations.map(r => r.email?.toLowerCase().trim()).filter(Boolean)).size;
+  const uniqueClients = useMemo(() => 
+    new Set(reservations.map(r => r.email?.toLowerCase().trim()).filter(Boolean)).size,
+  [reservations]);
 
   // --- Dynamic Calendar Logic ---
-  const currentMonth = currentDateObj.toLocaleDateString('es-ES', { month: 'long' });
-  const currentYear = currentDateObj.getFullYear();
-  const daysInMonth = new Date(currentYear, currentDateObj.getMonth() + 1, 0).getDate();
-  const firstDayOfMonth = new Date(currentYear, currentDateObj.getMonth(), 1).getDay();
-  
-  // Find days in this month that have reservations
-  const daysWithReservations = reservations
-    .filter(r => r.eventDate && new Date(r.eventDate || '').getMonth() === currentDateObj.getMonth() && new Date(r.eventDate || '').getFullYear() === currentYear)
-    .map(r => new Date(r.eventDate || '').getDate());
+  const { currentMonth, currentYear, daysInMonth, firstDayOfMonth, daysWithReservations, currentMonthReservations } = useMemo(() => {
+    const month = currentDateObj.toLocaleDateString('es-ES', { month: 'long' });
+    const year = currentDateObj.getFullYear();
+    const days = new Date(year, currentDateObj.getMonth() + 1, 0).getDate();
+    const firstDay = new Date(year, currentDateObj.getMonth(), 1).getDay();
+    
+    const monthReservations = reservations.filter(r => 
+      r.eventDate && new Date(r.eventDate || '').getMonth() === currentDateObj.getMonth() && new Date(r.eventDate || '').getFullYear() === year
+    );
 
-  const currentMonthReservations = reservations.filter(r => 
-    r.eventDate && new Date(r.eventDate || '').getMonth() === currentDateObj.getMonth() && new Date(r.eventDate || '').getFullYear() === currentYear
-  );
+    const daysWithRes = monthReservations.map(r => new Date(r.eventDate || '').getDate());
+
+    return { 
+      currentMonth: month, 
+      currentYear: year, 
+      daysInMonth: days, 
+      firstDayOfMonth: firstDay, 
+      daysWithReservations: daysWithRes, 
+      currentMonthReservations: monthReservations 
+    };
+  }, [currentDateObj, reservations]);
 
   const prevMonth = () => setCurrentDateObj(new Date(currentYear, currentDateObj.getMonth() - 1, 1));
   const nextMonth = () => setCurrentDateObj(new Date(currentYear, currentDateObj.getMonth() + 1, 1));

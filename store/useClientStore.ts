@@ -11,6 +11,8 @@ interface ClientState {
   clearCache: () => Promise<void>;
 }
 
+const objectUrlMap = new Map<string, string>();
+
 export const useClientStore = create<ClientState>((set, get) => ({
   settings: [],
   plans: [],
@@ -30,12 +32,12 @@ export const useClientStore = create<ClientState>((set, get) => ({
           settings: cachedSettings?.data || [], 
           plans: cachedPlans?.data || [], 
           mediaPosts: cachedMedia?.data || [],
-          isLoaded: true // Marcamos como cargado YA con lo que hay en cache
+          isLoaded: true
         });
         hasCache = true;
       }
     } catch (e) {
-      console.warn("Dexie cache miss or error:", e);
+      console.warn("Dexie cache miss:", e);
     }
 
     // 2. Fetch en background para actualizar (Revalidate)
@@ -55,7 +57,6 @@ export const useClientStore = create<ClientState>((set, get) => ({
       const plans = plansRes.ok ? await plansRes.json() : [];
       const mediaPosts = mediaRes.ok ? await mediaRes.json() : [];
 
-      // Actualizamos el estado con la info fresca del servidor
       set({ settings, plans, mediaPosts, isLoaded: true });
 
       // 3. Guardar en Dexie para la próxima vez
@@ -66,52 +67,51 @@ export const useClientStore = create<ClientState>((set, get) => ({
         db.jsonCache.put({ key: 'mediaPosts', data: mediaPosts, updatedAt: now })
       ]);
 
-      // 4. PREFETCH SILENCIOSO: Descargar todo lo demás en background
-      // Esperamos 2 segundos para no molestar la carga inicial del Hero
+      // 4. PREFETCH SILENCIOSO
       setTimeout(() => {
-        // Lista de videos clave de otras páginas
         const importantVideos = [
-          "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429200/VIDEO_3_1_yuof8i.mp4", // Bodas
-          "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429204/VIDEO_5_1_r3j5j1.mp4", // Prebodas
+          "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429200/VIDEO_3_1_yuof8i.mp4",
+          "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429204/VIDEO_5_1_r3j5j1.mp4",
         ];
-
         [...importantVideos, ...mediaPosts].forEach((item: any) => {
           const url = typeof item === 'string' ? item : item.cloudinaryUrl;
-          if (url) {
-            fetch(url, { mode: 'no-cors', priority: 'low' }).catch(() => {});
-          }
+          if (url) fetch(url, { mode: 'no-cors', priority: 'low' }).catch(() => {});
         });
       }, 2000);
 
     } catch (error) {
       console.error("Error loading public data:", error);
-      // Si falló el fetch pero no teníamos cache, igual mostramos la web con los fallbacks
       if (!hasCache) set({ isLoaded: true });
     }
   },
 
   getCachedMediaUrl: async (url: string) => {
     if (!url) return '';
-    
-    if (!url.startsWith('http') && !url.startsWith('blob:')) {
-      return url;
-    }
+    if (!url.startsWith('http') && !url.startsWith('blob:')) return url;
+
+    // Si ya tenemos un ObjectURL activo para esta URL, lo devolvemos
+    if (objectUrlMap.has(url)) return objectUrlMap.get(url)!;
 
     try {
       const cached = await db.mediaCache.get(url);
-      if (cached) return URL.createObjectURL(cached.blob);
+      let blob: Blob;
 
-      const response = await fetch(url);
-      const blob = await response.blob();
+      if (cached) {
+        blob = cached.blob;
+      } else {
+        const response = await fetch(url);
+        blob = await response.blob();
+        await db.mediaCache.put({
+          id: url,
+          blob: blob,
+          type: blob.type,
+          updatedAt: new Date().toISOString(),
+        });
+      }
 
-      await db.mediaCache.put({
-        id: url,
-        blob: blob,
-        type: blob.type,
-        updatedAt: new Date().toISOString(),
-      });
-
-      return URL.createObjectURL(blob);
+      const objectUrl = URL.createObjectURL(blob);
+      objectUrlMap.set(url, objectUrl);
+      return objectUrl;
     } catch (error) {
       console.error("Error caching media:", error);
       return url;
@@ -119,6 +119,9 @@ export const useClientStore = create<ClientState>((set, get) => ({
   },
   
   clearCache: async () => {
+    // Revocar todos los URLs para liberar memoria RAM
+    objectUrlMap.forEach((url) => URL.revokeObjectURL(url));
+    objectUrlMap.clear();
     await db.mediaCache.clear();
   }
 }));
