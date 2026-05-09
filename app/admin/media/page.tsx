@@ -9,7 +9,7 @@ import { showConfirmToast } from '../../../components/admin/ConfirmToast';
 
 export default function MediaPage() {
   const { data: session } = useSession();
-  const { mediaPosts, syncWithBackend } = useAdminStore();
+  const { mediaPosts, syncWithBackend, saveMediaPost, deleteMediaPost } = useAdminStore();
   
   const [uploading, setUploading] = useState(false);
   const [filter, setFilter] = useState('TODOS');
@@ -46,34 +46,16 @@ export default function MediaPage() {
     setUploading(true);
     const loadingToast = toast.loading(newPost.id ? 'Actualizando publicación...' : 'Subiendo contenido...');
     
-    const formData = new FormData();
-    if (newPost.file) formData.append('file', newPost.file);
-    formData.append('title', newPost.title);
-    formData.append('category', newPost.category);
-    formData.append('status', 'published');
-
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const isEditing = !!newPost.id;
-      const url = `${apiUrl}/media-posts${isEditing ? `/${newPost.id}` : ''}`;
+      if (!session?.accessToken) throw new Error('No hay sesión activa');
       
-      const res = await fetch(url, {
-        method: isEditing ? 'PATCH' : 'POST',
-        headers: { 'Authorization': `Bearer ${(session as any)?.accessToken}` },
-        body: formData
-      });
+      await saveMediaPost((session as any).accessToken, newPost);
       
-      if (res.ok) {
-        toast.success(isEditing ? 'Publicación actualizada' : '¡Contenido subido con éxito!', { id: loadingToast });
-        setShowUploadModal(false);
-        setNewPost({ id: undefined, title: '', category: 'BODAS', file: null });
-        await syncWithBackend((session as any)?.accessToken);
-      } else {
-        const err = await res.json().catch(() => ({}));
-        toast.error(`Error: ${err.message || 'No se pudo guardar'}`, { id: loadingToast });
-      }
+      toast.success(newPost.id ? 'Publicación actualizada' : '¡Contenido subido con éxito!', { id: loadingToast });
+      setShowUploadModal(false);
+      setNewPost({ id: undefined, title: '', category: 'BODAS', file: null });
     } catch (error: any) {
-      toast.error(`Error de red: ${error.message}`, { id: loadingToast });
+      toast.error(`Error: ${error.message || 'No se pudo guardar'}`, { id: loadingToast });
     } finally {
       setUploading(false);
     }
@@ -86,18 +68,9 @@ export default function MediaPage() {
       onConfirm: async () => {
         const loadingToast = toast.loading('Eliminando publicación...');
         try {
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-          const res = await fetch(`${apiUrl}/media-posts/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${(session as any)?.accessToken}` }
-          });
-          
-          if (res.ok) {
-            toast.success('Publicación eliminada', { id: loadingToast });
-            await syncWithBackend((session as any)?.accessToken);
-          } else {
-            throw new Error('No se pudo eliminar');
-          }
+          if (!session?.accessToken) throw new Error('No hay sesión activa');
+          await deleteMediaPost((session as any).accessToken, id);
+          toast.success('Publicación eliminada', { id: loadingToast });
         } catch (error: any) {
           toast.error(`Error: ${error.message}`, { id: loadingToast });
         }

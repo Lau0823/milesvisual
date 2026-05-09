@@ -28,6 +28,13 @@ interface AdminState {
   fetchPlanes: (token: string) => Promise<void>;
   savePlan: (token: string, plan: any) => Promise<void>;
   deletePlan: (token: string, id: number) => Promise<void>;
+  
+  // Media Posts
+  fetchMediaPosts: (token: string) => Promise<void>;
+  saveMediaPost: (token: string, post: any) => Promise<void>;
+  deleteMediaPost: (token: string, id: number) => Promise<void>;
+
+  // Reservas
   deleteReservation: (token: string, id: number) => Promise<void>;
   
   setLoading: (loading: boolean) => void;
@@ -58,7 +65,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
   setLoading: (loading) => set({ loading }),
 
   syncWithBackend: async (token?: string) => {
-    // 1. Carga ultra-rápida desde Dexie (Caché local)
+    // 1. Carga inmediata desde Dexie (Caché local) para velocidad de UI
     try {
       const cachedData = await db.jsonCache.toArray();
       const cache: any = {};
@@ -71,7 +78,6 @@ export const useAdminStore = create<AdminState>((set, get) => ({
           settings: cache.settings || [],
           planes: cache.planes || [],
           mediaPosts: cache.mediaPosts || [],
-          // Recalcular métricas básicas de la caché para que no se vean en cero
           totalActiveReservations: (cache.reservations || []).filter((r: any) => r.status !== 'cancelled').length,
           totalPosts: (cache.mediaPosts || []).length
         });
@@ -84,49 +90,27 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       const API = getApiUrl();
       const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
       
+      // Cache buster para evitar que el navegador devuelva datos antiguos tras una eliminación
+      const t = Date.now();
       const [resRes, quoteRes, settingsRes, planesRes, mediaRes] = await Promise.all([
-        fetch(`${API}/reservations`, { headers }),
-        fetch(`${API}/quotes`, { headers }),
-        fetch(`${API}/settings`, { headers }),
-        fetch(`${API}/servicios?limit=100`, { headers }),
-        fetch(`${API}/media-posts`, { headers })
+        fetch(`${API}/reservations?t=${t}`, { headers }),
+        fetch(`${API}/quotes?t=${t}`, { headers }),
+        fetch(`${API}/settings?t=${t}`, { headers }),
+        fetch(`${API}/servicios?limit=100&t=${t}`, { headers }),
+        fetch(`${API}/media-posts?t=${t}`, { headers })
       ]);
 
-      const reservations = resRes.ok ? await resRes.json() : get().reservations;
-      const quoteRequests = quoteRes.ok ? await quoteRes.json() : get().quoteRequests;
-      const settings = settingsRes.ok ? await settingsRes.json() : get().settings;
-      const planesData = planesRes.ok ? await planesRes.json() : { data: get().planes };
-      const mediaPosts = mediaRes.ok ? await mediaRes.json() : get().mediaPosts;
-      const planes = planesData.data || [];
+      const [reservations, quoteRequests, settings, planesData, mediaPosts] = await Promise.all([
+        resRes.ok ? resRes.json() : Promise.resolve(get().reservations),
+        quoteRes.ok ? quoteRes.json() : Promise.resolve(get().quoteRequests),
+        settingsRes.ok ? settingsRes.json() : Promise.resolve(get().settings),
+        planesRes.ok ? planesRes.json() : Promise.resolve({ data: get().planes }),
+        mediaRes.ok ? mediaRes.json() : Promise.resolve(get().mediaPosts)
+      ]);
 
-      // Calcular ingresos reales y egresos
-      let paid = 0;
-      let pending = 0;
-      let refunds = 0;
-      let expenses = 0;
+      const planes = planesData.data || planesData; // Soporte para ambos formatos
 
-      reservations.forEach((r: any) => {
-        const val = Number(r.value || 0);
-        const ant = Number(r.anticipo || 0);
-        const dev = Number(r.devolucion || 0);
-        const gas = Number(r.gastos_operativos || 0);
-
-        // Pagado: Si es PAID es el valor total. Si no, solo el anticipo.
-        // Importante: Restamos lo devuelto para saber cuánto dinero TENEMOS realmente.
-        paid += (r.paymentStatus === 'paid' ? val : ant) - dev;
-        
-        // Pendiente: Solo si no está cancelada y no está pagada totalmente
-        if (r.status !== 'cancelled' && r.paymentStatus !== 'paid') {
-          pending += (val - ant);
-        }
-
-        refunds += dev;
-        expenses += gas;
-      });
-
-      const activeReservationsCount = reservations.filter((r: any) => r.status !== 'cancelled').length;
-
-      // 3. Guardar en Dexie para la próxima vez
+      // 3. Guardar en Dexie para la próxima vez (Actualización Atómica)
       const now = new Date().toISOString();
       await Promise.all([
         db.jsonCache.put({ key: 'reservations', data: reservations, updatedAt: now }),
@@ -136,15 +120,21 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         db.jsonCache.put({ key: 'mediaPosts', data: mediaPosts, updatedAt: now }),
       ]);
 
+      // Calcular métricas
+      let paid = 0, pending = 0, refunds = 0, expenses = 0;
+      reservations.forEach((r: any) => {
+        const val = Number(r.value || 0), ant = Number(r.anticipo || 0), dev = Number(r.devolucion || 0), gas = Number(r.gastos_operativos || 0);
+        paid += (r.paymentStatus === 'paid' ? val : ant) - dev;
+        if (r.status !== 'cancelled' && r.paymentStatus !== 'paid') pending += (val - ant);
+        refunds += dev; expenses += gas;
+      });
+
       set({ 
         reservations, quoteRequests, settings, planes, mediaPosts,
-        totalPaidIncome: paid,
-        totalPendingIncome: pending,
-        totalActiveReservations: activeReservationsCount,
+        totalPaidIncome: paid, totalPendingIncome: pending,
+        totalActiveReservations: reservations.filter((r: any) => r.status !== 'cancelled').length,
         totalPosts: mediaPosts.length,
-        // Añadimos estas métricas al estado (puedes expandir el AdminState si quieres verlas en el dashboard)
-        refunds,
-        expenses
+        refunds, expenses
       });
     } catch (error) {
       console.error("Error in syncWithBackend:", error);
@@ -157,12 +147,13 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
   fetchSettings: async (token) => {
     try {
-      const res = await fetch(`${getApiUrl()}/settings`, {
+      const res = await fetch(`${getApiUrl()}/settings?t=${Date.now()}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
         const data = await res.json();
         set({ settings: data });
+        await db.jsonCache.put({ key: 'settings', data, updatedAt: new Date().toISOString() });
       }
     } catch (error) {
       console.error("Error fetching admin settings:", error);
@@ -173,10 +164,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     try {
       const res = await fetch(`${getApiUrl()}/settings`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ key, value })
       });
       
@@ -184,14 +172,11 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         const updatedSetting = await res.json();
         const currentSettings = [...get().settings];
         const index = currentSettings.findIndex(s => s.key === key);
-        
-        if (index !== -1) {
-          currentSettings[index] = updatedSetting;
-        } else {
-          currentSettings.push(updatedSetting);
-        }
+        if (index !== -1) currentSettings[index] = updatedSetting;
+        else currentSettings.push(updatedSetting);
         
         set({ settings: currentSettings });
+        await db.jsonCache.put({ key: 'settings', data: currentSettings, updatedAt: new Date().toISOString() });
       }
     } catch (error) {
       console.error("Error updating setting:", error);
@@ -202,15 +187,13 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     try {
       const res = await fetch(`${getApiUrl()}/settings/batch`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ settings })
       });
       
       if (res.ok) {
         set({ settings });
+        await db.jsonCache.put({ key: 'settings', data: settings, updatedAt: new Date().toISOString() });
         return true;
       }
       return false;
@@ -222,12 +205,14 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
   fetchPlanes: async (token) => {
     try {
-      const res = await fetch(`${getApiUrl()}/servicios?limit=100`, {
+      const res = await fetch(`${getApiUrl()}/servicios?limit=100&t=${Date.now()}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
         const data = await res.json();
-        set({ planes: data.data || [] });
+        const planes = data.data || [];
+        set({ planes });
+        await db.jsonCache.put({ key: 'planes', data: planes, updatedAt: new Date().toISOString() });
       }
     } catch (error) {
       console.error("Error fetching planes:", error);
@@ -241,39 +226,26 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
     try {
       const formData = new FormData();
-      // Solo excluimos el id (que va en la URL) y campos automáticos/relaciones.
       const excluded = ['id', 'ventasServicios', 'created_at', 'updated_at', 'slug'];
-      
       Object.keys(plan).forEach(key => {
         if (!excluded.includes(key) && plan[key] !== undefined && plan[key] !== null) {
-          if (plan[key] instanceof File) {
-            formData.append(key, plan[key]);
-          } else if (typeof plan[key] === 'boolean') {
-            const boolVal = plan[key] ? 'true' : 'false';
-            formData.append(key, boolVal);
-          } else {
-            formData.append(key, plan[key].toString());
-          }
+          if (plan[key] instanceof File) formData.append(key, plan[key]);
+          else if (typeof plan[key] === 'boolean') formData.append(key, plan[key] ? 'true' : 'false');
+          else formData.append(key, plan[key].toString());
         }
       });
 
       const res = await fetch(url, {
         method,
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
         body: formData
       });
       
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Error al guardar el plan');
-      }
-      
+      if (!res.ok) throw new Error('Error al guardar el plan');
       await get().fetchPlanes(token);
     } catch (error) {
       console.error("Error saving plan:", error);
-      throw error; // Re-lanzar para que el componente lo maneje
+      throw error;
     }
   },
 
@@ -284,14 +256,72 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Error al eliminar el plan');
-      }
+      if (!res.ok) throw new Error('Error al eliminar el plan');
       
-      set({ planes: get().planes.filter(p => p.id !== id) });
+      const newPlanes = get().planes.filter(p => p.id !== id);
+      set({ planes: newPlanes });
+      await db.jsonCache.put({ key: 'planes', data: newPlanes, updatedAt: new Date().toISOString() });
     } catch (error) {
       console.error("Error deleting plan:", error);
+      throw error;
+    }
+  },
+
+  fetchMediaPosts: async (token) => {
+    try {
+      const res = await fetch(`${getApiUrl()}/media-posts?t=${Date.now()}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        set({ mediaPosts: data });
+        await db.jsonCache.put({ key: 'mediaPosts', data, updatedAt: new Date().toISOString() });
+      }
+    } catch (error) {
+      console.error("Error fetching media posts:", error);
+    }
+  },
+
+  saveMediaPost: async (token, post) => {
+    const isEditing = !!post.id;
+    const url = `${getApiUrl()}/media-posts${isEditing ? `/${post.id}` : ''}`;
+    const method = isEditing ? 'PATCH' : 'POST';
+
+    try {
+      const formData = new FormData();
+      if (post.file) formData.append('file', post.file);
+      formData.append('title', post.title);
+      formData.append('category', post.category);
+      formData.append('status', 'published');
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      
+      if (!res.ok) throw new Error('Error al guardar el post');
+      await get().fetchMediaPosts(token);
+    } catch (error) {
+      console.error("Error saving media post:", error);
+      throw error;
+    }
+  },
+
+  deleteMediaPost: async (token, id) => {
+    try {
+      const res = await fetch(`${getApiUrl()}/media-posts/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (!res.ok) throw new Error('No se pudo eliminar el post');
+      
+      const newMedia = get().mediaPosts.filter(p => p.id !== id);
+      set({ mediaPosts: newMedia });
+      await db.jsonCache.put({ key: 'mediaPosts', data: newMedia, updatedAt: new Date().toISOString() });
+    } catch (error) {
+      console.error("Error deleting media post:", error);
       throw error;
     }
   },
@@ -303,18 +333,11 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || 'No se pudo eliminar la reserva');
-      }
+      if (!res.ok) throw new Error('No se pudo eliminar la reserva');
       
       const newReservations = get().reservations.filter(r => r.id !== id);
       set({ reservations: newReservations });
-      
-      // Actualizar caché local
-      const db = (await import('../lib/db')).db;
       await db.jsonCache.put({ key: 'reservations', data: newReservations, updatedAt: new Date().toISOString() });
-      
     } catch (error) {
       console.error("Error deleting reservation:", error);
       throw error;
