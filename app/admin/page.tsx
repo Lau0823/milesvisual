@@ -2,23 +2,23 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useAdminStore } from '../../store/useAdminStore';
-import { 
-  Calendar, DollarSign, TrendingUp, Users, ArrowUpRight, 
-  Clock, CheckCircle2, Image as ImageIcon, MoreVertical, 
+import {
+  Calendar, DollarSign, TrendingUp, Users, ArrowUpRight,
+  Clock, CheckCircle2, Image as ImageIcon, MoreVertical,
   Search, Plus, Filter, Mail, Phone, CalendarDays, Upload, Trash2, ChevronLeft, ChevronRight, Activity, MessageSquare
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const { 
-    totalActiveReservations, totalPaidIncome, totalPendingIncome, totalPosts, 
-    reservations, quoteRequests, mediaPosts, syncWithBackend 
+  const {
+    totalActiveReservations, totalPaidIncome, totalPendingIncome, totalPosts,
+    reservations, quoteRequests, mediaPosts, syncWithBackend
   } = useAdminStore();
 
   const [loading, setLoading] = useState(false);
   const [currentDateObj, setCurrentDateObj] = useState(new Date());
-  
+
   const [newRes, setNewRes] = useState({
     clientName: '', email: '', phone: '', serviceType: 'Boda', eventDate: '', time: '', value: ''
   });
@@ -41,37 +41,35 @@ export default function DashboardPage() {
     return Object.entries(monthly).map(([month, total]) => ({ month, total }));
   }, [reservations]);
 
-  const uniqueClients = useMemo(() => 
+  const uniqueClients = useMemo(() =>
     new Set(reservations.map(r => r.email?.toLowerCase().trim()).filter(Boolean)).size,
-  [reservations]);
+    [reservations]);
 
-  // --- Dynamic Calendar Logic ---
   const { currentMonth, currentYear, daysInMonth, firstDayOfMonth, daysWithReservations, currentMonthReservations } = useMemo(() => {
     const month = currentDateObj.toLocaleDateString('es-ES', { month: 'long' });
     const year = currentDateObj.getFullYear();
     const days = new Date(year, currentDateObj.getMonth() + 1, 0).getDate();
     const firstDay = new Date(year, currentDateObj.getMonth(), 1).getDay();
-    
-    const monthReservations = reservations.filter(r => 
+
+    const monthReservations = reservations.filter(r =>
       r.eventDate && new Date(r.eventDate || '').getMonth() === currentDateObj.getMonth() && new Date(r.eventDate || '').getFullYear() === year
     );
 
     const daysWithRes = monthReservations.map(r => new Date(r.eventDate || '').getDate());
 
-    return { 
-      currentMonth: month, 
-      currentYear: year, 
-      daysInMonth: days, 
-      firstDayOfMonth: firstDay, 
-      daysWithReservations: daysWithRes, 
-      currentMonthReservations: monthReservations 
+    return {
+      currentMonth: month,
+      currentYear: year,
+      daysInMonth: days,
+      firstDayOfMonth: firstDay,
+      daysWithReservations: daysWithRes,
+      currentMonthReservations: monthReservations
     };
   }, [currentDateObj, reservations]);
 
   const prevMonth = () => setCurrentDateObj(new Date(currentYear, currentDateObj.getMonth() - 1, 1));
   const nextMonth = () => setCurrentDateObj(new Date(currentYear, currentDateObj.getMonth() + 1, 1));
 
-  // --- Form Logic ---
   const handleCreateReservation = async (status: string) => {
     if (!newRes.clientName || !newRes.eventDate) return alert("Nombre y Fecha son obligatorios");
     setLoading(true);
@@ -79,15 +77,15 @@ export default function DashboardPage() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       await fetch(`${apiUrl}/reservations`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${(session as any)?.accessToken}`
         },
-        body: JSON.stringify({ 
-          ...newRes, 
+        body: JSON.stringify({
+          ...newRes,
           value: Number(newRes.value) || 0,
-          status, 
-          paymentStatus: 'pending' 
+          status,
+          paymentStatus: 'pending'
         })
       });
       await syncWithBackend((session as any)?.accessToken);
@@ -100,8 +98,6 @@ export default function DashboardPage() {
 
   return (
     <div className="animate-in fade-in duration-700 space-y-8 pb-20">
-      
-      {/* HEADER DASHBOARD */}
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[9px] uppercase tracking-[0.3em] text-black/40 font-bold mb-1">PANEL DE GESTIÓN</p>
@@ -113,7 +109,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* KPI CARDS SUPERIORES */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         {[
           { label: 'RESERVAS', value: totalActiveReservations, icon: <Calendar size={16} /> },
@@ -135,11 +130,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-8">
-        
-        {/* COLUMNA IZQUIERDA: GESTIÓN MANUAL + FINANZAS + MEDIA */}
         <div className="space-y-8">
-          
-          {/* GESTIÓN MANUAL (FORMULARIO ACTIVO) */}
           <div className="bg-white rounded-[40px] p-10 shadow-sm border border-black/5">
             <div className="flex items-center justify-between mb-8">
               <div>
@@ -159,22 +150,22 @@ export default function DashboardPage() {
                   <Plus size={16} className="text-black/20" />
                 </div>
                 <div className="space-y-4">
-                  <input type="text" value={newRes.clientName} onChange={e => setNewRes({...newRes, clientName: e.target.value})} placeholder="Nombre del cliente" className="w-full bg-white rounded-xl px-5 py-3.5 text-xs border border-black/5 outline-none focus:border-[var(--mv-sage)] transition" />
+                  <input type="text" value={newRes.clientName} onChange={e => setNewRes({ ...newRes, clientName: e.target.value })} placeholder="Nombre del cliente" className="w-full bg-white rounded-xl px-5 py-3.5 text-xs border border-black/5 outline-none focus:border-[var(--mv-sage)] transition" />
                   <div className="grid grid-cols-2 gap-4">
-                    <input type="email" value={newRes.email} onChange={e => setNewRes({...newRes, email: e.target.value})} placeholder="Correo" className="w-full bg-white rounded-xl px-5 py-3.5 text-xs border border-black/5 outline-none focus:border-[var(--mv-sage)] transition" />
-                    <input type="text" value={newRes.phone} onChange={e => setNewRes({...newRes, phone: e.target.value})} placeholder="Teléfono" className="w-full bg-white rounded-xl px-5 py-3.5 text-xs border border-black/5 outline-none focus:border-[var(--mv-sage)] transition" />
+                    <input type="email" value={newRes.email} onChange={e => setNewRes({ ...newRes, email: e.target.value })} placeholder="Correo" className="w-full bg-white rounded-xl px-5 py-3.5 text-xs border border-black/5 outline-none focus:border-[var(--mv-sage)] transition" />
+                    <input type="text" value={newRes.phone} onChange={e => setNewRes({ ...newRes, phone: e.target.value })} placeholder="Teléfono" className="w-full bg-white rounded-xl px-5 py-3.5 text-xs border border-black/5 outline-none focus:border-[var(--mv-sage)] transition" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <select value={newRes.serviceType} onChange={e => setNewRes({...newRes, serviceType: e.target.value})} className="w-full bg-white rounded-xl px-5 py-3.5 text-xs border border-black/5 outline-none text-black/70">
+                    <select value={newRes.serviceType} onChange={e => setNewRes({ ...newRes, serviceType: e.target.value })} className="w-full bg-white rounded-xl px-5 py-3.5 text-xs border border-black/5 outline-none text-black/70">
                       <option value="Boda">Boda</option>
                       <option value="Preboda">Preboda</option>
                       <option value="Estudio">Estudio</option>
                     </select>
-                    <input type="number" value={newRes.value} onChange={e => setNewRes({...newRes, value: e.target.value})} placeholder="Valor (Ej: 1500)" className="w-full bg-white rounded-xl px-5 py-3.5 text-xs border border-black/5 outline-none focus:border-[var(--mv-sage)] transition" />
+                    <input type="number" value={newRes.value} onChange={e => setNewRes({ ...newRes, value: e.target.value })} placeholder="Valor (Ej: 1500)" className="w-full bg-white rounded-xl px-5 py-3.5 text-xs border border-black/5 outline-none focus:border-[var(--mv-sage)] transition" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <input type="date" value={newRes.eventDate} onChange={e => setNewRes({...newRes, eventDate: e.target.value})} className="w-full bg-white rounded-xl px-5 py-3.5 text-xs border border-black/5 outline-none text-black/70" />
-                    <input type="time" value={newRes.time} onChange={e => setNewRes({...newRes, time: e.target.value})} className="w-full bg-white rounded-xl px-5 py-3.5 text-xs border border-black/5 outline-none text-black/70" />
+                    <input type="date" value={newRes.eventDate} onChange={e => setNewRes({ ...newRes, eventDate: e.target.value })} className="w-full bg-white rounded-xl px-5 py-3.5 text-xs border border-black/5 outline-none text-black/70" />
+                    <input type="time" value={newRes.time} onChange={e => setNewRes({ ...newRes, time: e.target.value })} className="w-full bg-white rounded-xl px-5 py-3.5 text-xs border border-black/5 outline-none text-black/70" />
                   </div>
                   <div className="flex gap-3 pt-4">
                     <button onClick={() => handleCreateReservation('pending')} disabled={loading} className="flex-1 py-4 bg-[#789894] text-white rounded-2xl text-[9px] font-bold uppercase tracking-widest hover:bg-[#66827e] transition">
@@ -188,25 +179,24 @@ export default function DashboardPage() {
               </div>
 
               <div className="space-y-4">
-                 <p className="text-[9px] uppercase tracking-widest font-bold text-[var(--mv-ink)] bg-[var(--mv-cream)] px-4 py-3 rounded-xl border border-black/5 text-center">CLIENTES/SERVICIOS</p>
-                 <div className="space-y-4 max-h-[360px] overflow-y-auto pr-2 custom-scrollbar">
-                    {reservations.map((r, i) => (
-                      <div key={r.id} className="pb-4 border-b border-black/5 last:border-0 group cursor-pointer hover:bg-black/5 p-2 rounded-xl transition">
-                        <div className="flex justify-between items-start">
-                          <h6 className="text-[11px] font-bold uppercase tracking-tight text-[var(--mv-ink)] group-hover:text-[var(--mv-sage)] transition">{r.clientName}</h6>
-                          <div className={`w-1.5 h-1.5 rounded-full ${r.status === 'confirmed' ? 'bg-[var(--mv-sage)]' : 'bg-amber-400'}`} />
-                        </div>
-                        <p className="text-[9px] opacity-40 truncate mb-1">{r.email || r.phone}</p>
-                        <p className="text-[8px] uppercase tracking-widest font-bold text-[var(--mv-gold)]">{r.serviceType}</p>
+                <p className="text-[9px] uppercase tracking-widest font-bold text-[var(--mv-ink)] bg-[var(--mv-cream)] px-4 py-3 rounded-xl border border-black/5 text-center">CLIENTES/SERVICIOS</p>
+                <div className="space-y-4 max-h-[360px] overflow-y-auto pr-2 custom-scrollbar">
+                  {reservations.map((r, i) => (
+                    <div key={r.id} className="pb-4 border-b border-black/5 last:border-0 group cursor-pointer hover:bg-black/5 p-2 rounded-xl transition">
+                      <div className="flex justify-between items-start">
+                        <h6 className="text-[11px] font-bold uppercase tracking-tight text-[var(--mv-ink)] group-hover:text-[var(--mv-sage)] transition">{r.clientName}</h6>
+                        <div className={`w-1.5 h-1.5 rounded-full ${r.status === 'confirmed' ? 'bg-[var(--mv-sage)]' : 'bg-amber-400'}`} />
                       </div>
-                    ))}
-                    {reservations.length === 0 && <p className="text-xs text-center opacity-40 italic mt-10">No hay reservas aún</p>}
-                 </div>
+                      <p className="text-[9px] opacity-40 truncate mb-1">{r.email || r.phone}</p>
+                      <p className="text-[8px] uppercase tracking-widest font-bold text-[var(--mv-gold)]">{r.serviceType}</p>
+                    </div>
+                  ))}
+                  {reservations.length === 0 && <p className="text-xs text-center opacity-40 italic mt-10">No hay reservas aún</p>}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* RESUMEN MENSUAL (FINANZAS) */}
           <div className="bg-white rounded-[40px] p-10 shadow-sm border border-black/5">
             <div className="flex items-start gap-10">
               <div className="min-w-[200px]">
@@ -218,17 +208,15 @@ export default function DashboardPage() {
               </p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 mt-10">
-               {monthlyData.map((m, i) => (
-                 <div key={i} className="bg-[var(--mv-cream)]/40 p-6 rounded-[28px] border border-black/5 hover:border-[var(--mv-sage)] transition duration-300">
-                    <p className="text-[8px] uppercase tracking-widest font-bold text-black/30 mb-3">{m.month}</p>
-                    <h5 className="text-xl font-bold text-[var(--mv-sage)]">$ {m.total.toLocaleString()}</h5>
-                 </div>
-               ))}
-               {monthlyData.length === 0 && <p className="text-xs opacity-40 italic col-span-3">Aún no hay ingresos registrados para mostrar un resumen.</p>}
+              {monthlyData.map((m, i) => (
+                <div key={i} className="bg-[var(--mv-cream)]/40 p-6 rounded-[28px] border border-black/5 hover:border-[var(--mv-sage)] transition duration-300">
+                  <p className="text-[8px] uppercase tracking-widest font-bold text-black/30 mb-3">{m.month}</p>
+                  <h5 className="text-xl font-bold text-[var(--mv-sage)]">$ {m.total.toLocaleString()}</h5>
+                </div>
+              ))}
+              {monthlyData.length === 0 && <p className="text-xs opacity-40 italic col-span-3">Aún no hay ingresos registrados para mostrar un resumen.</p>}
             </div>
           </div>
-
-          {/* PUBLICACIÓN Y GESTIÓN (MEDIA) */}
           <div className="bg-white rounded-[40px] p-10 shadow-sm border border-black/5">
             <div className="flex items-center justify-between mb-10">
               <div>
@@ -236,31 +224,27 @@ export default function DashboardPage() {
                 <h4 className="text-2xl font-bold uppercase tracking-tight">PUBLICACIÓN Y GESTIÓN</h4>
               </div>
               <div className="flex gap-2">
-                 <button className="px-6 py-2.5 bg-[#789894] text-white rounded-full text-[9px] uppercase tracking-widest font-bold flex items-center gap-2 shadow-sm hover:bg-[#66827e] transition"><ImageIcon size={14} /> GESTIONAR GALERÍA</button>
+                <button className="px-6 py-2.5 bg-[#789894] text-white rounded-full text-[9px] uppercase tracking-widest font-bold flex items-center gap-2 shadow-sm hover:bg-[#66827e] transition"><ImageIcon size={14} /> GESTIONAR GALERÍA</button>
               </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-               {mediaPosts.slice(0, 4).map((p, i) => (
-                 <div key={i} className="bg-[var(--mv-cream)]/40 p-2.5 rounded-[24px] border border-black/5 group">
-                    <div className="aspect-[3/4] rounded-[20px] overflow-hidden mb-4 relative bg-black/5">
-                       <img src={p.cloudinaryUrl} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" />
-                       <div className="absolute top-3 right-3 px-2 py-1 bg-white/90 rounded-full text-[7px] font-bold tracking-widest uppercase">{p.category}</div>
-                    </div>
-                    <div className="px-1 space-y-3 pb-2">
-                       <h6 className="text-[10px] font-bold uppercase truncate">{p.title}</h6>
-                       <div className="flex items-center justify-center py-1.5 bg-[#789894]/10 text-[#789894] rounded-lg text-[7px] font-bold uppercase tracking-widest">PUBLICADO</div>
-                    </div>
-                 </div>
-               ))}
-               {mediaPosts.length === 0 && <div className="col-span-4 py-10 text-center text-xs opacity-40 italic">No hay publicaciones en la galería.</div>}
+              {mediaPosts.slice(0, 4).map((p, i) => (
+                <div key={i} className="bg-[var(--mv-cream)]/40 p-2.5 rounded-[24px] border border-black/5 group">
+                  <div className="aspect-[3/4] rounded-[20px] overflow-hidden mb-4 relative bg-black/5">
+                    <img src={p.cloudinaryUrl} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" />
+                    <div className="absolute top-3 right-3 px-2 py-1 bg-white/90 rounded-full text-[7px] font-bold tracking-widest uppercase">{p.category}</div>
+                  </div>
+                  <div className="px-1 space-y-3 pb-2">
+                    <h6 className="text-[10px] font-bold uppercase truncate">{p.title}</h6>
+                    <div className="flex items-center justify-center py-1.5 bg-[#789894]/10 text-[#789894] rounded-lg text-[7px] font-bold uppercase tracking-widest">PUBLICADO</div>
+                  </div>
+                </div>
+              ))}
+              {mediaPosts.length === 0 && <div className="col-span-4 py-10 text-center text-xs opacity-40 italic">No hay publicaciones en la galería.</div>}
             </div>
           </div>
         </div>
-
-        {/* COLUMNA DERECHA: AGENDA VISUAL + SISTEMA ACTIVO */}
         <div className="space-y-8">
-          
-          {/* CALENDARIO Y AGENDA DINÁMICO */}
           <div className="bg-white rounded-[40px] p-10 shadow-sm border border-black/5">
             <div className="flex items-center justify-between mb-8">
               <div>
@@ -274,93 +258,90 @@ export default function DashboardPage() {
             </div>
 
             <div className="mb-10">
-               <p className="text-[10px] uppercase tracking-widest font-bold text-center mb-6 text-[var(--mv-ink)]">
-                 {currentMonth} {currentYear}
-               </p>
-               <div className="grid grid-cols-7 gap-2 text-center text-[9px] font-bold text-black/30 mb-4">
-                  {['D','L','M','M','J','V','S'].map(d => <div key={d}>{d}</div>)}
-               </div>
-               <div className="grid grid-cols-7 gap-2">
-                  {/* Celdas vacías para alinear el primer día del mes */}
-                  {Array.from({length: firstDayOfMonth}).map((_, i) => <div key={`empty-${i}`} />)}
-                  
-                  {/* Días del mes */}
-                  {Array.from({length: daysInMonth}).map((_, i) => {
-                    const dayNumber = i + 1;
-                    const hasReservation = daysWithReservations.includes(dayNumber);
-                    return (
-                      <div key={dayNumber} className={`aspect-square flex items-center justify-center rounded-xl text-[10px] font-semibold transition cursor-default
+              <p className="text-[10px] uppercase tracking-widest font-bold text-center mb-6 text-[var(--mv-ink)]">
+                {currentMonth} {currentYear}
+              </p>
+              <div className="grid grid-cols-7 gap-2 text-center text-[9px] font-bold text-black/30 mb-4">
+                {['D', 'L', 'M', 'M', 'J', 'V', 'S'].map(d => <div key={d}>{d}</div>)}
+              </div>
+              <div className="grid grid-cols-7 gap-2">
+                {Array.from({ length: firstDayOfMonth }).map((_, i) => <div key={`empty-${i}`} />)}
+
+                {Array.from({ length: daysInMonth }).map((_, i) => {
+                  const dayNumber = i + 1;
+                  const hasReservation = daysWithReservations.includes(dayNumber);
+                  return (
+                    <div key={dayNumber} className={`aspect-square flex items-center justify-center rounded-xl text-[10px] font-semibold transition cursor-default
                         ${hasReservation ? 'bg-[#789894] text-white shadow-md hover:bg-[#66827e]' : 'bg-black/[0.02] hover:bg-black/5'}
                       `}>
-                        {dayNumber}
-                      </div>
-                    );
-                  })}
-               </div>
+                      {dayNumber}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="space-y-6 pt-6 border-t border-black/5">
-               <div className="flex justify-between items-center">
-                 <p className="text-[9px] uppercase tracking-widest font-bold text-black/40">RESERVAS ESTE MES</p>
-                 <span className="text-[9px] font-bold bg-[var(--mv-cream)] px-2 py-1 rounded text-black/40">{currentMonthReservations.length}</span>
-               </div>
-               
-               {currentMonthReservations.slice(0, 3).map((r, i) => (
-                 <div key={r.id} className="bg-[var(--mv-cream)]/30 p-6 rounded-[28px] border border-black/5 hover:bg-[var(--mv-cream)] transition">
-                    <div className="flex justify-between items-start mb-4">
-                       <h6 className="text-[13px] font-bold uppercase tracking-tight">{r.clientName}</h6>
-                       <span className="text-[9px] opacity-40 font-bold">{new Date(r.eventDate || '').toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}</span>
-                    </div>
-                    <p className="text-[10px] opacity-40 uppercase tracking-widest font-bold mb-6">{r.serviceType}</p>
-                    <div className="flex gap-2">
-                       <button className={`flex-1 py-2.5 rounded-xl text-[8px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition ${r.status === 'confirmed' ? 'bg-white border border-black/5 text-[var(--mv-sage)]' : 'bg-[#789894] text-white hover:bg-[#66827e]'}`}>
-                         {r.status === 'confirmed' ? <><CheckCircle2 size={12} /> CONFIRMADO</> : 'CONFIRMAR'}
-                       </button>
-                    </div>
-                 </div>
-               ))}
-               {currentMonthReservations.length === 0 && (
-                 <p className="text-xs text-center opacity-40 italic py-6 bg-black/[0.02] rounded-2xl">Libre. Sin reservas para este mes.</p>
-               )}
+              <div className="flex justify-between items-center">
+                <p className="text-[9px] uppercase tracking-widest font-bold text-black/40">RESERVAS ESTE MES</p>
+                <span className="text-[9px] font-bold bg-[var(--mv-cream)] px-2 py-1 rounded text-black/40">{currentMonthReservations.length}</span>
+              </div>
+
+              {currentMonthReservations.slice(0, 3).map((r, i) => (
+                <div key={r.id} className="bg-[var(--mv-cream)]/30 p-6 rounded-[28px] border border-black/5 hover:bg-[var(--mv-cream)] transition">
+                  <div className="flex justify-between items-start mb-4">
+                    <h6 className="text-[13px] font-bold uppercase tracking-tight">{r.clientName}</h6>
+                    <span className="text-[9px] opacity-40 font-bold">{new Date(r.eventDate || '').toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}</span>
+                  </div>
+                  <p className="text-[10px] opacity-40 uppercase tracking-widest font-bold mb-6">{r.serviceType}</p>
+                  <div className="flex gap-2">
+                    <button className={`flex-1 py-2.5 rounded-xl text-[8px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition ${r.status === 'confirmed' ? 'bg-white border border-black/5 text-[var(--mv-sage)]' : 'bg-[#789894] text-white hover:bg-[#66827e]'}`}>
+                      {r.status === 'confirmed' ? <><CheckCircle2 size={12} /> CONFIRMADO</> : 'CONFIRMAR'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {currentMonthReservations.length === 0 && (
+                <p className="text-xs text-center opacity-40 italic py-6 bg-black/[0.02] rounded-2xl">Libre. Sin reservas para este mes.</p>
+              )}
             </div>
           </div>
 
-          {/* ESTADO DEL SISTEMA (ANTES VISTA FUTURA) */}
           <div className="bg-[var(--mv-ink)] text-white rounded-[40px] p-10 shadow-lg relative overflow-hidden">
             <div className="absolute top-0 right-0 p-10 opacity-10">
-               <Activity size={120} />
+              <Activity size={120} />
             </div>
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-8">
-                 <div className="p-2 bg-white/10 text-[var(--mv-gold)] rounded-lg">
-                    <Activity size={18} />
-                 </div>
-                 <h4 className="text-xl font-bold uppercase tracking-tight">ESTADO DEL SISTEMA</h4>
+                <div className="p-2 bg-white/10 text-[var(--mv-gold)] rounded-lg">
+                  <Activity size={18} />
+                </div>
+                <h4 className="text-xl font-bold uppercase tracking-tight">ESTADO DEL SISTEMA</h4>
               </div>
               <div className="space-y-6">
-                 <div className="p-6 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-sm">
-                    <p className="text-[8px] uppercase tracking-widest font-bold text-white/40 mb-3">CONEXIÓN BACKEND</p>
-                    <p className="text-[11px] leading-relaxed text-white/80">
-                      La interfaz se encuentra 100% conectada a la base de datos PostgreSQL. Todos los módulos operativos.
-                    </p>
-                 </div>
-                 <div className="p-6 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-sm">
-                    <p className="text-[8px] uppercase tracking-widest font-bold text-white/40 mb-4">MÓDULOS ACTIVOS</p>
-                    <ul className="space-y-4">
-                       <li className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-white/80">
-                          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-[var(--mv-sage)]"><CheckCircle2 size={12} className="text-white" /></div> 
-                          Sincronización Google Calendar
-                       </li>
-                       <li className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-white/80">
-                          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-[var(--mv-sage)]"><CheckCircle2 size={12} className="text-white" /></div> 
-                          Correos Transaccionales (Nodemailer)
-                       </li>
-                       <li className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-white/80">
-                          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-[var(--mv-sage)]"><CheckCircle2 size={12} className="text-white" /></div> 
-                          Subida a Nube Cloudinary
-                       </li>
-                    </ul>
-                 </div>
+                <div className="p-6 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-sm">
+                  <p className="text-[8px] uppercase tracking-widest font-bold text-white/40 mb-3">CONEXIÓN BACKEND</p>
+                  <p className="text-[11px] leading-relaxed text-white/80">
+                    La interfaz se encuentra 100% conectada a la base de datos PostgreSQL. Todos los módulos operativos.
+                  </p>
+                </div>
+                <div className="p-6 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-sm">
+                  <p className="text-[8px] uppercase tracking-widest font-bold text-white/40 mb-4">MÓDULOS ACTIVOS</p>
+                  <ul className="space-y-4">
+                    <li className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-white/80">
+                      <div className="flex items-center justify-center w-5 h-5 rounded-full bg-[var(--mv-sage)]"><CheckCircle2 size={12} className="text-white" /></div>
+                      Sincronización Google Calendar
+                    </li>
+                    <li className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-white/80">
+                      <div className="flex items-center justify-center w-5 h-5 rounded-full bg-[var(--mv-sage)]"><CheckCircle2 size={12} className="text-white" /></div>
+                      Correos Transaccionales (Nodemailer)
+                    </li>
+                    <li className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-white/80">
+                      <div className="flex items-center justify-center w-5 h-5 rounded-full bg-[var(--mv-sage)]"><CheckCircle2 size={12} className="text-white" /></div>
+                      Subida a Nube Cloudinary
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

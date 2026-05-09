@@ -10,7 +10,7 @@ export default function BodasPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<number | string>(0);
-  
+
   const { loadPublicData, settings, plans: displayPlansFull, mediaPosts: mediaPostsFull, isLoaded } = useClientStore();
 
   useEffect(() => {
@@ -81,7 +81,6 @@ export default function BodasPage() {
 
   return (
     <main className="bg-[var(--mv-cream)] text-[var(--mv-ink)]">
-      {/* HERO */}
       <section className="relative min-h-screen overflow-hidden bg-black">
         <video
           className="absolute inset-0 h-full w-full object-cover"
@@ -131,8 +130,8 @@ export default function BodasPage() {
 
           <div
             className={`fixed inset-0 z-50 transition ${menuOpen
-                ? "pointer-events-auto opacity-100"
-                : "pointer-events-none opacity-0"
+              ? "pointer-events-auto opacity-100"
+              : "pointer-events-none opacity-0"
               }`}
           >
             <div
@@ -189,7 +188,6 @@ export default function BodasPage() {
         </div>
       </section>
 
-      {/* FRASE */}
       <section className="mx-auto max-w-[1180px] px-4 py-16 text-center md:px-8 md:py-24">
         <p className="mv-script text-[54px] leading-none text-[var(--mv-gold)] md:text-[92px]">
           Momentos Inolvidables
@@ -199,7 +197,6 @@ export default function BodasPage() {
         </h2>
       </section>
 
-      {/* GRILLA 1 x 6 FULLSCREEN */}
       <section className="space-y-0">
         {bodasGallery.map((photo, index) => (
           <button
@@ -232,7 +229,6 @@ export default function BodasPage() {
         ))}
       </section>
 
-      {/* MODAL FOTO */}
       {activePhoto && (
         <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm">
           <div className="relative flex min-h-screen items-center justify-center px-4 py-10">
@@ -286,7 +282,6 @@ export default function BodasPage() {
         </div>
       )}
 
-      {/* PLANES */}
       <section className="mx-auto max-w-[1280px] px-4 py-20 md:px-8 md:py-28">
         <div className="mb-12 text-center">
           <p className="mv-script text-[44px] leading-none text-[var(--mv-gold)] md:text-[72px]">
@@ -303,8 +298,8 @@ export default function BodasPage() {
               key={plan.id}
               onClick={() => setSelectedPlan(plan.id)}
               className={`rounded-[18px] px-4 py-4 text-center text-[12px] font-medium uppercase tracking-[0.12em] transition ${selectedPlan === plan.id
-                  ? "bg-[#789894] text-white shadow-lg"
-                  : "bg-white text-[var(--mv-ink)] shadow-sm"
+                ? "bg-[#789894] text-white shadow-lg"
+                : "bg-white text-[var(--mv-ink)] shadow-sm"
                 }`}
             >
               {plan.nombre || plan.name}
@@ -368,7 +363,6 @@ export default function BodasPage() {
         </div>}
       </section>
 
-      {/* FOOTER */}
       <footer className="border-t border-black/8 bg-white">
         <div className="mx-auto flex max-w-[1280px] flex-col gap-6 px-4 py-10 md:flex-row md:items-center md:justify-between md:px-8">
           <nav className="flex flex-wrap gap-5">
@@ -395,7 +389,6 @@ export default function BodasPage() {
         </div>
       </footer>
 
-      {/* WHATSAPP FLOTANTE */}
       <a
         href={getWhatsappLink("Hola Miles Visual")}
         target="_blank"

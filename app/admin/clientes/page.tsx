@@ -27,13 +27,12 @@ export default function ClientesPage() {
     }
   }, [session, syncWithBackend]);
 
-  // Agrupar reservas por cliente (Email como ID único)
   const clientsData = useMemo(() => {
     const groups: { [key: string]: ClientEntry } = {};
 
     reservations.forEach(res => {
       const email = (res.email || 'sin-email@miles.com').toLowerCase().trim();
-      
+
       if (!groups[email]) {
         groups[email] = {
           email,
@@ -47,11 +46,9 @@ export default function ClientesPage() {
       }
 
       groups[email].reservations.push(res);
-      // Solo sumamos lo que realmente ha pagado (anticipo + saldo si está pagado)
       const paidAmount = res.paymentStatus === 'paid' ? Number(res.value) : Number(res.anticipo || 0);
       groups[email].totalSpent += paidAmount;
 
-      // Actualizar última fecha si esta es más reciente
       if (new Date(res.eventDate) > new Date(groups[email].lastDate)) {
         groups[email].lastDate = res.eventDate;
         groups[email].lastService = res.serviceType;
@@ -61,7 +58,7 @@ export default function ClientesPage() {
     return Object.values(groups).sort((a, b) => b.totalSpent - a.totalSpent);
   }, [reservations]);
 
-  const filteredClients = clientsData.filter(c => 
+  const filteredClients = clientsData.filter(c =>
     c.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -76,11 +73,11 @@ export default function ClientesPage() {
             Visualiza el historial completo de cada persona que ha confiado en Miles Visual. Agrupado automáticamente por contacto.
           </p>
         </div>
-        
+
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20" size={18} />
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder="Buscar por nombre o correo..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -90,7 +87,6 @@ export default function ClientesPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4">
-        {/* Cabecera de tabla estilo premium */}
         <div className="hidden lg:grid grid-cols-6 px-10 py-4 text-[10px] uppercase tracking-[0.2em] font-bold text-black/30">
           <div className="col-span-2">Cliente</div>
           <div>Total Invertido</div>
@@ -102,8 +98,7 @@ export default function ClientesPage() {
         {filteredClients.map((client) => (
           <div key={client.email} className="bg-white rounded-[32px] border border-black/5 p-6 lg:p-10 hover:shadow-xl transition-all duration-500 group relative overflow-hidden">
             <div className="grid grid-cols-1 lg:grid-cols-6 items-center gap-6 relative z-10">
-              
-              {/* Info Cliente */}
+
               <div className="col-span-1 lg:col-span-2 flex items-center gap-5">
                 <div className="w-14 h-14 rounded-2xl bg-[var(--mv-cream)] text-[var(--mv-sage)] flex items-center justify-center border border-black/5 shadow-inner">
                   <Users size={24} />
@@ -117,7 +112,6 @@ export default function ClientesPage() {
                 </div>
               </div>
 
-              {/* LTV - Total Invertido */}
               <div>
                 <p className="lg:hidden text-[9px] uppercase tracking-widest font-bold text-black/30 mb-1">Inversión Total</p>
                 <div className="flex items-center gap-1 text-xl font-bold text-[var(--mv-sage)]">
@@ -126,17 +120,15 @@ export default function ClientesPage() {
                 </div>
               </div>
 
-              {/* Conteo de Servicios */}
               <div>
                 <p className="lg:hidden text-[9px] uppercase tracking-widest font-bold text-black/30 mb-1">Servicios</p>
                 <div className="flex items-center gap-2">
-                   <div className="px-3 py-1 bg-[var(--mv-cream)] rounded-full text-[11px] font-bold text-[var(--mv-ink)] border border-black/5">
+                  <div className="px-3 py-1 bg-[var(--mv-cream)] rounded-full text-[11px] font-bold text-[var(--mv-ink)] border border-black/5">
                     {client.reservations.length} {client.reservations.length === 1 ? 'Sesión' : 'Sesiones'}
-                   </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Última Visita */}
               <div>
                 <p className="lg:hidden text-[9px] uppercase tracking-widest font-bold text-black/30 mb-1">Última Visita</p>
                 <div className="space-y-1">
@@ -145,35 +137,33 @@ export default function ClientesPage() {
                 </div>
               </div>
 
-              {/* Acciones */}
               <div className="flex justify-end gap-3">
-                 <Link 
+                <Link
                   href={`/admin/reservas?search=${encodeURIComponent(client.email)}`}
                   className="p-3 bg-black/5 text-[var(--mv-ink)] rounded-xl hover:bg-[var(--mv-ink)] hover:text-white transition flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest"
-                 >
-                   <History size={14} /> Historial
-                 </Link>
-                 <a 
-                  href={`https://wa.me/${client.phone.replace(/\D/g,'')}`}
+                >
+                  <History size={14} /> Historial
+                </Link>
+                <a
+                  href={`https://wa.me/${client.phone.replace(/\D/g, '')}`}
                   target="_blank"
                   rel="noreferrer"
                   className="p-3 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-500 hover:text-white transition"
-                 >
-                   <ArrowRight size={14} className="-rotate-45" />
-                 </a>
+                >
+                  <ArrowRight size={14} className="-rotate-45" />
+                </a>
               </div>
 
             </div>
 
-            {/* Background decoration */}
             <div className="absolute top-0 right-0 w-32 h-32 -mt-16 -mr-16 bg-[var(--mv-cream)]/50 rounded-full blur-3xl transition-all group-hover:scale-150" />
           </div>
         ))}
 
         {filteredClients.length === 0 && (
           <div className="py-20 text-center bg-white rounded-[40px] border border-black/5 shadow-sm">
-             <Users size={48} className="mx-auto text-black/5 mb-4" />
-             <p className="text-[11px] uppercase tracking-widest text-black/30 font-bold">No se encontraron clientes con esos criterios</p>
+            <Users size={48} className="mx-auto text-black/5 mb-4" />
+            <p className="text-[11px] uppercase tracking-widest text-black/30 font-bold">No se encontraron clientes con esos criterios</p>
           </div>
         )}
       </div>

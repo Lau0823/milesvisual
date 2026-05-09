@@ -14,7 +14,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const totalActiveReservations = useAdminStore((state) => state.totalActiveReservations);
   const totalPosts = useAdminStore((state) => state.totalPosts);
 
-  // Sincronización de datos manejada en cada página individual (page.tsx) con el token de sesión.
   const menuItems = [
     { href: '/admin', label: 'Resumen', icon: <LayoutDashboard size={18} className="h-5 w-5" /> },
     { href: '/admin/reservas', label: 'Reservas', icon: <Calendar size={18} className="h-5 w-5" /> },
@@ -30,7 +29,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <SessionProvider>
       <main className="min-h-screen bg-[#f4f0ea] text-[#2d2a27]">
         <div className="flex min-h-screen">
-          {/* Sidebar desktop */}
           <aside className="hidden w-[290px] shrink-0 border-r border-black/8 bg-white/70 px-6 py-6 backdrop-blur xl:block sticky top-0 h-screen overflow-y-auto custom-scrollbar">
             <div className="rounded-[24px] bg-[#789894] px-5 py-5 text-white">
               <p className="font-[Allura] text-[42px] leading-none">Miles Visual</p>
@@ -46,11 +44,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-3 rounded-[18px] px-4 py-4 text-left transition ${
-                      active
+                    className={`flex items-center gap-3 rounded-[18px] px-4 py-4 text-left transition ${active
                         ? "bg-[#789894] text-white shadow-lg"
                         : "bg-transparent text-[#2d2a27]/80 hover:bg-black/5"
-                    }`}
+                      }`}
                   >
                     {item.icon}
                     <span className="text-[13px] uppercase tracking-[0.12em]">
@@ -80,9 +77,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </div>
               </div>
             </div>
-            
+
             <div className="mt-6 border-t border-black/5 pt-6 grid gap-2">
-              <button 
+              <button
                 onClick={() => signOut()}
                 className="flex w-full items-center justify-center gap-2 rounded-[18px] border border-red-200 bg-red-50 px-4 py-4 text-red-600 transition hover:bg-red-100"
               >
@@ -92,22 +89,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </aside>
 
-          {/* Mobile panel */}
           <div
-            className={`fixed inset-0 z-50 xl:hidden ${
-              menuOpen ? "pointer-events-auto" : "pointer-events-none"
-            }`}
+            className={`fixed inset-0 z-50 xl:hidden ${menuOpen ? "pointer-events-auto" : "pointer-events-none"
+              }`}
           >
             <div
-              className={`absolute inset-0 bg-black/40 transition ${
-                menuOpen ? "opacity-100" : "opacity-0"
-              }`}
+              className={`absolute inset-0 bg-black/40 transition ${menuOpen ? "opacity-100" : "opacity-0"
+                }`}
               onClick={() => setMenuOpen(false)}
             />
             <aside
-              className={`absolute left-0 top-0 h-full w-[86%] max-w-[320px] bg-white px-6 py-6 transition-transform duration-300 overflow-y-auto ${
-                menuOpen ? "translate-x-0" : "-translate-x-full"
-              }`}
+              className={`absolute left-0 top-0 h-full w-[86%] max-w-[320px] bg-white px-6 py-6 transition-transform duration-300 overflow-y-auto ${menuOpen ? "translate-x-0" : "-translate-x-full"
+                }`}
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -135,11 +128,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       key={item.href}
                       href={item.href}
                       onClick={() => setMenuOpen(false)}
-                      className={`flex items-center gap-3 rounded-[18px] px-4 py-4 text-left transition ${
-                        active
+                      className={`flex items-center gap-3 rounded-[18px] px-4 py-4 text-left transition ${active
                           ? "bg-[#789894] text-white shadow-lg"
                           : "bg-transparent text-[#2d2a27]/80 hover:bg-black/5"
-                      }`}
+                        }`}
                     >
                       {item.icon}
                       <span className="text-[13px] uppercase tracking-[0.12em]">
@@ -160,9 +152,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </aside>
           </div>
 
-          {/* Main Content */}
           <div className="min-w-0 flex-1 flex flex-col">
-            {/* Topbar for mobile */}
             <header className="sticky top-0 z-30 border-b border-black/8 bg-[#f4f0ea]/90 backdrop-blur xl:hidden">
               <div className="flex items-center gap-4 px-4 py-4 md:px-6">
                 <button

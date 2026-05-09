@@ -8,7 +8,7 @@ export default function ProfilePage() {
   const { data: session, update } = useSession();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     nombre: '',
     email: '',
@@ -56,7 +56,6 @@ export default function ProfilePage() {
 
       if (res.ok) {
         setSuccess(true);
-        // Actualizar la sesión de NextAuth para reflejar cambios
         await update({
           ...session,
           user: {
@@ -83,8 +82,7 @@ export default function ProfilePage() {
       </div>
 
       <div className="grid md:grid-cols-[300px_1fr] gap-8">
-        
-        {/* Lado Izquierdo: Foto y Resumen */}
+
         <div className="space-y-6">
           <div className="bg-white rounded-[32px] p-8 shadow-sm border border-black/5 text-center">
             <div className="relative w-32 h-32 mx-auto mb-4 group">
@@ -114,27 +112,26 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Lado Derecho: Formulario */}
         <div className="bg-white rounded-[32px] p-8 md:p-10 shadow-sm border border-black/5">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Nombre Completo</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={formData.nombre}
-                  onChange={(e) => setFormData({...formData, nombre: e.target.value})}
-                  className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm outline-none border border-black/5 focus:border-[var(--mv-sage)] transition" 
+                  onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                  className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm outline-none border border-black/5 focus:border-[var(--mv-sage)] transition"
                   placeholder="Ej. Juan Pérez"
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Username</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={formData.username}
                   disabled
-                  className="w-full bg-black/5 rounded-2xl px-5 py-4 text-sm outline-none border border-black/5 text-black/40 cursor-not-allowed" 
+                  className="w-full bg-black/5 rounded-2xl px-5 py-4 text-sm outline-none border border-black/5 text-black/40 cursor-not-allowed"
                 />
               </div>
             </div>
@@ -142,21 +139,21 @@ export default function ProfilePage() {
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Email</label>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm outline-none border border-black/5 focus:border-[var(--mv-sage)] transition" 
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm outline-none border border-black/5 focus:border-[var(--mv-sage)] transition"
                   placeholder="admin@milesvisual.com"
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Teléfono</label>
-                <input 
-                  type="tel" 
+                <input
+                  type="tel"
                   value={formData.telefono}
-                  onChange={(e) => setFormData({...formData, telefono: e.target.value})}
-                  className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm outline-none border border-black/5 focus:border-[var(--mv-sage)] transition" 
+                  onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                  className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm outline-none border border-black/5 focus:border-[var(--mv-sage)] transition"
                   placeholder="+57 300 000 0000"
                 />
               </div>
@@ -165,11 +162,11 @@ export default function ProfilePage() {
             <div className="pt-4 border-t border-black/5">
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Nueva Contraseña (Opcional)</label>
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm outline-none border border-black/5 focus:border-[var(--mv-sage)] transition" 
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm outline-none border border-black/5 focus:border-[var(--mv-sage)] transition"
                   placeholder="Dejar en blanco para no cambiar"
                 />
               </div>
@@ -181,7 +178,7 @@ export default function ProfilePage() {
                   ¡Perfil actualizado con éxito!
                 </p>
               )}
-              <button 
+              <button
                 type="submit"
                 disabled={loading}
                 className="ml-auto bg-[var(--mv-ink)] text-white px-10 py-4 rounded-full text-[11px] uppercase tracking-[0.2em] font-semibold hover:bg-[var(--mv-sage)] transition flex items-center gap-3 disabled:opacity-50"

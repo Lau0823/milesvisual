@@ -10,7 +10,7 @@ export default function PrebodasPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<number | string>(0);
-  
+
   const { loadPublicData, settings, plans: displayPlansFull, mediaPosts: mediaPostsFull, isLoaded } = useClientStore();
 
   useEffect(() => {
@@ -80,7 +80,6 @@ export default function PrebodasPage() {
 
   return (
     <main className="bg-[var(--mv-cream)] text-[var(--mv-ink)]">
-      {/* HERO */}
       <section className="relative min-h-screen overflow-hidden bg-black">
         <video
           className="absolute inset-0 h-full w-full object-cover"
@@ -129,17 +128,15 @@ export default function PrebodasPage() {
           </button>
 
           <div
-            className={`fixed inset-0 z-50 transition ${
-              menuOpen
-                ? "pointer-events-auto opacity-100"
-                : "pointer-events-none opacity-0"
-            }`}
+            className={`fixed inset-0 z-50 transition ${menuOpen
+              ? "pointer-events-auto opacity-100"
+              : "pointer-events-none opacity-0"
+              }`}
           >
             <div className="absolute inset-0 bg-black/50" onClick={() => setMenuOpen(false)} />
             <div
-              className={`absolute right-0 top-0 flex h-full w-[86%] max-w-[360px] flex-col bg-[var(--mv-cream)] p-6 transition-transform duration-300 ${
-                menuOpen ? "translate-x-0" : "translate-x-full"
-              }`}
+              className={`absolute right-0 top-0 flex h-full w-[86%] max-w-[360px] flex-col bg-[var(--mv-cream)] p-6 transition-transform duration-300 ${menuOpen ? "translate-x-0" : "translate-x-full"
+                }`}
             >
               <div className="flex items-center justify-between">
                 <Image src={logoSrc} alt="Miles Visual" width={100} height={60} className="h-[60px] w-auto object-contain" />
@@ -180,7 +177,6 @@ export default function PrebodasPage() {
         </div>
       </section>
 
-      {/* FRASE */}
       <section className="mx-auto max-w-[1180px] px-4 py-16 text-center md:px-8 md:py-24">
         <p className="mv-script text-[54px] leading-none text-[var(--mv-gold)] md:text-[92px]">
           Conexión auténtica
@@ -190,7 +186,6 @@ export default function PrebodasPage() {
         </h2>
       </section>
 
-      {/* GRILLA 1 x 6 */}
       <section className="space-y-0">
         {prebodasGallery.map((photo, index) => (
           <button
@@ -224,7 +219,6 @@ export default function PrebodasPage() {
         ))}
       </section>
 
-      {/* MODAL */}
       {activePhoto && (
         <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm">
           <div className="relative flex min-h-screen items-center justify-center px-4 py-10">
@@ -278,7 +272,6 @@ export default function PrebodasPage() {
         </div>
       )}
 
-      {/* PLANES */}
       <section className="mx-auto max-w-[1280px] px-4 py-20 md:px-8 md:py-28">
         <div className="mb-12 text-center">
           <p className="mv-script text-[44px] leading-none text-[var(--mv-gold)] md:text-[72px]">
@@ -294,11 +287,10 @@ export default function PrebodasPage() {
             <button
               key={plan.id}
               onClick={() => setSelectedPlan(plan.id)}
-              className={`rounded-[18px] px-4 py-4 text-center text-[12px] font-medium uppercase tracking-[0.12em] transition ${
-                selectedPlan === plan.id
-                  ? "bg-[#789894] text-white shadow-lg"
-                  : "bg-white text-[var(--mv-ink)] shadow-sm"
-              }`}
+              className={`rounded-[18px] px-4 py-4 text-center text-[12px] font-medium uppercase tracking-[0.12em] transition ${selectedPlan === plan.id
+                ? "bg-[#789894] text-white shadow-lg"
+                : "bg-white text-[var(--mv-ink)] shadow-sm"
+                }`}
             >
               {plan.nombre || plan.name}
             </button>
@@ -361,7 +353,6 @@ export default function PrebodasPage() {
         </div>}
       </section>
 
-      {/* FOOTER */}
       <footer className="border-t border-black/8 bg-white">
         <div className="mx-auto flex max-w-[1280px] flex-col gap-6 px-4 py-10 md:flex-row md:items-center md:justify-between md:px-8">
           <nav className="flex flex-wrap gap-5">

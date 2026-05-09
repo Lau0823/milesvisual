@@ -119,7 +119,7 @@ export default function ReservasPage() {
       setEditingRes(null);
       setFormRes({
         clientName: '', email: '', phone: '', serviceType: 'Personalizado',
-        eventDate: '', time: '', value: 0, anticipo: 0, 
+        eventDate: '', time: '', value: 0, anticipo: 0,
         devolucion: 0, gastos_operativos: 0, notas_admin: '',
         status: 'pending', paymentStatus: 'pending'
       });
@@ -180,10 +180,10 @@ export default function ReservasPage() {
     } else {
       const selectedPlan = planes.find(p => p.nombre === planName);
       if (selectedPlan) {
-        setFormRes({ 
-          ...formRes, 
-          serviceType: selectedPlan.nombre, 
-          value: Number(selectedPlan.precio_base) 
+        setFormRes({
+          ...formRes,
+          serviceType: selectedPlan.nombre,
+          value: Number(selectedPlan.precio_base)
         });
         setValInput(selectedPlan.precio_base > 0 ? selectedPlan.precio_base.toString() : '');
       }
@@ -210,7 +210,7 @@ export default function ReservasPage() {
     }
     return defaultValue;
   };
-  
+
   const siteLogo = getSetting('site_logo', 'https://res.cloudinary.com/dgfp5gcjr/image/upload/v1714290580/milesvisual/logo_white.png');
 
   const filteredReservations = reservations
@@ -224,12 +224,12 @@ export default function ReservasPage() {
           <p className="text-[10px] uppercase tracking-[0.3em] text-black/50 font-semibold mb-1">Operaciones</p>
           <h2 className="text-4xl font-semibold tracking-tight uppercase">Reservas & Agenda</h2>
         </div>
-        
+
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20" size={16} />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Buscar cliente..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -237,7 +237,7 @@ export default function ReservasPage() {
             />
           </div>
 
-          <button 
+          <button
             onClick={() => openModal()}
             className="bg-[var(--mv-ink)] text-white px-6 py-3 rounded-full text-[11px] uppercase tracking-[0.2em] font-semibold hover:bg-[var(--mv-sage)] transition flex items-center gap-2 shadow-lg"
           >
@@ -253,7 +253,7 @@ export default function ReservasPage() {
           { id: 'pending', label: 'Pendientes' },
           { id: 'cancelled', label: 'Canceladas' },
         ].map((tab) => (
-          <button 
+          <button
             key={tab.id}
             onClick={() => setFilter(tab.id)}
             className={`pb-4 text-[10px] uppercase tracking-[0.2em] font-bold transition-all relative ${filter === tab.id ? 'text-[var(--mv-ink)]' : 'text-black/30'}`}
@@ -267,101 +267,101 @@ export default function ReservasPage() {
       <div className="bg-white rounded-[32px] border border-black/5 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[1100px]">
-          <thead>
-            <tr className="bg-black/[0.02] border-b border-black/5">
-              <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40">Cliente</th>
-              <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40">Servicio</th>
-              <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40">Fecha Evento</th>
-              <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40">Finanzas</th>
-              <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40">Estado</th>
-              <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40 text-right">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredReservations.map((res) => {
-              const saldo = Number(res.value) - Number(res.anticipo || 0);
-              return (
-                <tr key={res.id} className="border-b border-black/5 hover:bg-black/[0.01] transition-colors group">
-                  <td className="px-8 py-6">
-                    <div>
-                      <p className="text-sm font-semibold text-[var(--mv-ink)]">{res.clientName}</p>
-                      <div className="flex flex-col gap-1 mt-1 opacity-40">
-                         <span className="flex items-center gap-1 text-[10px]"><Mail size={10} /> {res.email}</span>
-                         <span className="flex items-center gap-1 text-[10px]"><Phone size={10} /> {res.phone}</span>
+            <thead>
+              <tr className="bg-black/[0.02] border-b border-black/5">
+                <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40">Cliente</th>
+                <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40">Servicio</th>
+                <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40">Fecha Evento</th>
+                <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40">Finanzas</th>
+                <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40">Estado</th>
+                <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-black/40 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredReservations.map((res) => {
+                const saldo = Number(res.value) - Number(res.anticipo || 0);
+                return (
+                  <tr key={res.id} className="border-b border-black/5 hover:bg-black/[0.01] transition-colors group">
+                    <td className="px-8 py-6">
+                      <div>
+                        <p className="text-sm font-semibold text-[var(--mv-ink)]">{res.clientName}</p>
+                        <div className="flex flex-col gap-1 mt-1 opacity-40">
+                          <span className="flex items-center gap-1 text-[10px]"><Mail size={10} /> {res.email}</span>
+                          <span className="flex items-center gap-1 text-[10px]"><Phone size={10} /> {res.phone}</span>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <span className="px-3 py-1 bg-[var(--mv-cream)] text-[var(--mv-sage)] text-[9px] font-bold uppercase tracking-widest rounded-full border border-[var(--mv-sage)]/10">
-                      {res.serviceType}
-                    </span>
-                  </td>
-                  <td className="px-8 py-6">
-                    <div className="flex items-center gap-2 text-sm text-black/60">
-                      <CalendarDays size={14} />
-                      {res.eventDate ? new Date(res.eventDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : '---'}
-                      <span className="text-[10px] opacity-50 ml-1">at {res.time}</span>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6 font-medium text-[11px]">
-                    <div className="space-y-1">
-                      <div className="flex justify-between w-24">
-                        <span className="opacity-40 uppercase">Total:</span>
-                        <span>${Number(res.value).toLocaleString()}</span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className="px-3 py-1 bg-[var(--mv-cream)] text-[var(--mv-sage)] text-[9px] font-bold uppercase tracking-widest rounded-full border border-[var(--mv-sage)]/10">
+                        {res.serviceType}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-2 text-sm text-black/60">
+                        <CalendarDays size={14} />
+                        {res.eventDate ? new Date(res.eventDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : '---'}
+                        <span className="text-[10px] opacity-50 ml-1">at {res.time}</span>
                       </div>
-                      <div className="flex justify-between w-24 text-[var(--mv-sage)]">
-                        <span className="opacity-40 uppercase">Antic:</span>
-                        <span>${Number(res.anticipo || 0).toLocaleString()}</span>
+                    </td>
+                    <td className="px-8 py-6 font-medium text-[11px]">
+                      <div className="space-y-1">
+                        <div className="flex justify-between w-24">
+                          <span className="opacity-40 uppercase">Total:</span>
+                          <span>${Number(res.value).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between w-24 text-[var(--mv-sage)]">
+                          <span className="opacity-40 uppercase">Antic:</span>
+                          <span>${Number(res.anticipo || 0).toLocaleString()}</span>
+                        </div>
+                        <div className={`flex justify-between w-24 font-bold ${saldo > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                          <span className="opacity-40 uppercase">Saldo:</span>
+                          <span>${saldo.toLocaleString()}</span>
+                        </div>
                       </div>
-                      <div className={`flex justify-between w-24 font-bold ${saldo > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                        <span className="opacity-40 uppercase">Saldo:</span>
-                        <span>${saldo.toLocaleString()}</span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="space-y-2">
+                        {getStatusBadge(res.status)}
+                        <div className={`text-[8px] uppercase tracking-tighter font-bold px-2 py-0.5 rounded-md border w-fit ${res.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
+                          PAGO: {res.paymentStatus}
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <div className="space-y-2">
-                       {getStatusBadge(res.status)}
-                       <div className={`text-[8px] uppercase tracking-tighter font-bold px-2 py-0.5 rounded-md border w-fit ${res.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
-                         PAGO: {res.paymentStatus}
-                       </div>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button 
-                        onClick={async () => {
-                          const t = toast.loading("Generando documento...");
-                          try {
-                            await generateQuotePDF(res as any, 'quote', siteLogo);
-                            toast.success("PDF generado con éxito", { id: t });
-                          } catch (e) {
-                            toast.error("Error al generar PDF", { id: t });
-                            console.error(e);
-                          }
-                        }}
-                        className="p-2.5 bg-[var(--mv-cream)] text-[var(--mv-gold)] rounded-xl hover:bg-[var(--mv-gold)] hover:text-white transition flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest px-4 shadow-sm"
-                      >
-                        <FileText size={14} /> PDF
-                      </button>
-                      <button 
-                        onClick={() => openModal(res)}
-                        className="p-2.5 bg-black/5 text-black/40 rounded-xl hover:bg-[var(--mv-ink)] hover:text-white transition shadow-sm"
-                      >
-                        <Edit3 size={14} />
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(res.id)}
-                        className="p-2.5 bg-rose-50 text-rose-400 rounded-xl hover:bg-rose-500 hover:text-white transition shadow-sm"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
+                    </td>
+                    <td className="px-8 py-6 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={async () => {
+                            const t = toast.loading("Generando documento...");
+                            try {
+                              await generateQuotePDF(res as any, 'quote', siteLogo);
+                              toast.success("PDF generado con éxito", { id: t });
+                            } catch (e) {
+                              toast.error("Error al generar PDF", { id: t });
+                              console.error(e);
+                            }
+                          }}
+                          className="p-2.5 bg-[var(--mv-cream)] text-[var(--mv-gold)] rounded-xl hover:bg-[var(--mv-gold)] hover:text-white transition flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest px-4 shadow-sm"
+                        >
+                          <FileText size={14} /> PDF
+                        </button>
+                        <button
+                          onClick={() => openModal(res)}
+                          className="p-2.5 bg-black/5 text-black/40 rounded-xl hover:bg-[var(--mv-ink)] hover:text-white transition shadow-sm"
+                        >
+                          <Edit3 size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(res.id)}
+                          className="p-2.5 bg-rose-50 text-rose-400 rounded-xl hover:bg-rose-500 hover:text-white transition shadow-sm"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
           </table>
         </div>
       </div>
@@ -371,37 +371,37 @@ export default function ReservasPage() {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
           <div className="relative bg-white rounded-[32px] w-full max-w-[700px] p-8 shadow-2xl animate-in zoom-in-95 duration-300 overflow-y-auto max-h-[95vh]">
             <div className="flex justify-between items-center mb-8">
-               <h3 className="text-2xl font-semibold uppercase tracking-tight">{editingRes ? 'Editar Reserva' : 'Nueva Reserva'}</h3>
-               <button onClick={() => setShowModal(false)} className="p-2 hover:bg-black/5 rounded-full"><XCircle size={24} className="text-black/20" /></button>
+              <h3 className="text-2xl font-semibold uppercase tracking-tight">{editingRes ? 'Editar Reserva' : 'Nueva Reserva'}</h3>
+              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-black/5 rounded-full"><XCircle size={24} className="text-black/20" /></button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="bg-black/5 p-6 rounded-3xl space-y-4">
                 <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-black/40 mb-2 border-b border-black/5 pb-2">Datos del Cliente</p>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Nombre Completo</label>
-                    <input type="text" required value={formRes.clientName} onChange={(e) => setFormRes({...formRes, clientName: e.target.value})} className="w-full bg-white rounded-xl px-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" />
+                    <input type="text" required value={formRes.clientName} onChange={(e) => setFormRes({ ...formRes, clientName: e.target.value })} className="w-full bg-white rounded-xl px-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Teléfono / WhatsApp</label>
-                    <input type="text" required value={formRes.phone} onChange={(e) => setFormRes({...formRes, phone: e.target.value})} className="w-full bg-white rounded-xl px-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" />
+                    <input type="text" required value={formRes.phone} onChange={(e) => setFormRes({ ...formRes, phone: e.target.value })} className="w-full bg-white rounded-xl px-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" />
                   </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Correo Electrónico</label>
-                  <input type="email" required value={formRes.email} onChange={(e) => setFormRes({...formRes, email: e.target.value})} className="w-full bg-white rounded-xl px-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" />
+                  <input type="email" required value={formRes.email} onChange={(e) => setFormRes({ ...formRes, email: e.target.value })} className="w-full bg-white rounded-xl px-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" />
                 </div>
               </div>
 
               <div className="bg-[var(--mv-cream)]/50 p-6 rounded-3xl space-y-4 border border-[var(--mv-sage)]/10">
                 <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--mv-sage)] mb-2 border-b border-[var(--mv-sage)]/10 pb-2">Detalles del Servicio & Finanzas</p>
-                
+
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Seleccionar Plan</label>
-                    <select 
-                      value={formRes.serviceType} 
+                    <select
+                      value={formRes.serviceType}
                       onChange={(e) => handlePlanChange(e.target.value)}
                       className="w-full bg-white rounded-xl px-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]"
                     >
@@ -415,17 +415,17 @@ export default function ReservasPage() {
                     <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Valor Total (COP)</label>
                     <div className="relative">
                       <DollarSign size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20" />
-                      <input 
-                        type="text" 
-                        required 
-                        value={valInput} 
+                      <input
+                        type="text"
+                        required
+                        value={valInput}
                         onChange={(e) => {
                           const val = e.target.value.replace(/\D/g, '').replace(/^0+/, '');
                           setValInput(val);
-                          setFormRes({...formRes, value: Number(val)});
-                        }} 
+                          setFormRes({ ...formRes, value: Number(val) });
+                        }}
                         placeholder="0"
-                        className="w-full bg-white rounded-xl pl-10 pr-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)] font-bold text-[var(--mv-ink)]" 
+                        className="w-full bg-white rounded-xl pl-10 pr-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)] font-bold text-[var(--mv-ink)]"
                       />
                     </div>
                   </div>
@@ -436,16 +436,16 @@ export default function ReservasPage() {
                     <label className="text-[9px] uppercase tracking-widest font-bold text-[var(--mv-sage)] ml-1">Anticipo / Abono</label>
                     <div className="relative">
                       <CreditCard size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--mv-sage)]/30" />
-                      <input 
-                        type="text" 
-                        value={antInput} 
+                      <input
+                        type="text"
+                        value={antInput}
                         onChange={(e) => {
                           const val = e.target.value.replace(/\D/g, '').replace(/^0+/, '');
                           setAntInput(val);
-                          setFormRes({...formRes, anticipo: Number(val)});
-                        }} 
+                          setFormRes({ ...formRes, anticipo: Number(val) });
+                        }}
                         placeholder="0"
-                        className="w-full bg-white rounded-xl pl-10 pr-4 py-3 text-sm border border-[var(--mv-sage)]/20 outline-none focus:border-[var(--mv-sage)] font-bold text-[var(--mv-sage)]" 
+                        className="w-full bg-white rounded-xl pl-10 pr-4 py-3 text-sm border border-[var(--mv-sage)]/20 outline-none focus:border-[var(--mv-sage)] font-bold text-[var(--mv-sage)]"
                       />
                     </div>
                   </div>
@@ -457,30 +457,28 @@ export default function ReservasPage() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Estado Reserva</label>
-                    <select value={formRes.status} onChange={(e) => setFormRes({...formRes, status: e.target.value})} className="w-full bg-white rounded-xl px-4 py-3 text-[10px] uppercase font-bold border border-black/5 outline-none">
+                    <select value={formRes.status} onChange={(e) => setFormRes({ ...formRes, status: e.target.value })} className="w-full bg-white rounded-xl px-4 py-3 text-[10px] uppercase font-bold border border-black/5 outline-none">
                       <option value="pending">Pendiente</option>
                       <option value="confirmed">Confirmada</option>
                       <option value="cancelled">Cancelada</option>
                     </select>
                   </div>
                 </div>
-
-                {/* NUEVOS CAMPOS: Devoluciones y Gastos */}
                 <div className="grid grid-cols-2 gap-6 pt-4 border-t border-black/5">
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-widest font-bold text-rose-500/60 ml-1">Devolución (Refund)</label>
                     <div className="relative">
                       <DollarSign size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-300" />
-                      <input 
-                        type="text" 
-                        value={devInput} 
+                      <input
+                        type="text"
+                        value={devInput}
                         onChange={(e) => {
                           const val = e.target.value.replace(/\D/g, '').replace(/^0+/, '');
                           setDevInput(val);
-                          setFormRes({...formRes, devolucion: Number(val)});
-                        }} 
+                          setFormRes({ ...formRes, devolucion: Number(val) });
+                        }}
                         placeholder="0"
-                        className="w-full bg-rose-50/30 rounded-xl pl-10 pr-4 py-3 text-sm border border-rose-100 outline-none focus:border-rose-300 text-rose-600 font-medium" 
+                        className="w-full bg-rose-50/30 rounded-xl pl-10 pr-4 py-3 text-sm border border-rose-100 outline-none focus:border-rose-300 text-rose-600 font-medium"
                       />
                     </div>
                   </div>
@@ -488,16 +486,16 @@ export default function ReservasPage() {
                     <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Gastos Operativos</label>
                     <div className="relative">
                       <DollarSign size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20" />
-                      <input 
-                        type="text" 
-                        value={gasInput} 
+                      <input
+                        type="text"
+                        value={gasInput}
                         onChange={(e) => {
                           const val = e.target.value.replace(/\D/g, '').replace(/^0+/, '');
                           setGasInput(val);
-                          setFormRes({...formRes, gastos_operativos: Number(val)});
-                        }} 
+                          setFormRes({ ...formRes, gastos_operativos: Number(val) });
+                        }}
                         placeholder="0"
-                        className="w-full bg-white rounded-xl pl-10 pr-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)] font-medium" 
+                        className="w-full bg-white rounded-xl pl-10 pr-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)] font-medium"
                       />
                     </div>
                   </div>
@@ -505,9 +503,9 @@ export default function ReservasPage() {
 
                 <div className="space-y-1">
                   <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Notas Internas / Motivo Cancelación</label>
-                  <textarea 
-                    value={formRes.notas_admin} 
-                    onChange={(e) => setFormRes({...formRes, notas_admin: e.target.value})}
+                  <textarea
+                    value={formRes.notas_admin}
+                    onChange={(e) => setFormRes({ ...formRes, notas_admin: e.target.value })}
                     placeholder="Escribe aquí detalles sobre devoluciones, gastos o por qué se canceló la sesión..."
                     className="w-full bg-white rounded-xl px-4 py-3 text-xs border border-black/5 outline-none focus:border-[var(--mv-sage)] min-h-[80px] resize-none"
                   />
@@ -517,11 +515,11 @@ export default function ReservasPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Fecha del Evento</label>
-                  <input type="date" required value={formRes.eventDate} onChange={(e) => setFormRes({...formRes, eventDate: e.target.value})} className="w-full bg-black/5 rounded-xl px-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" />
+                  <input type="date" required value={formRes.eventDate} onChange={(e) => setFormRes({ ...formRes, eventDate: e.target.value })} className="w-full bg-black/5 rounded-xl px-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] uppercase tracking-widest font-bold text-black/40 ml-1">Hora</label>
-                  <input type="time" required value={formRes.time} onChange={(e) => setFormRes({...formRes, time: e.target.value})} className="w-full bg-black/5 rounded-xl px-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" />
+                  <input type="time" required value={formRes.time} onChange={(e) => setFormRes({ ...formRes, time: e.target.value })} className="w-full bg-black/5 rounded-xl px-4 py-3 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" />
                 </div>
               </div>
 

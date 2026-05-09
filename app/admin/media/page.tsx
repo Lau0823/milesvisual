@@ -10,7 +10,7 @@ import { showConfirmToast } from '../../../components/admin/ConfirmToast';
 export default function MediaPage() {
   const { data: session } = useSession();
   const { mediaPosts, syncWithBackend, saveMediaPost, deleteMediaPost } = useAdminStore();
-  
+
   const [uploading, setUploading] = useState(false);
   const [filter, setFilter] = useState('TODOS');
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -25,7 +25,7 @@ export default function MediaPage() {
     category: 'BODAS',
     file: null as File | null
   });
-  
+
   const [isNewCategory, setIsNewCategory] = useState(false);
   const categories = Array.from(new Set(mediaPosts.map(p => p.category).filter(Boolean)));
 
@@ -41,16 +41,16 @@ export default function MediaPage() {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPost.id && !newPost.file) return; 
-    
+    if (!newPost.id && !newPost.file) return;
+
     setUploading(true);
     const loadingToast = toast.loading(newPost.id ? 'Actualizando publicación...' : 'Subiendo contenido...');
-    
+
     try {
       if (!session?.accessToken) throw new Error('No hay sesión activa');
-      
+
       await saveMediaPost((session as any).accessToken, newPost);
-      
+
       toast.success(newPost.id ? 'Publicación actualizada' : '¡Contenido subido con éxito!', { id: loadingToast });
       setShowUploadModal(false);
       setNewPost({ id: undefined, title: '', category: 'BODAS', file: null });
@@ -87,7 +87,7 @@ export default function MediaPage() {
           <p className="mv-script text-[32px] text-[var(--mv-sage)] leading-none mb-2">multimedia</p>
           <h2 className="text-4xl font-semibold tracking-tight uppercase">Gestión de Contenido</h2>
         </div>
-        
+
         <div className="flex bg-white rounded-full p-1 border border-black/5 shadow-sm overflow-hidden mb-1 md:mb-0">
           <button onClick={() => setActiveTab('portfolio')} className={`px-8 py-3 rounded-full text-[10px] uppercase tracking-widest font-bold transition ${activeTab === 'portfolio' ? 'bg-[var(--mv-ink)] text-white shadow-md' : 'text-black/30 hover:text-black'}`}>
             Portafolio
@@ -126,13 +126,13 @@ export default function MediaPage() {
                     {post.category}
                   </div>
                 </div>
-                
+
                 <div className="px-3 py-5 flex-1 flex flex-col">
                   <h4 className="text-[13px] font-bold uppercase tracking-tight text-[var(--mv-ink)] mb-1 truncate">{post.title}</h4>
                   <p className="text-[9px] uppercase tracking-widest text-black/30 font-bold mb-6">
                     {post.cloudinaryUrl.includes('/video/upload/') ? 'Producción Audiovisual' : 'Fotografía Editorial'}
                   </p>
-                  
+
                   <div className="mt-auto space-y-2">
                     <div className="flex items-center justify-center gap-2 py-2 bg-green-50 text-green-600 rounded-xl text-[9px] font-bold uppercase tracking-widest border border-green-100">
                       <CheckCircle2 size={12} /> Publicado
@@ -152,8 +152,7 @@ export default function MediaPage() {
                 </div>
               </div>
             ))}
-            
-            {/* Placeholder para subir */}
+
             <button onClick={() => { setNewPost({ id: undefined, title: '', category: 'BODAS', file: null }); setShowUploadModal(true); }} className="aspect-[3/4.5] rounded-[32px] border-2 border-dashed border-black/5 flex flex-col items-center justify-center gap-3 text-black/20 hover:text-[var(--mv-sage)] hover:border-[var(--mv-sage)]/30 transition-all group">
               <div className="p-4 bg-black/[0.02] group-hover:bg-[var(--mv-sage)]/5 rounded-full transition">
                 <Plus size={32} />
@@ -220,7 +219,6 @@ export default function MediaPage() {
           ))}
         </div>
       )}
-      {/* Modal Subida */}
       {showUploadModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowUploadModal(false)} />
@@ -229,7 +227,7 @@ export default function MediaPage() {
             <form onSubmit={handleUpload} className="space-y-6">
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-widest font-bold text-black/40 ml-1">Título</label>
-                <input type="text" required value={newPost.title} onChange={(e) => setNewPost({...newPost, title: e.target.value})} className="w-full bg-[var(--mv-cream)] rounded-2xl px-5 py-4 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" placeholder="Título del post..." />
+                <input type="text" required value={newPost.title} onChange={(e) => setNewPost({ ...newPost, title: e.target.value })} className="w-full bg-[var(--mv-cream)] rounded-2xl px-5 py-4 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" placeholder="Título del post..." />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between ml-1">
@@ -239,9 +237,9 @@ export default function MediaPage() {
                   </button>
                 </div>
                 {isNewCategory ? (
-                  <input type="text" value={newPost.category} onChange={e => setNewPost({...newPost, category: e.target.value})} className="w-full bg-[var(--mv-cream)] rounded-2xl px-5 py-4 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" placeholder="Escribe nueva categoría..." autoFocus />
+                  <input type="text" value={newPost.category} onChange={e => setNewPost({ ...newPost, category: e.target.value })} className="w-full bg-[var(--mv-cream)] rounded-2xl px-5 py-4 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)]" placeholder="Escribe nueva categoría..." autoFocus />
                 ) : (
-                  <select value={newPost.category} onChange={e => setNewPost({...newPost, category: e.target.value})} className="w-full bg-[var(--mv-cream)] rounded-2xl px-5 py-4 text-sm border border-black/5 outline-none appearance-none cursor-pointer">
+                  <select value={newPost.category} onChange={e => setNewPost({ ...newPost, category: e.target.value })} className="w-full bg-[var(--mv-cream)] rounded-2xl px-5 py-4 text-sm border border-black/5 outline-none appearance-none cursor-pointer">
                     <option value="" disabled>Seleccione una categoría</option>
                     {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                     {categories.length === 0 && <option value="BODAS">BODAS</option>}
