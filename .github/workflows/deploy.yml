@@ -2,7 +2,7 @@ name: Deploy Frontend
 
 on:
   push:
-    branches: [ frontend ]
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -18,7 +18,7 @@ jobs:
             cd /var/www/frontend
             # Forzamos la limpieza para evitar bloqueos por archivos locales (como package-lock.json)
             git fetch --all
-            git reset --hard origin/frontend
+            git reset --hard origin/main
             npm install
             npm run build
             # Usamos el archivo central de infraestructura para el despliegue
