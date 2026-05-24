@@ -23,7 +23,8 @@ interface Servicio {
 const formatDescription = (desc: string) => {
   if (!desc) return 'Sin descripción';
   try {
-    const parsed = JSON.parse(desc);
+    let parsed = JSON.parse(desc);
+    if (typeof parsed === 'string') parsed = JSON.parse(parsed);
     if (Array.isArray(parsed)) {
       return parsed.join(', ');
     }
@@ -59,7 +60,8 @@ export default function PlanesPage() {
         return;
       }
       try {
-        const parsed = JSON.parse(editingPlan.descripcion);
+        let parsed = JSON.parse(editingPlan.descripcion);
+        if (typeof parsed === 'string') parsed = JSON.parse(parsed);
         if (Array.isArray(parsed)) {
           setDescText(parsed.join('\n'));
           return;

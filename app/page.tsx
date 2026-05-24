@@ -578,7 +578,18 @@ export default function HomePage() {
               {(() => {
                 let itemsList = activePlan.items;
                 if (!itemsList && activePlan.descripcion) {
-                  try { itemsList = JSON.parse(activePlan.descripcion); } catch (e) { itemsList = [activePlan.descripcion]; }
+                  try { 
+                    let parsed = JSON.parse(activePlan.descripcion); 
+                    if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+                    
+                    if (Array.isArray(parsed)) {
+                      itemsList = parsed;
+                    } else {
+                      itemsList = [activePlan.descripcion];
+                    }
+                  } catch (e) { 
+                    itemsList = [activePlan.descripcion]; 
+                  }
                 }
 
                 return (
