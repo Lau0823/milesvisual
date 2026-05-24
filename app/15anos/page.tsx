@@ -229,12 +229,6 @@ export default function QuincePage() {
             </div>
           </button>
         ))}
-        {quinceGallery.length === 0 && (
-          <div className="py-20 text-center">
-            <p className="text-xl opacity-60">Aún no hay fotos en la galería para 15 años.</p>
-            <p className="text-sm opacity-40 mt-2">Sube imágenes desde el admin asignando la categoría "15 AÑOS".</p>
-          </div>
-        )}
       </section>
 
       {activePhoto && (
@@ -313,11 +307,6 @@ export default function QuincePage() {
               {plan.nombre || plan.name}
             </button>
           ))}
-          {displayPlans.length === 0 && (
-            <p className="col-span-2 md:col-span-5 text-center text-sm opacity-60">
-              Aún no hay planes creados para 15 años. (Crea uno en el admin usando la categoría "15 años")
-            </p>
-          )}
         </div>
 
         {activePlan && <div className="overflow-hidden rounded-[30px] bg-white shadow-[0_22px_60px_rgba(0,0,0,0.08)]">
