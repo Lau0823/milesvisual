@@ -20,6 +20,17 @@ interface Servicio {
   file?: File;
 }
 
+const formatDescription = (desc: string) => {
+  if (!desc) return 'Sin descripción';
+  try {
+    const parsed = JSON.parse(desc);
+    if (Array.isArray(parsed)) {
+      return parsed.join(', ');
+    }
+  } catch (e) {}
+  return desc;
+};
+
 export default function PlanesPage() {
   const { data: session } = useSession();
   const { planes, fetchPlanes, savePlan, deletePlan } = useAdminStore();
@@ -27,6 +38,7 @@ export default function PlanesPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Partial<Servicio> | null>(null);
   const [isNewCategory, setIsNewCategory] = useState(false);
+  const [descText, setDescText] = useState('');
 
   const categories = Array.from(new Set(planes.map(p => p.categoria).filter(Boolean)));
 
@@ -40,13 +52,43 @@ export default function PlanesPage() {
     load();
   }, [session, fetchPlanes]);
 
+  useEffect(() => {
+    if (editingPlan) {
+      if (!editingPlan.descripcion) {
+        setDescText('');
+        return;
+      }
+      try {
+        const parsed = JSON.parse(editingPlan.descripcion);
+        if (Array.isArray(parsed)) {
+          setDescText(parsed.join('\n'));
+          return;
+        }
+      } catch (e) {}
+      setDescText(editingPlan.descripcion);
+    } else {
+      setDescText('');
+    }
+  }, [editingPlan]);
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingPlan || !session?.accessToken) return;
 
+    const lines = descText
+      .split('\n')
+      .map(line => line.trim())
+      .filter(Boolean);
+    const serializedDesc = JSON.stringify(lines);
+
+    const planToSave = {
+      ...editingPlan,
+      descripcion: serializedDesc,
+    };
+
     const loadingToast = toast.loading('Guardando cambios...');
     try {
-      await savePlan((session as any).accessToken, editingPlan);
+      await savePlan((session as any).accessToken, planToSave);
       toast.success('¡Plan actualizado con éxito!', { id: loadingToast });
       setShowModal(false);
     } catch (error: any) {
@@ -116,7 +158,7 @@ export default function PlanesPage() {
             </div>
 
             <p className="text-sm text-black/50 leading-relaxed mb-8 flex-1 relative z-10 line-clamp-3">
-              {plan.descripcion || 'Sin descripción'}
+              {formatDescription(plan.descripcion)}
             </p>
 
             <div className="flex items-end justify-between pt-6 border-t border-black/5 relative z-10">
@@ -188,8 +230,8 @@ export default function PlanesPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-black/40 ml-1">Descripción</label>
-                <textarea rows={4} value={editingPlan?.descripcion || ''} onChange={e => setEditingPlan({ ...editingPlan, descripcion: e.target.value })} className="w-full bg-[var(--mv-cream)] rounded-2xl px-5 py-4 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)] resize-none" />
+                <label className="text-[10px] uppercase tracking-widest font-bold text-black/40 ml-1">Descripción (Una característica por línea)</label>
+                <textarea rows={6} value={descText} onChange={e => setDescText(e.target.value)} className="w-full bg-[var(--mv-cream)] rounded-2xl px-5 py-4 text-sm border border-black/5 outline-none focus:border-[var(--mv-sage)] resize-none" placeholder="Ejemplo:&#10;5 fotos impresas tamaño 15x20 cm.&#10;Cubrimiento del evento en formato digital (aprox. 200 fotos).&#10;Protocolo, decoración, recepción, maquillaje y hora loca." />
               </div>
 
               <div className="space-y-2">
