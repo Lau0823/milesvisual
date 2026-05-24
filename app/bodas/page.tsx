@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useMemo, useState, useEffect } from "react";
 import { Menu, X, ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
 import { useClientStore } from "../../store/useClientStore";
+import { parsePlanDescription } from "../../utils/parseDescription";
 
 export default function BodasPage() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -327,7 +328,7 @@ export default function BodasPage() {
               </p>
 
               <ul className="mt-7 space-y-3">
-                {(activePlan.descripcion ? activePlan.descripcion.split('. ').filter(Boolean) : activePlan.items).map((item: string, idx: number) => (
+                {parsePlanDescription(activePlan.descripcion, activePlan.items).map((item: string, idx: number) => (
                   <li key={idx} className="flex items-start gap-3">
                     <span className="mt-[10px] h-[5px] w-[5px] rounded-full bg-[#789894]" />
                     <span className="text-[15px] leading-7 text-[var(--mv-ink)]/82 md:text-[17px] md:leading-8">

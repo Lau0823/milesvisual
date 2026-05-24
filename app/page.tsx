@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState, useEffect, useMemo } from "react";
 import { Menu, X, ChevronLeft, ChevronRight, MessageCircle, Instagram, Star } from "lucide-react";
 import { useClientStore } from "../store/useClientStore";
+import { parsePlanDescription } from "../utils/parseDescription";
 
 // Función de optimización de Cloudinary movida fuera para ser accesible por todos los componentes
 const getOptimizedUrl = (url: string) => {
@@ -576,21 +577,7 @@ export default function HomePage() {
 
             <div className="px-6 py-8 md:px-10 md:py-10">
               {(() => {
-                let itemsList = activePlan.items;
-                if (!itemsList && activePlan.descripcion) {
-                  try { 
-                    let parsed = JSON.parse(activePlan.descripcion); 
-                    if (typeof parsed === 'string') parsed = JSON.parse(parsed);
-                    
-                    if (Array.isArray(parsed)) {
-                      itemsList = parsed;
-                    } else {
-                      itemsList = [activePlan.descripcion];
-                    }
-                  } catch (e) { 
-                    itemsList = [activePlan.descripcion]; 
-                  }
-                }
+                const itemsList = parsePlanDescription(activePlan.descripcion, activePlan.items);
 
                 return (
                   <>
