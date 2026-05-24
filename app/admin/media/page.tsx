@@ -170,6 +170,7 @@ export default function MediaPage() {
             { key: 'bodas_video_url', label: 'Cabecera Bodas', desc: 'Video de fondo para la página de bodas' },
             { key: 'prebodas_video_url', label: 'Cabecera Pre-Bodas', desc: 'Video de fondo para la página de pre-bodas' },
             { key: 'estudio_video_url', label: 'Cabecera Estudio', desc: 'Video de fondo para la página de estudio' },
+            { key: '15anos_video_url', label: 'Cabecera 15 Años', desc: 'Video de fondo para la página de 15 años' },
             { key: 'acerca_video_url', label: 'Acerca de mí', desc: 'Video para la sección personal' },
           ].map((v) => (
             <div key={v.key} className="bg-white rounded-[32px] p-8 shadow-sm border border-black/5 flex flex-col hover:shadow-xl transition-all duration-500 group">
