@@ -6,11 +6,13 @@ import { useMemo, useState, useEffect } from "react";
 import { Menu, X, ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
 import { useClientStore } from "../../store/useClientStore";
 import { parsePlanDescription } from "../../utils/parseDescription";
+import QuoteModal from "../../components/QuoteModal";
 
 export default function BodasPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<number | string>(0);
+  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
 
   const { loadPublicData, settings, plans: displayPlansFull, mediaPosts: mediaPostsFull, isLoaded } = useClientStore();
 
@@ -348,14 +350,12 @@ export default function BodasPage() {
               </div>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <a
-                  href={getWhatsappLink(`Hola Miles Visual, quiero cotizar el plan ${activePlan.nombre || activePlan.name}`)}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() => setIsQuoteModalOpen(true)}
                   className="mv-button-dark"
                 >
                   Cotizar
-                </a>
+                </button>
                 <Link href="/bodas" className="mv-button-outline-dark">
                   Ver galería
                 </Link>
@@ -403,6 +403,13 @@ export default function BodasPage() {
       >
         <MessageCircle className="h-6 w-6" />
       </a>
+
+      <QuoteModal 
+        isOpen={isQuoteModalOpen} 
+        onClose={() => setIsQuoteModalOpen(false)} 
+        planName={activePlan?.nombre || activePlan?.name || 'Bodas'}
+        whatsappUrl={getWhatsappLink(`Hola Miles Visual, quiero cotizar el plan ${activePlan?.nombre || activePlan?.name} de Bodas`)}
+      />
     </main>
   );
 }

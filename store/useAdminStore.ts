@@ -36,6 +36,9 @@ interface AdminState {
 
   // Reservas
   deleteReservation: (token: string, id: number) => Promise<void>;
+
+  // Cotizaciones
+  updateQuoteStatus: (token: string, id: number, status: string) => Promise<void>;
   
   setLoading: (loading: boolean) => void;
 }
@@ -340,6 +343,39 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       await db.jsonCache.put({ key: 'reservations', data: newReservations, updatedAt: new Date().toISOString() });
     } catch (error) {
       console.error("Error deleting reservation:", error);
+      throw error;
+    }
+  },
+
+  updateQuoteStatus: async (token, id, status) => {
+    try {
+      const res = await fetch(`${getApiUrl()}/quotes/${id}/status`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ status })
+      });
+      
+      if (!res.ok) {
+        // Fallback if the endpoint is just /quotes/:id
+        const fallbackRes = await fetch(`${getApiUrl()}/quotes/${id}`, {
+          method: 'PATCH',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
+          body: JSON.stringify({ status })
+        });
+        if (!fallbackRes.ok) throw new Error('No se pudo actualizar el estado de la cotización');
+      }
+      
+      const newQuotes = get().quoteRequests.map(q => q.id === id ? { ...q, status } : q);
+      set({ quoteRequests: newQuotes });
+      await db.jsonCache.put({ key: 'quoteRequests', data: newQuotes, updatedAt: new Date().toISOString() });
+    } catch (error) {
+      console.error("Error updating quote status:", error);
       throw error;
     }
   }
