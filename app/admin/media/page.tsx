@@ -27,7 +27,8 @@ export default function MediaPage() {
   });
 
   const [isNewCategory, setIsNewCategory] = useState(false);
-  const categories = Array.from(new Set(mediaPosts.map(p => p.category).filter(Boolean)));
+  const defaultCategories = ['BODAS', 'PREBODAS', 'ESTUDIO', '15 AÑOS', 'VIDEOS'];
+  const categories = Array.from(new Set([...defaultCategories, ...mediaPosts.map(p => p.category).filter(Boolean)]));
 
   useEffect(() => {
     if (session?.accessToken) {
@@ -102,7 +103,7 @@ export default function MediaPage() {
         <>
           <div className="flex flex-wrap items-center justify-between gap-4 mb-10">
             <div className="flex bg-white rounded-full p-1 border border-black/5 shadow-sm overflow-hidden">
-              {['TODOS', 'BODAS', 'PREBODAS', 'ESTUDIO', 'VIDEOS'].map((f) => (
+              {['TODOS', 'BODAS', 'PREBODAS', 'ESTUDIO', '15 AÑOS', 'VIDEOS'].map((f) => (
                 <button key={f} onClick={() => setFilter(f)} className={`px-5 py-2 rounded-full text-[9px] uppercase tracking-widest font-bold transition ${filter === f ? 'bg-[var(--mv-sage)] text-white' : 'text-black/30 hover:text-black'}`}>{f}</button>
               ))}
             </div>
@@ -242,10 +243,6 @@ export default function MediaPage() {
                   <select value={newPost.category} onChange={e => setNewPost({ ...newPost, category: e.target.value })} className="w-full bg-[var(--mv-cream)] rounded-2xl px-5 py-4 text-sm border border-black/5 outline-none appearance-none cursor-pointer">
                     <option value="" disabled>Seleccione una categoría</option>
                     {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                    {categories.length === 0 && <option value="BODAS">BODAS</option>}
-                    {categories.length === 0 && <option value="PREBODAS">PREBODAS</option>}
-                    {categories.length === 0 && <option value="ESTUDIO">ESTUDIO</option>}
-                    {categories.length === 0 && <option value="VIDEOS">VIDEOS</option>}
                   </select>
                 )}
               </div>
