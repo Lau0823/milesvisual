@@ -22,14 +22,28 @@ interface Servicio {
 
 const formatDescription = (desc: string) => {
   if (!desc) return 'Sin descripción';
+  let currentDesc = desc;
   try {
-    let parsed = JSON.parse(desc);
-    if (typeof parsed === 'string') parsed = JSON.parse(parsed);
-    if (Array.isArray(parsed)) {
-      return parsed.join(', ');
+    // Intentar desempaquetar si viene doblemente serializado
+    while (typeof currentDesc === 'string') {
+      const parsed = JSON.parse(currentDesc);
+      if (typeof parsed === 'string') {
+        currentDesc = parsed;
+      } else if (Array.isArray(parsed)) {
+        return parsed.join(', ');
+      } else {
+        break; // No es array ni string
+      }
     }
-  } catch (e) {}
-  return desc;
+  } catch (e) {
+    // Si falla el parseo, tal vez tenga comillas al inicio/fin que estorban
+    const cleaned = currentDesc.replace(/^"|"$/g, '').replace(/^'|'$/g, '').replace(/\\"/g, '"');
+    try {
+      const parsed2 = JSON.parse(cleaned);
+      if (Array.isArray(parsed2)) return parsed2.join(', ');
+    } catch (e2) {}
+  }
+  return desc; // Fallback al texto original
 };
 
 export default function PlanesPage() {
@@ -59,14 +73,29 @@ export default function PlanesPage() {
         setDescText('');
         return;
       }
+      let currentDesc = editingPlan.descripcion;
       try {
-        let parsed = JSON.parse(editingPlan.descripcion);
-        if (typeof parsed === 'string') parsed = JSON.parse(parsed);
-        if (Array.isArray(parsed)) {
-          setDescText(parsed.join('\n'));
-          return;
+        while (typeof currentDesc === 'string') {
+          const parsed = JSON.parse(currentDesc);
+          if (typeof parsed === 'string') {
+            currentDesc = parsed;
+          } else if (Array.isArray(parsed)) {
+            setDescText(parsed.join('\n'));
+            return;
+          } else {
+            break;
+          }
         }
-      } catch (e) {}
+      } catch (e) {
+        const cleaned = currentDesc.replace(/^"|"$/g, '').replace(/^'|'$/g, '').replace(/\\"/g, '"');
+        try {
+          const parsed2 = JSON.parse(cleaned);
+          if (Array.isArray(parsed2)) {
+            setDescText(parsed2.join('\n'));
+            return;
+          }
+        } catch (e2) {}
+      }
       setDescText(editingPlan.descripcion);
     } else {
       setDescText('');
