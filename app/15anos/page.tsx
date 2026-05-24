@@ -7,7 +7,7 @@ import { Menu, X, ChevronLeft, ChevronRight, MessageCircle } from "lucide-react"
 import { useClientStore } from "../../store/useClientStore";
 import { parsePlanDescription } from "../../utils/parseDescription";
 
-export default function PrebodasPage() {
+export default function QuincePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<number | string>(0);
@@ -21,10 +21,11 @@ export default function PrebodasPage() {
   const displayPlans = useMemo(() => {
     return displayPlansFull.filter((p: any) => {
       const cat = p.categoria?.toLowerCase() || '';
-      return cat.includes('pre-boda') || cat.includes('preboda');
+      return cat.includes('15') || cat.includes('quince');
     });
   }, [displayPlansFull]);
-  const prebodasGallery = useMemo(() => mediaPostsFull.filter((p: any) => p.category === 'PREBODAS').map((p: any) => ({ id: p.id, title: p.title, image: p.cloudinaryUrl, description: p.cloudinaryPublicId })), [mediaPostsFull]);
+
+  const quinceGallery = useMemo(() => mediaPostsFull.filter((p: any) => p.category?.toUpperCase().includes('15') || p.category?.toUpperCase() === 'QUINCE').map((p: any) => ({ id: p.id, title: p.title, image: p.cloudinaryUrl, description: p.cloudinaryPublicId })), [mediaPostsFull]);
 
   useEffect(() => {
     if (displayPlans.length > 0 && selectedPlan === 0) {
@@ -40,7 +41,7 @@ export default function PrebodasPage() {
     return url.replace('/upload/', '/upload/f_auto,q_auto/');
   };
 
-  let heroVideoSrc = getSetting('prebodas_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429204/VIDEO_5_1_r3j5j1.mp4");
+  let heroVideoSrc = getSetting('15anos_video_url', "https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429200/VIDEO_3_1_yuof8i.mp4");
 
   const getWhatsappLink = (text: string) => {
     const number = getSetting('whatsapp_number', '573148112717');
@@ -57,7 +58,7 @@ export default function PrebodasPage() {
   const navRight = [
     { href: "/contacto", label: "Contacto" },
     { href: "/#planes", label: "Planes" },
-    { href: "/acercami", label: "Acerca de mí" },
+    { href: "/acercademi", label: "Acerca de mí" },
   ];
 
   const activePlan: any = useMemo(
@@ -66,18 +67,18 @@ export default function PrebodasPage() {
   );
 
   const activePhoto =
-    selectedPhoto !== null ? prebodasGallery[selectedPhoto] : null;
+    selectedPhoto !== null ? quinceGallery[selectedPhoto] : null;
 
   const prevPhoto = () => {
     if (selectedPhoto === null) return;
     setSelectedPhoto(
-      (selectedPhoto - 1 + prebodasGallery.length) % prebodasGallery.length
+      (selectedPhoto - 1 + quinceGallery.length) % quinceGallery.length
     );
   };
 
   const nextPhoto = () => {
     if (selectedPhoto === null) return;
-    setSelectedPhoto((selectedPhoto + 1) % prebodasGallery.length);
+    setSelectedPhoto((selectedPhoto + 1) % quinceGallery.length);
   };
 
   return (
@@ -135,13 +136,23 @@ export default function PrebodasPage() {
               : "pointer-events-none opacity-0"
               }`}
           >
-            <div className="absolute inset-0 bg-black/50" onClick={() => setMenuOpen(false)} />
+            <div
+              className="absolute inset-0 bg-black/50"
+              onClick={() => setMenuOpen(false)}
+            />
+
             <div
               className={`absolute right-0 top-0 flex h-full w-[86%] max-w-[360px] flex-col bg-[var(--mv-cream)] p-6 transition-transform duration-300 ${menuOpen ? "translate-x-0" : "translate-x-full"
                 }`}
             >
               <div className="flex items-center justify-between">
-                <Image src={logoSrc} alt="Miles Visual" width={100} height={60} className="h-[60px] w-auto object-contain" />
+                <Image
+                  src={logoSrc}
+                  alt="Miles Visual"
+                  width={120}
+                  height={60}
+                  className="h-[60px] w-auto object-contain"
+                />
                 <button
                   onClick={() => setMenuOpen(false)}
                   className="flex h-10 w-10 items-center justify-center"
@@ -173,7 +184,7 @@ export default function PrebodasPage() {
               Portafolio
             </p>
             <h1 className="mt-3 max-w-[760px] text-[36px] font-semibold uppercase leading-[0.94] tracking-[0.03em] text-white md:text-[76px]">
-              PRE-BODAS
+              15 AÑOS
             </h1>
           </div>
         </div>
@@ -181,25 +192,24 @@ export default function PrebodasPage() {
 
       <section className="mx-auto max-w-[1180px] px-4 py-16 text-center md:px-8 md:py-24">
         <p className="mv-script text-[54px] leading-none text-[var(--mv-gold)] md:text-[92px]">
-          Conexión auténtica
+          Tu Juventud Capturada
         </p>
         <h2 className="mt-3 text-[30px] font-semibold uppercase tracking-[0.03em] md:text-[54px]">
-          ANTES DEL GRAN DÍA TAMBIÉN EXISTE UNA HISTORIA QUE MERECE SER CONTADA
+          CELEBRAMOS ESTA ETAPA MÁGICA CON FOTOGRAFÍAS INOLVIDABLES
         </h2>
       </section>
 
       <section className="space-y-0">
-        {prebodasGallery.map((photo, index) => (
+        {quinceGallery.map((photo, index) => (
           <button
             key={photo.id}
             onClick={() => setSelectedPhoto(index)}
             className="group relative block min-h-screen w-full overflow-hidden text-left"
           >
             <Image
-              src={getOptimizedUrl(photo.image)}
+              src={photo.image}
               alt={photo.title}
               fill
-              sizes="100vw"
               className="absolute inset-0 object-cover transition duration-700 group-hover:scale-[1.03]"
             />
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(17,19,20,0.10)_0%,rgba(17,19,20,0.20)_35%,rgba(17,19,20,0.52)_100%)]" />
@@ -207,7 +217,7 @@ export default function PrebodasPage() {
             <div className="relative z-10 flex min-h-screen items-end">
               <div className="mx-auto w-full max-w-[1320px] px-4 pb-14 md:px-8 md:pb-16">
                 <p className="mv-script text-[68px] leading-none text-white/18 md:text-[140px]">
-                  pre-bodas
+                  15 años
                 </p>
                 <h3 className="mt-2 text-[30px] font-semibold uppercase tracking-[0.03em] text-white md:text-[52px]">
                   {photo.title}
@@ -219,6 +229,12 @@ export default function PrebodasPage() {
             </div>
           </button>
         ))}
+        {quinceGallery.length === 0 && (
+          <div className="py-20 text-center">
+            <p className="text-xl opacity-60">Aún no hay fotos en la galería para 15 años.</p>
+            <p className="text-sm opacity-40 mt-2">Sube imágenes desde el admin asignando la categoría "15 AÑOS".</p>
+          </div>
+        )}
       </section>
 
       {activePhoto && (
@@ -251,7 +267,7 @@ export default function PrebodasPage() {
             <div className="grid w-full max-w-[1200px] overflow-hidden rounded-[28px] bg-white md:grid-cols-[1fr_0.9fr]">
               <div className="relative min-h-[360px]">
                 <Image
-                  src={getOptimizedUrl(activePhoto.image)}
+                  src={activePhoto.image}
                   alt={activePhoto.title}
                   fill
                   className="object-cover"
@@ -260,7 +276,7 @@ export default function PrebodasPage() {
 
               <div className="flex flex-col justify-center px-6 py-8 md:px-10">
                 <p className="mv-script text-[44px] leading-none text-[#789894] md:text-[68px]">
-                  pre-bodas
+                  15 años
                 </p>
                 <h3 className="mt-2 text-[28px] font-semibold uppercase tracking-[0.03em] md:text-[42px]">
                   {activePhoto.title}
@@ -277,7 +293,7 @@ export default function PrebodasPage() {
       <section className="mx-auto max-w-[1280px] px-4 py-20 md:px-8 md:py-28">
         <div className="mb-12 text-center">
           <p className="mv-script text-[44px] leading-none text-[var(--mv-gold)] md:text-[72px]">
-            planes
+            Planes
           </p>
           <h2 className="text-[32px] font-semibold uppercase tracking-[0.03em] md:text-[58px]">
             EXPERIENCIAS DISPONIBLES
@@ -297,13 +313,18 @@ export default function PrebodasPage() {
               {plan.nombre || plan.name}
             </button>
           ))}
+          {displayPlans.length === 0 && (
+            <p className="col-span-2 md:col-span-5 text-center text-sm opacity-60">
+              Aún no hay planes creados para 15 años. (Crea uno en el admin usando la categoría "15 años")
+            </p>
+          )}
         </div>
 
         {activePlan && <div className="overflow-hidden rounded-[30px] bg-white shadow-[0_22px_60px_rgba(0,0,0,0.08)]">
           <div className="grid md:grid-cols-[0.95fr_1.05fr]">
             <div className="relative min-h-[360px] md:min-h-[680px]">
               <Image
-                src={getOptimizedUrl(activePlan.imagen_url || activePlan.image)}
+                src={(activePlan.imagen_url || activePlan.image)}
                 alt={activePlan.nombre || activePlan.name}
                 fill
                 className="object-cover"
@@ -339,14 +360,14 @@ export default function PrebodasPage() {
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <a
-                  href={getWhatsappLink(`Hola Miles Visual, quiero cotizar el plan ${activePlan.nombre || activePlan.name}`)}
+                  href={getWhatsappLink(`Hola Miles Visual, quiero cotizar el plan ${activePlan.nombre || activePlan.name} de 15 años`)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mv-button-dark"
                 >
                   Cotizar
                 </a>
-                <Link href="/prebodas" className="mv-button-outline-dark">
+                <Link href="/15anos" className="mv-button-outline-dark">
                   Ver galería
                 </Link>
               </div>

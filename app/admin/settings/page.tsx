@@ -45,7 +45,7 @@ export default function SettingsPage() {
     if (!session?.accessToken) return;
     setLoading(true);
     setSuccess(false);
-    
+
     const loadingToast = toast.loading('Guardando configuración...');
     try {
       const ok = await saveBatchSettings((session as any).accessToken, localSettings);
@@ -93,7 +93,7 @@ export default function SettingsPage() {
           <p className="text-[10px] uppercase tracking-[0.3em] text-black/50 font-semibold mb-1">Configuración del Sitio</p>
           <h2 className="text-4xl font-semibold tracking-tight uppercase">Ajustes Web</h2>
         </div>
-        <button 
+        <button
           onClick={saveSettings}
           disabled={loading}
           className="bg-[var(--mv-ink)] text-white px-8 py-3 rounded-full text-[11px] uppercase tracking-[0.2em] font-semibold hover:bg-[var(--mv-sage)] transition flex items-center gap-3 disabled:opacity-50 shadow-xl"
@@ -104,7 +104,7 @@ export default function SettingsPage() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
-        
+
         {/* Estructura Home (Layout Order) */}
         <section className="bg-white rounded-[32px] p-8 shadow-sm border border-black/5 md:col-span-2">
           <div className="flex items-center gap-3 mb-6">
@@ -123,15 +123,15 @@ export default function SettingsPage() {
                   {index + 1}. {section}
                 </span>
                 <div className="flex flex-col gap-1">
-                  <button 
-                    onClick={() => moveSection(index, -1)} 
+                  <button
+                    onClick={() => moveSection(index, -1)}
                     disabled={index === 0}
                     className="w-5 h-4 flex items-center justify-center bg-black/5 hover:bg-black/10 rounded disabled:opacity-30 transition"
                   >
                     ▲
                   </button>
-                  <button 
-                    onClick={() => moveSection(index, 1)} 
+                  <button
+                    onClick={() => moveSection(index, 1)}
                     disabled={index === layoutOrder.length - 1}
                     className="w-5 h-4 flex items-center justify-center bg-black/5 hover:bg-black/10 rounded disabled:opacity-30 transition"
                   >
@@ -175,9 +175,9 @@ export default function SettingsPage() {
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Imagen de Fondo (Cloudinary)</label>
               <div className="flex gap-4 items-center">
-                <input 
-                  type="file" 
-                  accept="image/*" 
+                <input
+                  type="file"
+                  accept="image/*"
                   onChange={async (e) => {
                     if (e.target.files?.[0]) {
                       const formData = new FormData();
@@ -193,8 +193,8 @@ export default function SettingsPage() {
                         handleUpdate('hero_image_url', data.value);
                       }
                     }
-                  }} 
-                  className="text-[10px]" 
+                  }}
+                  className="text-[10px]"
                 />
                 {getSetting('hero_image_url') && <img src={getSetting('hero_image_url')} className="w-10 h-10 rounded-lg object-cover shadow-md" />}
               </div>
@@ -202,9 +202,9 @@ export default function SettingsPage() {
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Video de Fondo (Hero Video)</label>
               <div className="flex gap-4 items-center">
-                <input 
-                  type="file" 
-                  accept="video/*" 
+                <input
+                  type="file"
+                  accept="video/*"
                   onChange={async (e) => {
                     if (e.target.files?.[0]) {
                       const formData = new FormData();
@@ -220,8 +220,8 @@ export default function SettingsPage() {
                         handleUpdate('hero_video_url', data.value);
                       }
                     }
-                  }} 
-                  className="text-[10px]" 
+                  }}
+                  className="text-[10px]"
                 />
                 {getSetting('hero_video_url') && (
                   <div className="flex items-center gap-3">
@@ -234,9 +234,9 @@ export default function SettingsPage() {
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Video Intermedio (Middle Video)</label>
               <div className="flex gap-4 items-center">
-                <input 
-                  type="file" 
-                  accept="video/*" 
+                <input
+                  type="file"
+                  accept="video/*"
                   onChange={async (e) => {
                     if (e.target.files?.[0]) {
                       const formData = new FormData();
@@ -252,8 +252,8 @@ export default function SettingsPage() {
                         handleUpdate('middle_video_url', data.value);
                       }
                     }
-                  }} 
-                  className="text-[10px]" 
+                  }}
+                  className="text-[10px]"
                 />
                 {getSetting('middle_video_url') && (
                   <div className="flex items-center gap-3">
@@ -267,9 +267,9 @@ export default function SettingsPage() {
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Video Página Bodas</label>
               <div className="flex gap-4 items-center">
-                <input 
-                  type="file" 
-                  accept="video/*" 
+                <input
+                  type="file"
+                  accept="video/*"
                   onChange={async (e) => {
                     if (e.target.files?.[0]) {
                       const formData = new FormData();
@@ -285,8 +285,8 @@ export default function SettingsPage() {
                         handleUpdate('bodas_video_url', data.value);
                       }
                     }
-                  }} 
-                  className="text-[10px]" 
+                  }}
+                  className="text-[10px]"
                 />
                 {getSetting('bodas_video_url') && (
                   <div className="flex items-center gap-3">
@@ -300,9 +300,9 @@ export default function SettingsPage() {
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Video Página Pre-Bodas</label>
               <div className="flex gap-4 items-center">
-                <input 
-                  type="file" 
-                  accept="video/*" 
+                <input
+                  type="file"
+                  accept="video/*"
                   onChange={async (e) => {
                     if (e.target.files?.[0]) {
                       const formData = new FormData();
@@ -318,8 +318,8 @@ export default function SettingsPage() {
                         handleUpdate('prebodas_video_url', data.value);
                       }
                     }
-                  }} 
-                  className="text-[10px]" 
+                  }}
+                  className="text-[10px]"
                 />
                 {getSetting('prebodas_video_url') && (
                   <div className="flex items-center gap-3">
@@ -333,9 +333,9 @@ export default function SettingsPage() {
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Video Página Estudio</label>
               <div className="flex gap-4 items-center">
-                <input 
-                  type="file" 
-                  accept="video/*" 
+                <input
+                  type="file"
+                  accept="video/*"
                   onChange={async (e) => {
                     if (e.target.files?.[0]) {
                       const formData = new FormData();
@@ -351,8 +351,8 @@ export default function SettingsPage() {
                         handleUpdate('estudio_video_url', data.value);
                       }
                     }
-                  }} 
-                  className="text-[10px]" 
+                  }}
+                  className="text-[10px]"
                 />
                 {getSetting('estudio_video_url') && (
                   <div className="flex items-center gap-3">
@@ -361,37 +361,70 @@ export default function SettingsPage() {
                   </div>
                 )}
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Video Acerca de mí</label>
-                <input 
-                  type="file" 
-                  accept="video/*" 
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Video Página 15 Años</label>
+              <div className="flex gap-4 items-center">
+                <input
+                  type="file"
+                  accept="video/*"
                   onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
+                    if (e.target.files?.[0]) {
                       const formData = new FormData();
-                      formData.append('file', file);
-                      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/media/upload`, {
+                      formData.append('file', e.target.files[0]);
+                      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                      const res = await fetch(`${apiUrl}/settings/upload-image/15anos_video_url`, {
                         method: 'POST',
                         headers: { 'Authorization': `Bearer ${(session as any)?.accessToken}` },
                         body: formData
                       });
                       if (res.ok) {
                         const data = await res.json();
-                        handleUpdate('about_video_url', data.value);
+                        handleUpdate('15anos_video_url', data.value);
                       }
                     }
-                  }} 
-                  className="text-[10px]" 
+                  }}
+                  className="text-[10px]"
                 />
-                {getSetting('about_video_url') && (
+                {getSetting('15anos_video_url') && (
                   <div className="flex items-center gap-3">
-                    <video src={getSetting('about_video_url')} className="w-16 h-16 object-cover rounded border border-black/10" muted loop autoPlay />
-                    <a href={getSetting('about_video_url')} target="_blank" rel="noreferrer" className="text-[9px] text-blue-500 underline uppercase tracking-widest font-bold">Ver Video</a>
+                    <video src={getSetting('15anos_video_url')} className="w-16 h-16 object-cover rounded border border-black/10" muted loop autoPlay />
+                    <a href={getSetting('15anos_video_url')} target="_blank" rel="noreferrer" className="text-[9px] text-blue-500 underline uppercase tracking-widest font-bold">Ver Video</a>
                   </div>
                 )}
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Video Acerca de mí</label>
+              <input
+                type="file"
+                accept="video/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/media/upload`, {
+                      method: 'POST',
+                      headers: { 'Authorization': `Bearer ${(session as any)?.accessToken}` },
+                      body: formData
+                    });
+                    if (res.ok) {
+                      const data = await res.json();
+                      handleUpdate('about_video_url', data.value);
+                    }
+                  }
+                }}
+                className="text-[10px]"
+              />
+              {getSetting('about_video_url') && (
+                <div className="flex items-center gap-3">
+                  <video src={getSetting('about_video_url')} className="w-16 h-16 object-cover rounded border border-black/10" muted loop autoPlay />
+                  <a href={getSetting('about_video_url')} target="_blank" rel="noreferrer" className="text-[9px] text-blue-500 underline uppercase tracking-widest font-bold">Ver Video</a>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -425,9 +458,9 @@ export default function SettingsPage() {
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Imagen de Perfil</label>
               <div className="flex gap-4 items-center">
-                <input 
-                  type="file" 
-                  accept="image/*" 
+                <input
+                  type="file"
+                  accept="image/*"
                   onChange={async (e) => {
                     if (e.target.files?.[0]) {
                       const formData = new FormData();
@@ -443,8 +476,8 @@ export default function SettingsPage() {
                         handleUpdate('about_image_url', data.value);
                       }
                     }
-                  }} 
-                  className="text-[10px]" 
+                  }}
+                  className="text-[10px]"
                 />
                 {getSetting('about_image_url') && <img src={getSetting('about_image_url')} className="w-10 h-10 rounded-lg object-cover shadow-md" />}
               </div>

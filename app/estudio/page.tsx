@@ -50,6 +50,7 @@ export default function EstudioPage() {
   const navLeft = [
     { href: "/bodas", label: "Bodas" },
     { href: "/prebodas", label: "Pre-Bodas" },
+    { href: "/15anos", label: "15 Años" },
     { href: "/estudio", label: "Foto Estudios" },
   ];
 
@@ -130,8 +131,8 @@ export default function EstudioPage() {
 
           <div
             className={`fixed inset-0 z-50 transition ${menuOpen
-                ? "pointer-events-auto opacity-100"
-                : "pointer-events-none opacity-0"
+              ? "pointer-events-auto opacity-100"
+              : "pointer-events-none opacity-0"
               }`}
           >
             <div className="absolute inset-0 bg-black/50" onClick={() => setMenuOpen(false)} />
@@ -288,8 +289,8 @@ export default function EstudioPage() {
               key={plan.id}
               onClick={() => setSelectedPlan(plan.id)}
               className={`rounded-[18px] px-4 py-4 text-center text-[12px] font-medium uppercase tracking-[0.12em] transition ${selectedPlan === plan.id
-                  ? "bg-[#789894] text-white shadow-lg"
-                  : "bg-white text-[var(--mv-ink)] shadow-sm"
+                ? "bg-[#789894] text-white shadow-lg"
+                : "bg-white text-[var(--mv-ink)] shadow-sm"
                 }`}
             >
               {plan.nombre || plan.name}
@@ -364,6 +365,9 @@ export default function EstudioPage() {
             </Link>
             <Link href="/prebodas" className="mv-nav-link">
               Pre-Bodas
+            </Link>
+            <Link href="/15anos" className="mv-nav-link">
+              15 Años
             </Link>
             <Link href="/estudio" className="mv-nav-link">
               Foto Estudios
