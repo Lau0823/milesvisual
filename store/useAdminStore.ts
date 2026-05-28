@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { db } from '../lib/db';
+import { signOut } from 'next-auth/react';
 
 interface AdminState {
   settings: any[];
@@ -51,6 +52,15 @@ const getApiUrl = () => {
   return API;
 };
 
+const handleUnauthorized = (status: number) => {
+  if (status === 401) {
+    console.warn("Sesión expirada o token inválido (401). Cerrando sesión...");
+    signOut({ callbackUrl: '/login' });
+    return true;
+  }
+  return false;
+};
+
 export const useAdminStore = create<AdminState>((set, get) => ({
   settings: [],
   planes: [],
@@ -95,13 +105,17 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       
       // Cache buster para evitar que el navegador devuelva datos antiguos tras una eliminación
       const t = Date.now();
-      const [resRes, quoteRes, settingsRes, planesRes, mediaRes] = await Promise.all([
+      const responses = await Promise.all([
         fetch(`${API}/reservations?t=${t}`, { headers }),
         fetch(`${API}/quotes?t=${t}`, { headers }),
         fetch(`${API}/settings?t=${t}`, { headers }),
         fetch(`${API}/servicios?limit=100&t=${t}`, { headers }),
         fetch(`${API}/media-posts?t=${t}`, { headers })
       ]);
+
+      if (responses.some(r => handleUnauthorized(r.status))) return;
+
+      const [resRes, quoteRes, settingsRes, planesRes, mediaRes] = responses;
 
       const [reservations, quoteRequests, settings, planesData, mediaPosts] = await Promise.all([
         resRes.ok ? resRes.json() : Promise.resolve(get().reservations),
@@ -153,6 +167,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       const res = await fetch(`${getApiUrl()}/settings?t=${Date.now()}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      if (handleUnauthorized(res.status)) return;
       if (res.ok) {
         const data = await res.json();
         set({ settings: data });
@@ -171,6 +186,8 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         body: JSON.stringify({ key, value })
       });
       
+      if (handleUnauthorized(res.status)) return;
+
       if (res.ok) {
         const updatedSetting = await res.json();
         const currentSettings = [...get().settings];
@@ -194,6 +211,8 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         body: JSON.stringify({ settings })
       });
       
+      if (handleUnauthorized(res.status)) return false;
+
       if (res.ok) {
         set({ settings });
         await db.jsonCache.put({ key: 'settings', data: settings, updatedAt: new Date().toISOString() });
@@ -211,6 +230,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       const res = await fetch(`${getApiUrl()}/servicios?limit=100&t=${Date.now()}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      if (handleUnauthorized(res.status)) return;
       if (res.ok) {
         const data = await res.json();
         const planes = data.data || [];
@@ -244,7 +264,18 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         body: formData
       });
       
-      if (!res.ok) throw new Error('Error al guardar el plan');
+      if (handleUnauthorized(res.status)) throw new Error('Sesión expirada.');
+      if (res.status === 413) throw new Error('La imagen es demasiado pesada. Por favor reduce su tamaño e intenta de nuevo.');
+      if (!res.ok) {
+        let errorMsg = 'Error al guardar el plan';
+        try {
+          const errData = await res.json();
+          errorMsg = errData.message || errData.error || `HTTP ${res.status}: ${res.statusText}`;
+        } catch (e) {
+          errorMsg = `HTTP ${res.status}: ${res.statusText}`;
+        }
+        throw new Error(errorMsg);
+      }
       await get().fetchPlanes(token);
     } catch (error) {
       console.error("Error saving plan:", error);
@@ -259,6 +290,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
+      if (handleUnauthorized(res.status)) throw new Error('Sesión expirada.');
       if (!res.ok) throw new Error('Error al eliminar el plan');
       
       const newPlanes = get().planes.filter(p => p.id !== id);
@@ -275,6 +307,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       const res = await fetch(`${getApiUrl()}/media-posts?t=${Date.now()}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      if (handleUnauthorized(res.status)) return;
       if (res.ok) {
         const data = await res.json();
         set({ mediaPosts: data });
@@ -303,7 +336,19 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         body: formData
       });
       
-      if (!res.ok) throw new Error('Error al guardar el post');
+      if (handleUnauthorized(res.status)) throw new Error('Sesión expirada.');
+      if (res.status === 413) throw new Error('La imagen es demasiado pesada. Por favor reduce su tamaño e intenta de nuevo.');
+      
+      if (!res.ok) {
+        let errorMsg = 'Error al guardar el post';
+        try {
+          const errData = await res.json();
+          errorMsg = errData.message || errData.error || `HTTP ${res.status}: ${res.statusText}`;
+        } catch (e) {
+          errorMsg = `HTTP ${res.status}: ${res.statusText}`;
+        }
+        throw new Error(errorMsg);
+      }
       await get().fetchMediaPosts(token);
     } catch (error) {
       console.error("Error saving media post:", error);
@@ -318,6 +363,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
+      if (handleUnauthorized(res.status)) throw new Error('Sesión expirada.');
       if (!res.ok) throw new Error('No se pudo eliminar el post');
       
       const newMedia = get().mediaPosts.filter(p => p.id !== id);
@@ -336,6 +382,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
+      if (handleUnauthorized(res.status)) throw new Error('Sesión expirada.');
       if (!res.ok) throw new Error('No se pudo eliminar la reserva');
       
       const newReservations = get().reservations.filter(r => r.id !== id);
@@ -349,7 +396,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
   updateQuoteStatus: async (token, id, status) => {
     try {
-      const res = await fetch(`${getApiUrl()}/quotes/${id}/status`, {
+      let res = await fetch(`${getApiUrl()}/quotes/${id}/status`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',
@@ -358,9 +405,11 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         body: JSON.stringify({ status })
       });
       
+      if (handleUnauthorized(res.status)) throw new Error('Sesión expirada.');
+
       if (!res.ok) {
         // Fallback if the endpoint is just /quotes/:id
-        const fallbackRes = await fetch(`${getApiUrl()}/quotes/${id}`, {
+        res = await fetch(`${getApiUrl()}/quotes/${id}`, {
           method: 'PATCH',
           headers: { 
             'Content-Type': 'application/json',
@@ -368,7 +417,8 @@ export const useAdminStore = create<AdminState>((set, get) => ({
           },
           body: JSON.stringify({ status })
         });
-        if (!fallbackRes.ok) throw new Error('No se pudo actualizar el estado de la cotización');
+        if (handleUnauthorized(res.status)) throw new Error('Sesión expirada.');
+        if (!res.ok) throw new Error('No se pudo actualizar el estado de la cotización');
       }
       
       const newQuotes = get().quoteRequests.map(q => q.id === id ? { ...q, status } : q);

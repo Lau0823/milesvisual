@@ -52,7 +52,7 @@ export default function PrebodasPage() {
   const navLeft = [
     { href: "/bodas", label: "Bodas" },
     { href: "/prebodas", label: "Pre-Bodas" },
-    { href: "/15anos", label: "15 Años" },
+    { href: "/quinceaneras", label: "15 Años" },
     { href: "/estudio", label: "Foto Estudios" },
   ];
 
@@ -367,7 +367,7 @@ export default function PrebodasPage() {
             <Link href="/prebodas" className="mv-nav-link">
               Pre-Bodas
             </Link>
-            <Link href="/15anos" className="mv-nav-link">
+            <Link href="/quinceaneras" className="mv-nav-link">
               15 Años
             </Link>
             <Link href="/estudio" className="mv-nav-link">
