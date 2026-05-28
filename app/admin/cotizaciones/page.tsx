@@ -259,3 +259,4 @@ export default function CotizacionesPage() {
     </div>
   );
 }
+

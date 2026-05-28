@@ -184,7 +184,7 @@ export default function PlanesPage() {
               </div>
               <div>
                 <h3 className="text-xl font-bold uppercase tracking-tight text-[var(--mv-ink)]">{plan.nombre}</h3>
-                <p className="text-[10px] uppercase tracking-widest font-bold text-black/30">{plan.categoria}</p>
+                <p className="text-[10px] uppercase tracking-widest font-bold text-black/30">{plan.categoria?.toLowerCase() === '15anos' || plan.categoria?.toLowerCase() === '15 años' ? 'Quinceañeras' : plan.categoria}</p>
               </div>
             </div>
 
@@ -241,11 +241,12 @@ export default function PlanesPage() {
                       <optgroup label="Sugeridas">
                         <option value="Bodas">Bodas</option>
                         <option value="Prebodas">Prebodas</option>
+                        <option value="Quinceañeras">Quinceañeras</option>
                         <option value="Estudio">Estudio / Editorial</option>
                       </optgroup>
                       {categories.length > 0 && (
                         <optgroup label="Existentes">
-                          {categories.filter(c => !['Bodas', 'Prebodas', 'Estudio'].includes(c)).map(cat => (
+                          {categories.filter(c => !['Bodas', 'Prebodas', 'Quinceañeras', 'Estudio'].includes(c) && c?.toLowerCase() !== '15anos' && c?.toLowerCase() !== '15 años').map(cat => (
                             <option key={cat} value={cat}>{cat}</option>
                           ))}
                         </optgroup>
@@ -316,3 +317,4 @@ export default function PlanesPage() {
     </div>
   );
 }
+

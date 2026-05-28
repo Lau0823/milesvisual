@@ -270,7 +270,15 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         let errorMsg = 'Error al guardar el plan';
         try {
           const errData = await res.json();
-          errorMsg = errData.message || errData.error || `HTTP ${res.status}: ${res.statusText}`;
+          if (Array.isArray(errData.message)) {
+            errorMsg = errData.message.join(', ');
+          } else if (typeof errData.message === 'string') {
+            errorMsg = errData.message;
+          } else if (errData.error) {
+            errorMsg = errData.error;
+          } else {
+            errorMsg = `HTTP ${res.status}: ${res.statusText}`;
+          }
         } catch (e) {
           errorMsg = `HTTP ${res.status}: ${res.statusText}`;
         }
@@ -343,7 +351,15 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         let errorMsg = 'Error al guardar el post';
         try {
           const errData = await res.json();
-          errorMsg = errData.message || errData.error || `HTTP ${res.status}: ${res.statusText}`;
+          if (Array.isArray(errData.message)) {
+            errorMsg = errData.message.join(', ');
+          } else if (typeof errData.message === 'string') {
+            errorMsg = errData.message;
+          } else if (errData.error) {
+            errorMsg = errData.error;
+          } else {
+            errorMsg = `HTTP ${res.status}: ${res.statusText}`;
+          }
         } catch (e) {
           errorMsg = `HTTP ${res.status}: ${res.statusText}`;
         }
