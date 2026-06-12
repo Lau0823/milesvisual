@@ -179,9 +179,14 @@ export default function SettingsPage() {
                   type="file"
                   accept="image/*"
                   onChange={async (e) => {
-                    if (e.target.files?.[0]) {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (file.size > 10 * 1024 * 1024) {
+                        toast.error('El archivo es demasiado grande. El límite es de 10 MB.');
+                        return;
+                      }
                       const formData = new FormData();
-                      formData.append('file', e.target.files[0]);
+                      formData.append('file', file);
                       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
                       const res = await fetch(`${apiUrl}/settings/upload-image/hero_image_url`, {
                         method: 'POST',
@@ -206,9 +211,14 @@ export default function SettingsPage() {
                   type="file"
                   accept="video/*"
                   onChange={async (e) => {
-                    if (e.target.files?.[0]) {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (file.size > 10 * 1024 * 1024) {
+                        toast.error('El archivo es demasiado grande. El límite es de 10 MB.');
+                        return;
+                      }
                       const formData = new FormData();
-                      formData.append('file', e.target.files[0]);
+                      formData.append('file', file);
                       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
                       const res = await fetch(`${apiUrl}/settings/upload-image/hero_video_url`, {
                         method: 'POST',
@@ -238,9 +248,14 @@ export default function SettingsPage() {
                   type="file"
                   accept="video/*"
                   onChange={async (e) => {
-                    if (e.target.files?.[0]) {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (file.size > 10 * 1024 * 1024) {
+                        toast.error('El archivo es demasiado grande. El límite es de 10 MB.');
+                        return;
+                      }
                       const formData = new FormData();
-                      formData.append('file', e.target.files[0]);
+                      formData.append('file', file);
                       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
                       const res = await fetch(`${apiUrl}/settings/upload-image/middle_video_url`, {
                         method: 'POST',
@@ -271,9 +286,14 @@ export default function SettingsPage() {
                   type="file"
                   accept="video/*"
                   onChange={async (e) => {
-                    if (e.target.files?.[0]) {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (file.size > 10 * 1024 * 1024) {
+                        toast.error('El archivo es demasiado grande. El límite es de 10 MB.');
+                        return;
+                      }
                       const formData = new FormData();
-                      formData.append('file', e.target.files[0]);
+                      formData.append('file', file);
                       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
                       const res = await fetch(`${apiUrl}/settings/upload-image/bodas_video_url`, {
                         method: 'POST',
@@ -304,9 +324,14 @@ export default function SettingsPage() {
                   type="file"
                   accept="video/*"
                   onChange={async (e) => {
-                    if (e.target.files?.[0]) {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (file.size > 10 * 1024 * 1024) {
+                        toast.error('El archivo es demasiado grande. El límite es de 10 MB.');
+                        return;
+                      }
                       const formData = new FormData();
-                      formData.append('file', e.target.files[0]);
+                      formData.append('file', file);
                       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
                       const res = await fetch(`${apiUrl}/settings/upload-image/prebodas_video_url`, {
                         method: 'POST',
@@ -337,9 +362,14 @@ export default function SettingsPage() {
                   type="file"
                   accept="video/*"
                   onChange={async (e) => {
-                    if (e.target.files?.[0]) {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (file.size > 10 * 1024 * 1024) {
+                        toast.error('El archivo es demasiado grande. El límite es de 10 MB.');
+                        return;
+                      }
                       const formData = new FormData();
-                      formData.append('file', e.target.files[0]);
+                      formData.append('file', file);
                       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
                       const res = await fetch(`${apiUrl}/settings/upload-image/estudio_video_url`, {
                         method: 'POST',
@@ -370,9 +400,14 @@ export default function SettingsPage() {
                   type="file"
                   accept="video/*"
                   onChange={async (e) => {
-                    if (e.target.files?.[0]) {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (file.size > 10 * 1024 * 1024) {
+                        toast.error('El archivo es demasiado grande. El límite es de 10 MB.');
+                        return;
+                      }
                       const formData = new FormData();
-                      formData.append('file', e.target.files[0]);
+                      formData.append('file', file);
                       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
                       const res = await fetch(`${apiUrl}/settings/upload-image/15anos_video_url`, {
                         method: 'POST',
@@ -404,6 +439,10 @@ export default function SettingsPage() {
                 onChange={async (e) => {
                   const file = e.target.files?.[0];
                   if (file) {
+                    if (file.size > 10 * 1024 * 1024) {
+                      toast.error('El archivo es demasiado grande. El límite es de 10 MB.');
+                      return;
+                    }
                     const formData = new FormData();
                     formData.append('file', file);
                     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/media/upload`, {
@@ -462,9 +501,14 @@ export default function SettingsPage() {
                   type="file"
                   accept="image/*"
                   onChange={async (e) => {
-                    if (e.target.files?.[0]) {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (file.size > 10 * 1024 * 1024) {
+                        toast.error('El archivo es demasiado grande. El límite es de 10 MB.');
+                        return;
+                      }
                       const formData = new FormData();
-                      formData.append('file', e.target.files[0]);
+                      formData.append('file', file);
                       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
                       const res = await fetch(`${apiUrl}/settings/upload-image/about_image_url`, {
                         method: 'POST',

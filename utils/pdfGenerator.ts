@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Reservation, QuoteRequest } from '../lib/db';
+import { useAdminStore } from '../store/useAdminStore';
 
 export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: 'quote' | 'invoice' | 'receipt' = 'quote', logoUrl?: string) => {
   const doc = new jsPDF();
@@ -154,36 +155,83 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
     }
   });
 
-  // Mensaje y Términos
+  // Mensaje y Términos (Izquierda)
   const finalY = (doc as any).lastAutoTable.finalY || 150;
   
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-  doc.text(mode === 'invoice' ? 'DETALLES DE PAGO:' : 'NOTAS IMPORTANTE:', 20, finalY + 20);
+  doc.text(mode === 'invoice' ? 'DETALLES DE PAGO:' : 'NOTAS IMPORTANTES:', 20, finalY + 20);
   
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(inkColor[0], inkColor[1], inkColor[2]);
   doc.setFontSize(8);
+  const state = useAdminStore.getState();
+  const whatsappSetting = state.settings.find(s => s.key === 'whatsapp_number');
+  const whatsapp = whatsappSetting ? whatsappSetting.value : '573148112717';
+
   const terms = mode === 'invoice' ? [
-    '- Favor realizar el pago a la cuenta de ahorros Bancolombia #XXX-XXXXXX-XX.',
-    '- Enviar comprobante de pago al correo hola@milesvisual.com.',
-    '- Esta factura no es un título valor, es un soporte de cobro por servicios profesionales.',
-    '- Gracias por confiar en Miles Visual para capturar tus momentos.'
+    '- Enviar comprobante de pago al WhatsApp',
+    `  +${whatsapp}.`,
+    '- Esta factura no es un título valor,',
+    '  es un soporte de cobro.',
+    '- Gracias por confiar en Miles Visual',
+    '  para capturar tus momentos.'
   ] : [
-    '- Esta cotización tiene una vigencia de 15 días a partir de la fecha de emisión.',
-    '- Para confirmar la reserva se requiere el pago del 30% del valor total.',
-    '- Los precios incluyen edición profesional y entrega en galería digital privada.',
-    '- El saldo restante debe cancelarse máximo 8 días antes del evento.'
+    '- Esta cotización tiene una vigencia de 15 días.',
+    '- Para confirmar reserva se requiere abono del 30%.',
+    '- Precios incluyen edición y entrega digital.',
+    '- El saldo debe cancelarse 8 días antes del evento.'
   ];
   doc.text(terms, 20, finalY + 28);
 
-  // Firma
+  // Firma (Izquierda)
   doc.setDrawColor(200, 200, 200);
-  doc.line(130, finalY + 60, 180, finalY + 60);
+  doc.line(20, finalY + 65, 80, finalY + 65);
   doc.setFontSize(8);
-  doc.text('FIRMA AUTORIZADA', 155, finalY + 65, { align: 'center' });
-  doc.text('MILES VISUAL STUDIO', 155, finalY + 70, { align: 'center' });
+  doc.text('FIRMA AUTORIZADA', 50, finalY + 70, { align: 'center' });
+  doc.text('MILES VISUAL STUDIO', 50, finalY + 75, { align: 'center' });
+
+  // Cuentas de Pago (Derecha)
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  doc.text('CUENTAS PARA PAGO:', 110, finalY + 20);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(inkColor[0], inkColor[1], inkColor[2]);
+  doc.setFontSize(8);
+  
+  doc.text('Miles Esteban Morales Andrade', 110, finalY + 26);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Cc 1001309695', 110, finalY + 30);
+  doc.text('Productor Audiovisual', 110, finalY + 34);
+  doc.text('Instagram: @milesvisualproducciones', 110, finalY + 38);
+  
+  let paymentY = finalY + 46;
+  
+  doc.setFont('helvetica', 'bold');
+  doc.text('BANCOLOMBIA (Ahorros):', 110, paymentY);
+  doc.setFont('helvetica', 'normal');
+  doc.text('05733188474', 160, paymentY);
+  paymentY += 5;
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('NEQUI:', 110, paymentY);
+  doc.setFont('helvetica', 'normal');
+  doc.text('3148112717', 160, paymentY);
+  paymentY += 5;
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('DAVIPLATA:', 110, paymentY);
+  doc.setFont('helvetica', 'normal');
+  doc.text('3148112717', 160, paymentY);
+  paymentY += 5;
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('CUENTA NU (Llave):', 110, paymentY);
+  doc.setFont('helvetica', 'normal');
+  doc.text('@QSV309', 160, paymentY);
 
   // Footer
   doc.setFontSize(7);

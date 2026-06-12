@@ -37,7 +37,14 @@ export default function MediaPage() {
   }, [session]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) setNewPost({ ...newPost, file: e.target.files[0] });
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('El archivo es demasiado grande. El límite es de 10 MB.');
+        return;
+      }
+      setNewPost({ ...newPost, file });
+    }
   };
 
   const handleUpload = async (e: React.FormEvent) => {
@@ -185,11 +192,16 @@ export default function MediaPage() {
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                   <div className="relative">
                     <input type="file" accept="video/*" onChange={async (e) => {
-                      if (e.target.files?.[0] && session?.accessToken) {
+                      const file = e.target.files?.[0];
+                      if (file && session?.accessToken) {
+                        if (file.size > 10 * 1024 * 1024) {
+                          toast.error('El video es demasiado grande. El límite es de 10 MB.');
+                          return;
+                        }
                         const loadingToast = toast.loading(`Subiendo nuevo video para ${v.label}...`);
                         try {
                           const formData = new FormData();
-                          formData.append('file', e.target.files[0]);
+                          formData.append('file', file);
                           const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings/upload-image/${v.key}`, {
                             method: 'POST',
                             headers: { 'Authorization': `Bearer ${(session as any).accessToken}` },
