@@ -106,6 +106,11 @@ export default function PlanesPage() {
     e.preventDefault();
     if (!editingPlan || !session?.accessToken) return;
 
+    if (editingPlan.file && editingPlan.file.size > 10 * 1024 * 1024) {
+      toast.error('Error: Imagen o video demasiado pesada, recuerda que debe ser menor a 10 MB.');
+      return;
+    }
+
     const lines = descText
       .split('\n')
       .map(line => line.trim())
@@ -123,7 +128,11 @@ export default function PlanesPage() {
       toast.success('¡Plan actualizado con éxito!', { id: loadingToast });
       setShowModal(false);
     } catch (error: any) {
-      toast.error(`Error al guardar: ${error.message}`, { id: loadingToast });
+      if (error.message?.includes('Internal server error') && editingPlan.file) {
+        toast.error('Error: Imagen o video demasiado pesada, recuerda que debe ser menor a 10 MB.', { id: loadingToast });
+      } else {
+        toast.error(`Error al guardar: ${error.message}`, { id: loadingToast });
+      }
     }
   };
 

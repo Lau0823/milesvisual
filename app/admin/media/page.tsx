@@ -63,7 +63,11 @@ export default function MediaPage() {
       setShowUploadModal(false);
       setNewPost({ id: undefined, title: '', category: 'BODAS', file: null });
     } catch (error: any) {
-      toast.error(`Error: ${error.message || 'No se pudo guardar'}`, { id: loadingToast });
+      if (error.message?.includes('Internal server error') && newPost.file) {
+        toast.error('Error: Imagen o video demasiado pesada, recuerda que debe ser menor a 10 MB.', { id: loadingToast });
+      } else {
+        toast.error(`Error: ${error.message || 'No se pudo guardar'}`, { id: loadingToast });
+      }
     } finally {
       setUploading(false);
     }
