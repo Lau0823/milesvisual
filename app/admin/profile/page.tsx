@@ -2,19 +2,24 @@
 
 import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
-import { User, Camera, Shield, Save, Loader2 } from 'lucide-react';
+import { User, Camera, Shield, Save, Loader2, Key, X } from 'lucide-react';
 
 export default function ProfilePage() {
   const { data: session, update } = useSession();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+
   const [formData, setFormData] = useState({
     nombre: '',
     email: '',
     username: '',
     telefono: '',
-    password: '',
     foto_perfil_url: ''
   });
 
@@ -25,7 +30,6 @@ export default function ProfilePage() {
         email: session.user.email || '',
         username: (session.user as any).username || '',
         telefono: (session.user as any).telefono || '',
-        password: '',
         foto_perfil_url: (session.user as any).foto_perfil_url || ''
       });
     }
@@ -49,8 +53,7 @@ export default function ProfilePage() {
           username: formData.username,
           email: formData.email,
           telefono: formData.telefono,
-          foto_perfil_url: formData.foto_perfil_url,
-          ...(formData.password ? { password: formData.password } : {})
+          foto_perfil_url: formData.foto_perfil_url
         })
       });
 
@@ -71,6 +74,52 @@ export default function ProfilePage() {
       console.error("Error updating profile:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess('');
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('Las contraseñas no coinciden');
+      return;
+    }
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordError('La nueva contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const res = await fetch(`${apiUrl}/users/profile/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(session as any)?.accessToken}`
+        },
+        body: JSON.stringify({
+          oldPassword: passwordForm.oldPassword,
+          newPassword: passwordForm.newPassword
+        })
+      });
+
+      if (res.ok) {
+        setPasswordSuccess('Contraseña actualizada con éxito');
+        setTimeout(() => {
+          setIsPasswordModalOpen(false);
+          setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
+          setPasswordSuccess('');
+        }, 2000);
+      } else {
+        const data = await res.json();
+        setPasswordError(data.message || 'Error al actualizar contraseña');
+      }
+    } catch (error) {
+      setPasswordError('Error de conexión con el servidor');
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -160,15 +209,18 @@ export default function ProfilePage() {
             </div>
 
             <div className="pt-4 border-t border-black/5">
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Nueva Contraseña (Opcional)</label>
-                <input
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full bg-[var(--mv-cream)]/50 rounded-2xl px-5 py-4 text-sm outline-none border border-black/5 focus:border-[var(--mv-sage)] transition"
-                  placeholder="Dejar en blanco para no cambiar"
-                />
+              <div className="space-y-2 flex items-center justify-between bg-black/5 p-4 rounded-2xl border border-black/5">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.2em] font-semibold text-black/80">Contraseña de Acceso</p>
+                  <p className="text-[10px] text-black/40 mt-1">Cambia tu contraseña de forma segura.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsPasswordModalOpen(true)}
+                  className="bg-white border border-black/10 text-black px-6 py-3 rounded-xl text-[10px] uppercase tracking-[0.2em] font-semibold hover:bg-[var(--mv-sage)] hover:text-white hover:border-[var(--mv-sage)] transition flex items-center gap-2 shadow-sm"
+                >
+                  <Key size={14} /> Cambiar Contraseña
+                </button>
               </div>
             </div>
 
@@ -189,8 +241,75 @@ export default function ProfilePage() {
             </div>
           </form>
         </div>
+        {isPasswordModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="bg-white rounded-[32px] p-8 w-full max-w-md shadow-2xl relative animate-in zoom-in-95 duration-300">
+              <button
+                onClick={() => setIsPasswordModalOpen(false)}
+                className="absolute top-6 right-6 text-black/40 hover:text-black transition"
+              >
+                <X size={20} />
+              </button>
+              <div className="mb-6">
+                <div className="w-12 h-12 bg-[var(--mv-cream)] rounded-full flex items-center justify-center mb-4">
+                  <Shield size={24} className="text-[var(--mv-sage)]" />
+                </div>
+                <h3 className="text-xl font-semibold uppercase tracking-tight">Cambiar Contraseña</h3>
+                <p className="text-xs text-black/50 mt-1">Ingresa tu contraseña actual y la nueva contraseña para actualizarla.</p>
+              </div>
+
+              <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Contraseña Actual</label>
+                  <input
+                    type="password"
+                    required
+                    value={passwordForm.oldPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
+                    className="w-full bg-[var(--mv-cream)]/50 rounded-xl px-4 py-3 text-sm outline-none border border-black/5 focus:border-[var(--mv-sage)] transition"
+                    placeholder="••••••••"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Nueva Contraseña</label>
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    className="w-full bg-[var(--mv-cream)]/50 rounded-xl px-4 py-3 text-sm outline-none border border-black/5 focus:border-[var(--mv-sage)] transition"
+                    placeholder="Mínimo 6 caracteres"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-black/40 ml-1">Confirmar Nueva Contraseña</label>
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                    className="w-full bg-[var(--mv-cream)]/50 rounded-xl px-4 py-3 text-sm outline-none border border-black/5 focus:border-[var(--mv-sage)] transition"
+                    placeholder="Repite la nueva contraseña"
+                  />
+                </div>
+
+                {passwordError && <p className="text-red-500 text-xs font-semibold mt-2">{passwordError}</p>}
+                {passwordSuccess && <p className="text-green-600 text-xs font-semibold mt-2">{passwordSuccess}</p>}
+
+                <button
+                  type="submit"
+                  disabled={passwordLoading}
+                  className="w-full mt-6 bg-[var(--mv-ink)] text-white px-6 py-4 rounded-xl text-[11px] uppercase tracking-[0.2em] font-semibold hover:bg-[var(--mv-sage)] transition flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {passwordLoading ? <Loader2 size={16} className="animate-spin" /> : 'Actualizar Contraseña'}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
-
