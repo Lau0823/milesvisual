@@ -2,10 +2,13 @@
 
 import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
+import { useAdminStore } from '../../../store/useAdminStore';
 import { User, Camera, Shield, Save, Loader2, Key, X } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
   const { data: session, update } = useSession();
+  const { uploadAvatar, updateProfile, changePassword } = useAdminStore();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -41,37 +44,31 @@ export default function ProfilePage() {
     setSuccess(false);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const res = await fetch(`${apiUrl}/users/profile`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(session as any)?.accessToken}`
-        },
-        body: JSON.stringify({
-          nombre: formData.nombre,
-          username: formData.username,
-          email: formData.email,
-          telefono: formData.telefono,
-          foto_perfil_url: formData.foto_perfil_url
-        })
+      const token = (session as any)?.accessToken;
+      if (!token) throw new Error('No estás autenticado');
+
+      await updateProfile(token, {
+        nombre: formData.nombre,
+        username: formData.username,
+        email: formData.email,
+        telefono: formData.telefono,
+        foto_perfil_url: formData.foto_perfil_url
       });
 
-      if (res.ok) {
-        setSuccess(true);
-        await update({
-          ...session,
-          user: {
-            ...session?.user,
-            name: formData.nombre,
-            email: formData.email,
-            foto_perfil_url: formData.foto_perfil_url
-          }
-        });
-        setTimeout(() => setSuccess(false), 3000);
-      }
+      setSuccess(true);
+      await update({
+        ...session,
+        user: {
+          ...session?.user,
+          name: formData.nombre,
+          email: formData.email,
+          foto_perfil_url: formData.foto_perfil_url
+        }
+      });
+      setTimeout(() => setSuccess(false), 3000);
     } catch (error) {
       console.error("Error updating profile:", error);
+      toast.error('Error al actualizar el perfil');
     } finally {
       setLoading(false);
     }
@@ -92,32 +89,22 @@ export default function ProfilePage() {
 
     setPasswordLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const res = await fetch(`${apiUrl}/users/profile/change-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(session as any)?.accessToken}`
-        },
-        body: JSON.stringify({
-          oldPassword: passwordForm.oldPassword,
-          newPassword: passwordForm.newPassword
-        })
+      const token = (session as any)?.accessToken;
+      if (!token) throw new Error('No estás autenticado');
+
+      await changePassword(token, {
+        oldPassword: passwordForm.oldPassword,
+        newPassword: passwordForm.newPassword
       });
 
-      if (res.ok) {
-        setPasswordSuccess('Contraseña actualizada con éxito');
-        setTimeout(() => {
-          setIsPasswordModalOpen(false);
-          setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
-          setPasswordSuccess('');
-        }, 2000);
-      } else {
-        const data = await res.json();
-        setPasswordError(data.message || 'Error al actualizar contraseña');
-      }
-    } catch (error) {
-      setPasswordError('Error de conexión con el servidor');
+      setPasswordSuccess('Contraseña actualizada con éxito');
+      setTimeout(() => {
+        setIsPasswordModalOpen(false);
+        setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
+        setPasswordSuccess('');
+      }, 2000);
+    } catch (error: any) {
+      setPasswordError(error.message || 'Error de conexión con el servidor');
     } finally {
       setPasswordLoading(false);
     }
@@ -134,17 +121,50 @@ export default function ProfilePage() {
 
         <div className="space-y-6">
           <div className="bg-white rounded-[32px] p-8 shadow-sm border border-black/5 text-center">
-            <div className="relative w-32 h-32 mx-auto mb-4 group">
-              <div className="w-full h-full rounded-full bg-[var(--mv-cream)] border-2 border-black/5 overflow-hidden flex items-center justify-center">
-                {formData.foto_perfil_url ? (
-                  <img src={formData.foto_perfil_url} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <User size={48} className="text-black/20" />
-                )}
-              </div>
-              <button className="absolute bottom-0 right-0 p-2 bg-[var(--mv-sage)] text-white rounded-full shadow-md hover:scale-110 transition group-hover:bg-[var(--mv-ink)]">
-                <Camera size={16} />
-              </button>
+            <div className="relative w-32 h-32 mx-auto mb-4 group cursor-pointer">
+              <input 
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                id="avatar-upload"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (file.size > 5 * 1024 * 1024) return toast.error('El archivo supera los 5 MB');
+                  
+                  const toastId = toast.loading('Subiendo foto...');
+                  try {
+                    const token = (session as any)?.accessToken;
+                    if (!token) throw new Error('No estás autenticado');
+                    
+                    const data = await uploadAvatar(token, file);
+                    
+                    setFormData(prev => ({ ...prev, foto_perfil_url: data.foto_perfil_url }));
+                    await update({
+                      ...session,
+                      user: {
+                        ...session?.user,
+                        foto_perfil_url: data.foto_perfil_url
+                      }
+                    });
+                    toast.success('Foto actualizada con éxito', { id: toastId });
+                  } catch (error: any) {
+                    toast.error(error.message || 'Error de conexión', { id: toastId });
+                  }
+                }}
+              />
+              <label htmlFor="avatar-upload" className="w-full h-full block cursor-pointer">
+                <div className="w-full h-full rounded-full bg-[var(--mv-cream)] border-2 border-black/5 overflow-hidden flex items-center justify-center pointer-events-none">
+                  {formData.foto_perfil_url ? (
+                    <img src={formData.foto_perfil_url} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <User size={48} className="text-black/20" />
+                  )}
+                </div>
+                <div className="absolute bottom-0 right-0 p-2 bg-[var(--mv-sage)] text-white rounded-full shadow-md hover:scale-110 transition group-hover:bg-[var(--mv-ink)]">
+                  <Camera size={16} />
+                </div>
+              </label>
             </div>
             <h3 className="text-xl font-semibold uppercase tracking-tight">{formData.nombre || 'Usuario'}</h3>
             <p className="text-[10px] uppercase tracking-widest text-black/40 font-medium mt-1">{(session?.user as any)?.rol || 'Admin'}</p>

@@ -41,6 +41,11 @@ interface AdminState {
   // Cotizaciones
   updateQuoteStatus: (token: string, id: number, status: string) => Promise<void>;
   
+  // Perfil / Usuario
+  uploadAvatar: (token: string, file: File) => Promise<{ foto_perfil_url: string }>;
+  updateProfile: (token: string, data: any) => Promise<void>;
+  changePassword: (token: string, data: any) => Promise<void>;
+  
   setLoading: (loading: boolean) => void;
 }
 
@@ -442,6 +447,88 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       await db.jsonCache.put({ key: 'quoteRequests', data: newQuotes, updatedAt: new Date().toISOString() });
     } catch (error) {
       console.error("Error updating quote status:", error);
+      throw error;
+    }
+  },
+
+  uploadAvatar: async (token, file) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const res = await fetch(`${getApiUrl()}/users/profile/upload-avatar`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      
+      if (handleUnauthorized(res.status)) throw new Error('Sesión expirada.');
+      if (res.status === 413) throw new Error('La imagen es demasiado pesada.');
+      
+      if (!res.ok) {
+        let errorMsg = 'Error al subir la foto';
+        try {
+          const errData = await res.json();
+          if (typeof errData.message === 'string') errorMsg = errData.message;
+          else if (Array.isArray(errData.message)) errorMsg = errData.message.join(', ');
+        } catch(e) {}
+        throw new Error(errorMsg);
+      }
+      return await res.json();
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      throw error;
+    }
+  },
+
+  updateProfile: async (token, data) => {
+    try {
+      const res = await fetch(`${getApiUrl()}/users/profile`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (handleUnauthorized(res.status)) throw new Error('Sesión expirada.');
+      if (!res.ok) {
+        let errorMsg = 'Error al actualizar perfil';
+        try {
+          const errData = await res.json();
+          errorMsg = errData.message || errorMsg;
+        } catch(e) {}
+        throw new Error(errorMsg);
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      throw error;
+    }
+  },
+
+  changePassword: async (token, data) => {
+    try {
+      const res = await fetch(`${getApiUrl()}/users/profile/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (handleUnauthorized(res.status)) throw new Error('Sesión expirada.');
+      if (!res.ok) {
+        let errorMsg = 'Error al actualizar contraseña';
+        try {
+          const errData = await res.json();
+          errorMsg = errData.message || errorMsg;
+        } catch(e) {}
+        throw new Error(errorMsg);
+      }
+    } catch (error) {
+      console.error("Error changing password:", error);
       throw error;
     }
   }
