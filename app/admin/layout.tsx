@@ -23,6 +23,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/facturas', label: 'Facturas', icon: <FileText size={18} className="h-5 w-5" /> },
     { href: '/admin/clientes', label: 'Clientes', icon: <Users size={18} className="h-5 w-5" /> },
     { href: '/admin/cotizaciones', label: 'Prospectos', icon: <MessageCircle size={18} className="h-5 w-5" /> },
+    { href: '/admin/settings', label: 'Configuración', icon: <Settings size={18} className="h-5 w-5" /> },
+    { href: '/admin/profile', label: 'Mi Perfil', icon: <User size={18} className="h-5 w-5" /> },
   ];
 
   return (

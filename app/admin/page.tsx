@@ -8,6 +8,7 @@ import {
   Search, Plus, Filter, Mail, Phone, CalendarDays, Upload, Trash2, ChevronLeft, ChevronRight, Activity, MessageSquare
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -224,7 +225,9 @@ export default function DashboardPage() {
                 <h4 className="text-2xl font-bold uppercase tracking-tight">PUBLICACIÓN Y GESTIÓN</h4>
               </div>
               <div className="flex gap-2">
-                <button className="px-6 py-2.5 bg-[#789894] text-white rounded-full text-[9px] uppercase tracking-widest font-bold flex items-center gap-2 shadow-sm hover:bg-[#66827e] transition"><ImageIcon size={14} /> GESTIONAR GALERÍA</button>
+                <Link href="/admin/media" className="px-6 py-2.5 bg-[#789894] text-white rounded-full text-[9px] uppercase tracking-widest font-bold flex items-center gap-2 shadow-sm hover:bg-[#66827e] transition">
+                  <ImageIcon size={14} /> GESTIONAR GALERÍA
+                </Link>
               </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
