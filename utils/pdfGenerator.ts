@@ -155,57 +155,32 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
     }
   });
 
-  // Mensaje y Términos (Centrado)
   const finalY = (doc as any).lastAutoTable.finalY || 150;
-  
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-  doc.text(mode === 'invoice' ? 'DETALLES DE PAGO:' : 'NOTAS IMPORTANTES:', 105, finalY + 20, { align: 'center' });
-  
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(inkColor[0], inkColor[1], inkColor[2]);
-  doc.setFontSize(8);
-  const state = useAdminStore.getState();
-  const whatsappSetting = state.settings.find(s => s.key === 'whatsapp_number');
-  const whatsapp = whatsappSetting ? whatsappSetting.value : '573148112717';
 
-  const terms = mode === 'invoice' ? [
-    '- Enviar comprobante de pago al WhatsApp +' + whatsapp + '.',
-    '- Esta factura no es un título valor, es un soporte de cobro.',
-    '- Gracias por confiar en Miles Visual para capturar tus momentos.'
-  ] : [
-    '- Esta cotización tiene una vigencia de 15 días.',
-    '- Para confirmar reserva se requiere abono del 50%.',
-    '- Precios incluyen edición y entrega digital.',
-    '- El saldo debe cancelarse 8 días antes del evento.'
-  ];
-  doc.text(terms, 105, finalY + 28, { align: 'center' });
-
-  // Firma (Izquierda)
+  // Firma (Izquierda) - Más arriba
   doc.setDrawColor(200, 200, 200);
-  doc.line(20, finalY + 65, 80, finalY + 65);
+  doc.line(20, finalY + 15, 80, finalY + 15);
   doc.setFontSize(8);
-  doc.text('FIRMA AUTORIZADA', 50, finalY + 70, { align: 'center' });
-  doc.text('MILES VISUAL STUDIO', 50, finalY + 75, { align: 'center' });
+  doc.text('FIRMA AUTORIZADA', 50, finalY + 20, { align: 'center' });
+  doc.text('MILES VISUAL STUDIO', 50, finalY + 25, { align: 'center' });
 
-  // Cuentas de Pago (Derecha)
+  // Cuentas de Pago (Derecha) - Más arriba
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-  doc.text('CUENTAS PARA PAGO:', 110, finalY + 20);
+  doc.text('CUENTAS PARA PAGO:', 110, finalY + 15);
 
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(inkColor[0], inkColor[1], inkColor[2]);
   doc.setFontSize(8);
   
-  doc.text('Miles Esteban Morales Andrade', 110, finalY + 26);
+  doc.text('Miles Esteban Morales Andrade', 110, finalY + 21);
   doc.setFont('helvetica', 'normal');
-  doc.text('Cc 1001309695', 110, finalY + 30);
-  doc.text('Productor Audiovisual', 110, finalY + 34);
-  doc.text('Instagram: @milesvisualproducciones', 110, finalY + 38);
+  doc.text('Cc 1001309695', 110, finalY + 25);
+  doc.text('Productor Audiovisual', 110, finalY + 29);
+  doc.text('Instagram: @milesvisualproducciones', 110, finalY + 33);
   
-  let paymentY = finalY + 46;
+  let paymentY = finalY + 41;
   
   doc.setFont('helvetica', 'bold');
   doc.text('BANCOLOMBIA (Ahorros):', 110, paymentY);
@@ -229,6 +204,31 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
   doc.text('CUENTA NU (Llave):', 110, paymentY);
   doc.setFont('helvetica', 'normal');
   doc.text('@QSV309', 160, paymentY);
+
+  // Mensaje y Términos (Centrado) - Al final
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  doc.text(mode === 'invoice' ? 'DETALLES DE PAGO:' : 'NOTAS IMPORTANTES:', 105, finalY + 60, { align: 'center' });
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(inkColor[0], inkColor[1], inkColor[2]);
+  doc.setFontSize(8);
+  const state = useAdminStore.getState();
+  const whatsappSetting = state.settings.find(s => s.key === 'whatsapp_number');
+  const whatsapp = whatsappSetting ? whatsappSetting.value : '573148112717';
+
+  const terms = mode === 'invoice' ? [
+    '- Enviar comprobante de pago al WhatsApp +' + whatsapp + '.',
+    '- Esta factura no es un título valor, es un soporte de cobro.',
+    '- Gracias por confiar en Miles Visual para capturar tus momentos.'
+  ] : [
+    '- Esta cotización tiene una vigencia de 15 días.',
+    '- Para confirmar reserva se requiere abono del 50%.',
+    '- Precios incluyen edición y entrega digital.',
+    '- El saldo debe cancelarse 8 días antes del evento.'
+  ];
+  doc.text(terms, 105, finalY + 68, { align: 'center' });
 
   // Footer
   doc.setFontSize(7);
