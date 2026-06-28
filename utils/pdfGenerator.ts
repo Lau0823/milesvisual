@@ -47,7 +47,7 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
     try {
       const base64Logo = await getBase64Image(finalLogoUrl);
       // Centrar el logo (ajustar dimensiones según necesidad)
-      doc.addImage(base64Logo, 'PNG', 85, 5, 40, 25);
+      doc.addImage(base64Logo, 'PNG', 84, 5, 42, 28);
     } catch (e) {
       console.warn("No se pudo cargar el logo, usando texto");
       doc.setTextColor(255, 255, 255);
@@ -65,7 +65,7 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
-  doc.text('FOTOGRAFÍA EDITORIAL & AUDIOVISUAL', 105, 35, { align: 'center', charSpace: 2 });
+  doc.text('FOTOGRAFÍA EDITORIAL & AUDIOVISUAL', 105, 30, { align: 'center', charSpace: 2 });
 
   // Título del documento
   doc.setTextColor(inkColor[0], inkColor[1], inkColor[2]);
