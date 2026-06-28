@@ -178,52 +178,51 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
   doc.text('CUENTAS PARA PAGO', 105, sectionY, { align: 'center' });
-  sectionY += 8;
+  sectionY += 9;
 
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(inkColor[0], inkColor[1], inkColor[2]);
   doc.setFontSize(8);
   doc.text('Miles Esteban Morales Andrade', 105, sectionY, { align: 'center' });
-  doc.setFont('helvetica', 'normal');
   sectionY += 4;
+  doc.setFont('helvetica', 'normal');
   doc.text('Cc 1001309695', 105, sectionY, { align: 'center' });
   sectionY += 4;
   doc.text('Productor Audiovisual', 105, sectionY, { align: 'center' });
   sectionY += 4;
   doc.text('Instagram: @milesvisualproducciones', 105, sectionY, { align: 'center' });
-  sectionY += 7;
+  sectionY += 8;
+
+  const bankLeft = 75;
+  const bankRight = 135;
 
   doc.setFont('helvetica', 'bold');
-  doc.text('BANCOLOMBIA (Ahorros):', 105, sectionY, { align: 'center' });
+  doc.text('BANCOLOMBIA (Ahorros):', bankLeft, sectionY);
   doc.setFont('helvetica', 'normal');
-  sectionY += 4;
-  doc.text('05733188474', 105, sectionY, { align: 'center' });
-  sectionY += 6;
+  doc.text('05733188474', bankRight, sectionY);
+  sectionY += 5;
 
   doc.setFont('helvetica', 'bold');
-  doc.text('NEQUI:', 105, sectionY, { align: 'center' });
+  doc.text('NEQUI:', bankLeft, sectionY);
   doc.setFont('helvetica', 'normal');
-  sectionY += 4;
-  doc.text('3148112717', 105, sectionY, { align: 'center' });
-  sectionY += 6;
+  doc.text('3148112717', bankRight, sectionY);
+  sectionY += 5;
 
   doc.setFont('helvetica', 'bold');
-  doc.text('DAVIPLATA:', 105, sectionY, { align: 'center' });
+  doc.text('DAVIPLATA:', bankLeft, sectionY);
   doc.setFont('helvetica', 'normal');
-  sectionY += 4;
-  doc.text('3148112717', 105, sectionY, { align: 'center' });
-  sectionY += 6;
+  doc.text('3148112717', bankRight, sectionY);
+  sectionY += 5;
 
   doc.setFont('helvetica', 'bold');
-  doc.text('CUENTA NU (Llave):', 105, sectionY, { align: 'center' });
+  doc.text('CUENTA NU (Llave):', bankLeft, sectionY);
   doc.setFont('helvetica', 'normal');
-  sectionY += 4;
-  doc.text('@QSV309', 105, sectionY, { align: 'center' });
+  doc.text('@QSV309', bankRight, sectionY);
 
   // 2. FIRMA - Centrado
   sectionY += 35;
 
-  doc.setDrawColor(180);
+  doc.setDrawColor(200, 200, 200);
   doc.line(65, sectionY, 145, sectionY);
 
   doc.setFontSize(10);
@@ -231,7 +230,7 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
   doc.setFont('helvetica', 'bold');
   doc.text('FIRMA AUTORIZADA', 105, sectionY + 8, { align: 'center' });
 
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setTextColor(inkColor[0], inkColor[1], inkColor[2]);
   doc.setFont('helvetica', 'normal');
   doc.text('MILES VISUAL STUDIO', 105, sectionY + 14, { align: 'center' });
