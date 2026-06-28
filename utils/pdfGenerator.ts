@@ -155,13 +155,13 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
     }
   });
 
-  // Mensaje y Términos (Izquierda)
+  // Mensaje y Términos (Centrado)
   const finalY = (doc as any).lastAutoTable.finalY || 150;
   
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-  doc.text(mode === 'invoice' ? 'DETALLES DE PAGO:' : 'NOTAS IMPORTANTES:', 20, finalY + 20);
+  doc.text(mode === 'invoice' ? 'DETALLES DE PAGO:' : 'NOTAS IMPORTANTES:', 105, finalY + 20, { align: 'center' });
   
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(inkColor[0], inkColor[1], inkColor[2]);
@@ -171,19 +171,16 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
   const whatsapp = whatsappSetting ? whatsappSetting.value : '573148112717';
 
   const terms = mode === 'invoice' ? [
-    '- Enviar comprobante de pago al WhatsApp',
-    `  +${whatsapp}.`,
-    '- Esta factura no es un título valor,',
-    '  es un soporte de cobro.',
-    '- Gracias por confiar en Miles Visual',
-    '  para capturar tus momentos.'
+    '- Enviar comprobante de pago al WhatsApp +' + whatsapp + '.',
+    '- Esta factura no es un título valor, es un soporte de cobro.',
+    '- Gracias por confiar en Miles Visual para capturar tus momentos.'
   ] : [
     '- Esta cotización tiene una vigencia de 15 días.',
-    '- Para confirmar reserva se requiere abono del 30%.',
+    '- Para confirmar reserva se requiere abono del 50%.',
     '- Precios incluyen edición y entrega digital.',
     '- El saldo debe cancelarse 8 días antes del evento.'
   ];
-  doc.text(terms, 20, finalY + 28);
+  doc.text(terms, 105, finalY + 28, { align: 'center' });
 
   // Firma (Izquierda)
   doc.setDrawColor(200, 200, 200);
