@@ -171,7 +171,17 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
     '- El saldo debe cancelarse 8 días antes del evento.'
   ];
 
-  let sectionY = finalY + 12;
+  // Validar si hay espacio suficiente en la página (el bloque inferior ocupa ~95mm)
+  if (finalY + 95 > 280) {
+    // Imprimir footer en la página actual antes de saltar
+    doc.setFontSize(7);
+    doc.setTextColor(150, 150, 150);
+    doc.text('www.milesvisual.com | hola@milesvisual.com | @milesvisual', 105, 285, { align: 'center' });
+    doc.addPage();
+    finalY = 10;
+  }
+
+  let sectionY = finalY + 8;
 
   // 1. CUENTAS PARA PAGO - Izquierda
   doc.setFontSize(11);
