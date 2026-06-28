@@ -171,89 +171,117 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
     '- El saldo debe cancelarse 8 días antes del evento.'
   ];
 
-  let sectionY = finalY + 15;
+  let sectionY = finalY + 12;
 
-  // 1. CUENTAS PARA PAGO - Centrado
-  doc.setFontSize(14);
+  // 1. CUENTAS PARA PAGO - Izquierda
+  doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-  doc.text('CUENTAS PARA PAGO', 105, sectionY, { align: 'center' });
-  sectionY += 9;
+  doc.text('CUENTAS PARA PAGO:', 20, sectionY);
+  
+  // Icono Banco
+  const iconX = 29;
+  const iconY = sectionY + 13;
+  doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  doc.circle(iconX, iconY, 9, 'F');
+  
+  doc.setFillColor(255, 255, 255);
+  // Techo
+  doc.triangle(iconX, iconY - 5, iconX - 6, iconY - 2, iconX + 6, iconY - 2, 'F');
+  doc.rect(iconX - 6, iconY - 2, 12, 1, 'F');
+  // Columnas
+  doc.rect(iconX - 5, iconY - 0.5, 1.2, 4, 'F');
+  doc.rect(iconX - 1.8, iconY - 0.5, 1.2, 4, 'F');
+  doc.rect(iconX + 1.4, iconY - 0.5, 1.2, 4, 'F');
+  doc.rect(iconX + 4.6, iconY - 0.5, 1.2, 4, 'F');
+  // Base
+  doc.rect(iconX - 6, iconY + 3.5, 12, 1, 'F');
+  doc.rect(iconX - 7, iconY + 4.5, 14, 1.5, 'F');
 
+  // Texto junto al icono
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(inkColor[0], inkColor[1], inkColor[2]);
-  doc.setFontSize(8);
-  doc.text('Miles Esteban Morales Andrade', 105, sectionY, { align: 'center' });
-  sectionY += 4;
+  doc.setFontSize(9);
+  doc.text('Miles Esteban Morales Andrade', 44, sectionY + 8);
   doc.setFont('helvetica', 'normal');
-  doc.text('Cc 1001309695', 105, sectionY, { align: 'center' });
-  sectionY += 4;
-  doc.text('Productor Audiovisual', 105, sectionY, { align: 'center' });
-  sectionY += 4;
-  doc.text('Instagram: @milesvisualproducciones', 105, sectionY, { align: 'center' });
-  sectionY += 8;
+  doc.setFontSize(8);
+  doc.text('Cc 1001309695', 44, sectionY + 13);
+  doc.text('Productor Audiovisual', 44, sectionY + 18);
+  doc.text('Instagram: @milesvisualproducciones', 44, sectionY + 23);
 
-  const bankLeft = 75;
-  const bankRight = 135;
+  sectionY += 32;
 
+  const bankLeft = 20;
+  const bankRight = 85;
+
+  doc.setFontSize(9);
   doc.setFont('helvetica', 'bold');
   doc.text('BANCOLOMBIA (Ahorros):', bankLeft, sectionY);
   doc.setFont('helvetica', 'normal');
   doc.text('05733188474', bankRight, sectionY);
-  sectionY += 5;
+  sectionY += 6;
 
   doc.setFont('helvetica', 'bold');
   doc.text('NEQUI:', bankLeft, sectionY);
   doc.setFont('helvetica', 'normal');
   doc.text('3148112717', bankRight, sectionY);
-  sectionY += 5;
+  sectionY += 6;
 
   doc.setFont('helvetica', 'bold');
   doc.text('DAVIPLATA:', bankLeft, sectionY);
   doc.setFont('helvetica', 'normal');
   doc.text('3148112717', bankRight, sectionY);
-  sectionY += 5;
+  sectionY += 6;
 
   doc.setFont('helvetica', 'bold');
   doc.text('CUENTA NU (Llave):', bankLeft, sectionY);
   doc.setFont('helvetica', 'normal');
   doc.text('@QSV309', bankRight, sectionY);
 
-  // 2. FIRMA - Centrado
-  sectionY += 35;
+  // Línea separadora
+  sectionY += 10;
+  doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  doc.setLineWidth(0.3);
+  doc.line(20, sectionY, 190, sectionY);
 
-  doc.setDrawColor(200, 200, 200);
-  doc.line(65, sectionY, 145, sectionY);
+  // 2. FIRMA - Centrado
+  sectionY += 12;
 
   doc.setFontSize(10);
   doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
   doc.setFont('helvetica', 'bold');
-  doc.text('FIRMA AUTORIZADA', 105, sectionY + 8, { align: 'center' });
+  doc.text('FIRMA AUTORIZADA', 105, sectionY, { align: 'center' });
 
+  sectionY += 8;
+  doc.setDrawColor(inkColor[0], inkColor[1], inkColor[2]);
+  doc.setLineWidth(0.5);
+  doc.line(65, sectionY, 145, sectionY);
+
+  sectionY += 5;
   doc.setFontSize(8);
   doc.setTextColor(inkColor[0], inkColor[1], inkColor[2]);
   doc.setFont('helvetica', 'normal');
-  doc.text('MILES VISUAL STUDIO', 105, sectionY + 14, { align: 'center' });
+  doc.text('MILES VISUAL STUDIO', 105, sectionY, { align: 'center' });
 
-  // 3. NOTAS IMPORTANTES - Centrado al final
-  sectionY += 28;
+  // 3. NOTAS IMPORTANTES - Izquierda
+  sectionY += 14;
 
-  doc.setFontSize(10);
+  doc.setFontSize(9);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
   doc.text(
     mode === 'invoice'
-      ? 'DETALLES DE PAGO'
-      : 'NOTAS IMPORTANTES',
-    105,
-    sectionY,
-    { align: 'center' }
+      ? 'DETALLES DE PAGO:'
+      : 'NOTAS IMPORTANTES:',
+    20,
+    sectionY
   );
 
-  doc.setFontSize(7.5);
+  sectionY += 6;
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(inkColor[0], inkColor[1], inkColor[2]);
-  doc.text(terms, 105, sectionY + 8, { align: 'center' });
+  doc.text(terms, 20, sectionY);
 
   // Footer
   doc.setFontSize(7);
