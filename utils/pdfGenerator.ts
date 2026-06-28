@@ -155,7 +155,7 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
     }
   });
 
-  const finalY = (doc as any).lastAutoTable.finalY || 150;
+  let finalY = (doc as any).lastAutoTable.finalY || 150;
   const state = useAdminStore.getState();
   const whatsappSetting = state.settings.find(s => s.key === 'whatsapp_number');
   const whatsapp = whatsappSetting ? whatsappSetting.value : '573148112717';
