@@ -138,12 +138,13 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
     headStyles: { 
       fillColor: primaryColor,
       textColor: [255, 255, 255] as [number, number, number],
-      fontSize: 10,
-      fontStyle: 'bold'
+      fontSize: 9,
+      fontStyle: 'bold',
+      cellPadding: 4
     },
     bodyStyles: {
-      fontSize: 9,
-      cellPadding: 6
+      fontSize: 8.5,
+      cellPadding: 4
     },
     columnStyles: {
       2: { halign: 'right', fontStyle: 'bold' }
@@ -171,8 +172,8 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
     '- El saldo debe cancelarse 8 días antes del evento.'
   ];
 
-  // Validar si hay espacio suficiente en la página (el bloque inferior ocupa ~95mm)
-  if (finalY + 95 > 280) {
+  // Validar si hay espacio suficiente en la página (el bloque inferior ocupa ~85mm)
+  if (finalY + 85 > 280) {
     // Imprimir footer en la página actual antes de saltar
     doc.setFontSize(7);
     doc.setTextColor(150, 150, 150);
@@ -183,12 +184,13 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
 
   let sectionY = finalY + 8;
 
-  // 1. CUENTAS PARA PAGO - Izquierda
+  // 1. CUENTAS PARA PAGO - Título
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
   doc.text('CUENTAS PARA PAGO:', 20, sectionY);
   
+  // -- COLUMNA IZQUIERDA (Info personal) --
   // Icono Banco
   const iconX = 29;
   const iconY = sectionY + 13;
@@ -219,50 +221,51 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
   doc.text('Productor Audiovisual', 44, sectionY + 18);
   doc.text('Instagram: @milesvisualproducciones', 44, sectionY + 23);
 
-  sectionY += 32;
+  // -- COLUMNA DERECHA (Bancos) --
+  const bankLeft = 115;
+  const bankRight = 165;
+  let bankY = sectionY + 8; // Alineado con el primer texto
 
-  const bankLeft = 20;
-  const bankRight = 85;
-
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
-  doc.text('BANCOLOMBIA (Ahorros):', bankLeft, sectionY);
+  doc.text('BANCOLOMBIA (Ahorros):', bankLeft, bankY);
   doc.setFont('helvetica', 'normal');
-  doc.text('05733188474', bankRight, sectionY);
-  sectionY += 6;
-
-  doc.setFont('helvetica', 'bold');
-  doc.text('NEQUI:', bankLeft, sectionY);
-  doc.setFont('helvetica', 'normal');
-  doc.text('3148112717', bankRight, sectionY);
-  sectionY += 6;
+  doc.text('05733188474', bankRight, bankY);
+  bankY += 5;
 
   doc.setFont('helvetica', 'bold');
-  doc.text('DAVIPLATA:', bankLeft, sectionY);
+  doc.text('NEQUI:', bankLeft, bankY);
   doc.setFont('helvetica', 'normal');
-  doc.text('3148112717', bankRight, sectionY);
-  sectionY += 6;
+  doc.text('3148112717', bankRight, bankY);
+  bankY += 5;
 
   doc.setFont('helvetica', 'bold');
-  doc.text('CUENTA NU (Llave):', bankLeft, sectionY);
+  doc.text('DAVIPLATA:', bankLeft, bankY);
   doc.setFont('helvetica', 'normal');
-  doc.text('@QSV309', bankRight, sectionY);
+  doc.text('3148112717', bankRight, bankY);
+  bankY += 5;
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('CUENTA NU (Llave):', bankLeft, bankY);
+  doc.setFont('helvetica', 'normal');
+  doc.text('@QSV309', bankRight, bankY);
+
+  sectionY += 30; // Bajamos después de las columnas
 
   // Línea separadora
-  sectionY += 10;
   doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
   doc.setLineWidth(0.3);
   doc.line(20, sectionY, 190, sectionY);
 
   // 2. FIRMA - Centrado
-  sectionY += 12;
+  sectionY += 10;
 
   doc.setFontSize(10);
   doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
   doc.setFont('helvetica', 'bold');
   doc.text('FIRMA AUTORIZADA', 105, sectionY, { align: 'center' });
 
-  sectionY += 8;
+  sectionY += 24; // Espacio amplio para firma
   doc.setDrawColor(inkColor[0], inkColor[1], inkColor[2]);
   doc.setLineWidth(0.5);
   doc.line(65, sectionY, 145, sectionY);
@@ -273,8 +276,8 @@ export const generateQuotePDF = async (data: QuoteRequest | Reservation, mode: '
   doc.setFont('helvetica', 'normal');
   doc.text('MILES VISUAL STUDIO', 105, sectionY, { align: 'center' });
 
-  // 3. NOTAS IMPORTANTES - Izquierda
-  sectionY += 14;
+  // 3. NOTAS IMPORTANTES
+  sectionY += 12;
 
   doc.setFontSize(9);
   doc.setFont('helvetica', 'bold');
